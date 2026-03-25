@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - mySiss Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+    <style>
+        :root {
+            --mysiss-purple: #800080;
+            --mysiss-light-purple: #EBE3F2;
+            --mysiss-hover-purple: #DFD1EE;
+            --mysiss-active-bg: #D0B8E6;
+        }
+        .focus-outline:focus-visible { outline: 2px solid var(--mysiss-purple); outline-offset: 2px; }
+        .submenu { display: none; padding-left: 1rem; }
+        .submenu.active { display: block; }
+        .nav-link.active { background-color: var(--mysiss-active-bg); font-weight: bold; position: relative; }
+        .nav-link.active::after { content:""; position:absolute; right:0; top:0; height:100%; width:4px; background-color:var(--mysiss-purple); }
+        .rotate-180 { transform: rotate(180deg); }
+        nav { display:flex; flex-direction:column; height:calc(100% - 80px); position:relative; }
+        .logout-link { margin-top:auto; position:sticky; bottom:0; background-color:var(--mysiss-light-purple); padding:10px 0; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:1000; }
+        .modal-content { background-color:white; margin:3% auto; padding:24px; width:90%; max-width:680px; border-radius:10px; max-height:90vh; overflow-y:auto; }
+        .selected-row { background-color: var(--mysiss-light-purple) !important; }
+        .badge-active { background:#dcfce7; color:#166534; }
+        .badge-inactive { background:#fee2e2; color:#991b1b; }
+        .tab-btn { padding:8px 16px; border-bottom:2px solid transparent; font-weight:600; color:#6b7280; cursor:pointer; }
+        .tab-btn.active { border-bottom-color:var(--mysiss-purple); color:var(--mysiss-purple); }
+        .tab-panel { display:none; }
+        .tab-panel.active { display:block; }
+        .sede-card { border:1px solid #e5e7eb; border-radius:8px; padding:12px 16px; margin-bottom:8px; cursor:pointer; transition:background .15s; }
+        .sede-card:hover { background:#faf5ff; }
+        .sede-card.selected { background:var(--mysiss-light-purple); border-color:var(--mysiss-purple); }
+        .modulo-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:20px; font-size:.78rem; font-weight:600; margin:3px; }
+        .modulo-activo { background:#f3e8ff; color:var(--mysiss-purple); border:1px solid #d8b4fe; }
+        .modulo-inactivo { background:#f3f4f6; color:#9ca3af; border:1px solid #e5e7eb; }
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <div class="w-48 h-full bg-[var(--mysiss-light-purple)] flex flex-col flex-shrink-0">
+        <div class="p-6">
+            <h1 class="text-[var(--mysiss-purple)] text-5xl font-bold">mySiss</h1>
+        </div>
+        <nav class="mt-4 flex flex-col" aria-label="Menú principal">
+            <!-- Configuración -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('config-submenu', this)">
+                    <strong>Configuración</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="config-submenu" class="submenu">
+                    <a href="conf_bas_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Base</a>
+                    <a href="conf_func_3.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>
+                    <a href="conf_role.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Roles</a>
+                </div>
+            </div>
+            <!-- Usuario -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('usuario-submenu', this)">
+                    <strong>Usuario</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="usuario-submenu" class="submenu">
+                    <a href="conf_usua_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Usuario</a>
+                    <a href="conf_rol.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Asignar Rol</a>
+                </div>
+            </div>
+            <!-- Clientes (NUEVO) -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('clientes-submenu', this)">
+                    <strong>Clientes</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="clientes-submenu" class="submenu active">
+                    <a href="seg_clientes.html" class="nav-link active py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Gestión Clientes</a>
+                </div>
+            </div>
+            <!-- Módulos -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('modulos-submenu', this)">
+                    <strong>Modulos</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="modulos-submenu" class="submenu">
+                    <a href="../Honorarios/honorarios.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Honorarios</a>
+                    <a href="../Auditoria/Auditoria.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Auditoría</a>
+                    <a href="../Glosas/radicacion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Glosas</a>
+                </div>
+            </div>
+            <a href="../../mySiss_Cloud_Login.html" class="logout-link nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline">
+                <strong>Cerrar Sesión</strong>
+            </a>
+        </nav>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="flex-1 bg-white p-8 overflow-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-[var(--mysiss-purple)]">Gestión de Clientes</h2>
+            <button onclick="openModalCliente(null)" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900 focus:outline-none">
+                <i class="fas fa-plus mr-2"></i>Nuevo Cliente
+            </button>
+        </div>
+
+        <!-- Búsqueda -->
+        <div class="flex gap-3 mb-4">
+            <div class="relative flex-1">
+                <input type="text" id="buscarCliente" placeholder="Buscar por NIT, nombre..." oninput="filtrarClientes()"
+                    class="w-full border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            <select id="filtroEstado" onchange="filtrarClientes()" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                <option value="">Todos los estados</option>
+                <option value="A">Activos</option>
+                <option value="I">Inactivos</option>
+            </select>
+        </div>
+
+        <!-- Tabla de clientes -->
+        <div class="overflow-x-auto rounded-lg shadow">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-[var(--mysiss-purple)]">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">NIT</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Nombre / Razón Social</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Ciudad</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Contacto</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Sedes</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Módulos</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Estado</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="tablaClientes">
+                    <tr id="rowNoData">
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-400">
+                            <i class="fas fa-building text-3xl mb-2 block"></i>
+                            No hay clientes registrados. Use <strong>Nuevo Cliente</strong> para agregar.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: Crear / Editar Cliente                                  -->
+    <!-- ============================================================ -->
+    <div id="modal-cliente" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-[var(--mysiss-purple)]" id="titulo-modal-cliente">Nuevo Cliente</h3>
+                <button onclick="closeModal('cliente')" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Tabs del modal -->
+            <div class="flex border-b mb-4" id="modal-tabs">
+                <button class="tab-btn active" onclick="switchTab('tab-datos', this)">Datos del cliente</button>
+                <button class="tab-btn" onclick="switchTab('tab-sedes', this)" id="btn-tab-sedes" disabled>Sedes</button>
+                <button class="tab-btn" onclick="switchTab('tab-modulos', this)" id="btn-tab-modulos" disabled>Módulos</button>
+            </div>
+
+            <!-- TAB 1: Datos del cliente -->
+            <div id="tab-datos" class="tab-panel active">
+                <form id="form-cliente" onsubmit="guardarCliente(event)">
+                    <input type="hidden" id="cliente-id">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">NIT <span class="text-red-500">*</span></label>
+                            <input type="text" id="cli-nit" required maxlength="20"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]"
+                                placeholder="800123456-7">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre / Razón Social <span class="text-red-500">*</span></label>
+                            <input type="text" id="cli-nombre" required maxlength="200"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Razón Social (opcional)</label>
+                            <input type="text" id="cli-razon" maxlength="200"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+                            <input type="email" id="cli-email" maxlength="150"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                            <input type="text" id="cli-telefono" maxlength="30"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                            <input type="text" id="cli-direccion" maxlength="300"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                            <input type="text" id="cli-ciudad" maxlength="100"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <input type="text" id="cli-departamento" maxlength="100"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Persona de contacto</label>
+                            <input type="text" id="cli-contacto" maxlength="150"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" onclick="closeModal('cliente')" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">
+                            <i class="fas fa-save mr-1"></i>Guardar y continuar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- TAB 2: Sedes -->
+            <div id="tab-sedes" class="tab-panel">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-gray-700">Sedes del cliente</h4>
+                    <button onclick="openModalSede(null)" class="px-3 py-1.5 bg-[var(--mysiss-purple)] text-white rounded-md text-sm hover:bg-purple-900">
+                        <i class="fas fa-plus mr-1"></i>Nueva Sede
+                    </button>
+                </div>
+                <div id="lista-sedes">
+                    <p class="text-gray-400 text-sm text-center py-6">No hay sedes registradas para este cliente.</p>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button onclick="switchTabById('tab-datos')" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">← Volver</button>
+                    <button onclick="switchTabById('tab-modulos')" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">Módulos →</button>
+                </div>
+            </div>
+
+            <!-- TAB 3: Módulos -->
+            <div id="tab-modulos" class="tab-panel">
+                <h4 class="font-semibold text-gray-700 mb-3">Módulos contratados</h4>
+                <p class="text-sm text-gray-500 mb-4">Seleccione los módulos a los que este cliente tiene acceso:</p>
+                <div id="lista-modulos-cliente" class="grid grid-cols-1 gap-3">
+                    <!-- Se renderiza dinámicamente -->
+                </div>
+                <div class="mt-4 p-3 bg-blue-50 rounded-md text-sm text-blue-700">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Puede configurar módulos específicos por sede en la pestaña de Sedes.
+                </div>
+                <div class="flex justify-between gap-2 mt-6">
+                    <button onclick="switchTabById('tab-sedes')" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">← Sedes</button>
+                    <button onclick="guardarModulos()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">
+                        <i class="fas fa-check mr-1"></i>Finalizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Crear / Editar Sede -->
+    <div id="modal-sede" class="modal">
+        <div class="modal-content" style="max-width:520px">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-[var(--mysiss-purple)]" id="titulo-modal-sede">Nueva Sede</h3>
+                <button onclick="closeModal('sede')" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="form-sede" onsubmit="guardarSede(event)">
+                <input type="hidden" id="sede-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la sede <span class="text-red-500">*</span></label>
+                        <input type="text" id="sede-nombre" required maxlength="200"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]"
+                            placeholder="Ej: Sede Principal, Sede Norte...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Código de habilitación</label>
+                        <input type="text" id="sede-codigo" maxlength="30"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                        <input type="text" id="sede-telefono" maxlength="30"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                        <input type="text" id="sede-direccion" maxlength="300"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                        <input type="text" id="sede-ciudad" maxlength="100"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                        <input type="text" id="sede-departamento" maxlength="100"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Responsable de sede</label>
+                        <input type="text" id="sede-responsable" maxlength="150"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email de la sede</label>
+                        <input type="email" id="sede-email" maxlength="150"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Observación</label>
+                        <textarea id="sede-observacion" maxlength="500" rows="2"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button type="button" onclick="closeModal('sede')" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">
+                        <i class="fas fa-save mr-1"></i>Guardar Sede
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmación -->
+    <div id="modal-confirmacion" class="modal">
+        <div class="modal-content max-w-sm">
+            <div class="text-center p-6">
+                <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+                <h3 class="text-lg font-bold text-gray-800 mb-2" id="msg-confirmacion">Operación exitosa</h3>
+                <button onclick="closeModal('confirmacion')" class="mt-4 px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const API = '/mySiss/api';
+    let clientes = [];
+    let clienteActual = null;
+    let sedesActuales = [];
+    let modulosSistema = [
+        {id:1, nombre:'Seguridad',   codigo:'SEG', icono:'fa-lock'},
+        {id:2, nombre:'Auditoría',   codigo:'AUD', icono:'fa-clipboard-check'},
+        {id:3, nombre:'Glosas',      codigo:'GLO', icono:'fa-file-invoice'},
+        {id:4, nombre:'Honorarios',  codigo:'HON', icono:'fa-stethoscope'},
+        {id:5, nombre:'Cuentas Méd.',codigo:'CUE', icono:'fa-folder-open'},
+    ];
+    let modulosSeleccionados = new Set();
+
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarClientes();
+        showAllMenuItems();
+    });
+
+    function showAllMenuItems() {
+        document.querySelectorAll('.submenu').forEach(s => { s.classList.add('active'); s.style.display='block'; });
+    }
+
+    // ============================================================
+    //  API
+    // ============================================================
+    async function apiCall(endpoint, method='GET', body=null) {
+        const opts = {method, headers:{'Content-Type':'application/json','X-Session-Token':sessionStorage.getItem('mySiss_token')||''}};
+        if (body) opts.body = JSON.stringify(body);
+        try {
+            const r = await fetch(API + endpoint, opts);
+            return await r.json();
+        } catch(e) { return {ok:false, error:'Error de conexión'}; }
+    }
+
+    // ============================================================
+    //  LISTADO
+    // ============================================================
+    async function cargarClientes() {
+        const data = await apiCall('/ms/clientes');
+        if (data.ok && data.data) {
+            clientes = data.data;
+        } else {
+            // Modo demo sin API
+            clientes = JSON.parse(localStorage.getItem('ms_clientes') || '[]');
+        }
+        renderClientes(clientes);
+    }
+
+    function renderClientes(lista) {
+        const tbody = document.getElementById('tablaClientes');
+        const noData = document.getElementById('rowNoData');
+        if (!lista.length) { noData.style.display=''; tbody.innerHTML=''; tbody.appendChild(noData); return; }
+        noData.style.display='none';
+        tbody.innerHTML = lista.map(c => `
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="verDetalle(${c.id})">
+                <td class="px-4 py-3 font-mono text-sm">${c.nit}</td>
+                <td class="px-4 py-3 font-semibold">${c.nombre}</td>
+                <td class="px-4 py-3 text-sm">${c.ciudad||'-'}</td>
+                <td class="px-4 py-3 text-sm">${c.contacto||c.email||'-'}</td>
+                <td class="px-4 py-3 text-center">
+                    <span class="px-2 py-0.5 bg-purple-100 text-[var(--mysiss-purple)] rounded-full text-xs font-semibold">
+                        ${(c.sedes||[]).length}
+                    </span>
+                </td>
+                <td class="px-4 py-3">${renderModulosBadges(c.modulos||[])}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${c.estado==='A'?'badge-active':'badge-inactive'}">
+                        ${c.estado==='A'?'Activo':'Inactivo'}
+                    </span>
+                </td>
+                <td class="px-4 py-3">
+                    <button onclick="event.stopPropagation();openModalCliente(${c.id})" class="text-[var(--mysiss-purple)] hover:text-purple-900 mr-2" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="event.stopPropagation();toggleEstado(${c.id})" class="text-gray-500 hover:text-gray-700" title="Activar/Inactivar">
+                        <i class="fas fa-${c.estado==='A'?'eye-slash':'eye'}"></i>
+                    </button>
+                </td>
+            </tr>`).join('');
+    }
+
+    function renderModulosBadges(mods) {
+        if (!mods.length) return '<span class="text-gray-400 text-xs">Ninguno</span>';
+        return mods.map(m => `<span class="modulo-badge modulo-activo"><i class="fas ${m.icono||'fa-puzzle-piece'} text-xs"></i>${m.codigo||m.nombre}</span>`).join('');
+    }
+
+    function filtrarClientes() {
+        const q = document.getElementById('buscarCliente').value.toLowerCase();
+        const est = document.getElementById('filtroEstado').value;
+        renderClientes(clientes.filter(c =>
+            (!q || c.nit.toLowerCase().includes(q) || c.nombre.toLowerCase().includes(q)) &&
+            (!est || c.estado === est)));
+    }
+
+    // ============================================================
+    //  MODAL CLIENTE
+    // ============================================================
+    function openModalCliente(id) {
+        clienteActual = id ? clientes.find(c => c.id === id) : null;
+        sedesActuales = clienteActual ? [...(clienteActual.sedes || [])] : [];
+        modulosSeleccionados = new Set((clienteActual?.modulos || []).map(m => m.id));
+
+        document.getElementById('titulo-modal-cliente').textContent = id ? 'Editar Cliente' : 'Nuevo Cliente';
+        document.getElementById('cliente-id').value = id || '';
+        document.getElementById('cli-nit').value          = clienteActual?.nit          || '';
+        document.getElementById('cli-nombre').value       = clienteActual?.nombre       || '';
+        document.getElementById('cli-razon').value        = clienteActual?.razonSocial  || '';
+        document.getElementById('cli-email').value        = clienteActual?.email        || '';
+        document.getElementById('cli-telefono').value     = clienteActual?.telefono     || '';
+        document.getElementById('cli-direccion').value    = clienteActual?.direccion    || '';
+        document.getElementById('cli-ciudad').value       = clienteActual?.ciudad       || '';
+        document.getElementById('cli-departamento').value = clienteActual?.departamento || '';
+        document.getElementById('cli-contacto').value     = clienteActual?.contacto     || '';
+
+        // Tabs habilitados solo si ya tiene ID
+        const hasSedes = !!id;
+        document.getElementById('btn-tab-sedes').disabled   = !hasSedes;
+        document.getElementById('btn-tab-modulos').disabled = !hasSedes;
+
+        // Renderizar módulos
+        renderModulosCheckbox();
+
+        switchTabById('tab-datos');
+        openModal('cliente');
+    }
+
+    async function guardarCliente(e) {
+        e.preventDefault();
+        const payload = {
+            nit:          document.getElementById('cli-nit').value.trim(),
+            nombre:       document.getElementById('cli-nombre').value.trim(),
+            razonSocial:  document.getElementById('cli-razon').value.trim(),
+            email:        document.getElementById('cli-email').value.trim(),
+            telefono:     document.getElementById('cli-telefono').value.trim(),
+            direccion:    document.getElementById('cli-direccion').value.trim(),
+            ciudad:       document.getElementById('cli-ciudad').value.trim(),
+            departamento: document.getElementById('cli-departamento').value.trim(),
+            contacto:     document.getElementById('cli-contacto').value.trim(),
+            estado:       'A',
+        };
+        const id = document.getElementById('cliente-id').value;
+        let resp;
+        if (id) {
+            resp = await apiCall('/ms/clientes/'+id, 'PUT', payload);
+        } else {
+            resp = await apiCall('/ms/clientes', 'POST', payload);
+        }
+
+        // Fallback a localStorage si la API no responde aún
+        if (!resp.ok) {
+            const newId = id ? parseInt(id) : Date.now();
+            const cliente = {id:newId, ...payload, sedes:sedesActuales, modulos:[]};
+            if (id) {
+                const idx = clientes.findIndex(c=>c.id===newId);
+                if (idx>=0) clientes[idx] = cliente;
+            } else {
+                clientes.push(cliente);
+            }
+            localStorage.setItem('ms_clientes', JSON.stringify(clientes));
+            clienteActual = cliente;
+        } else {
+            clienteActual = resp.data || {id: resp.id, ...payload, sedes:[], modulos:[]};
+            if (!id) clientes.push(clienteActual);
+        }
+
+        document.getElementById('cliente-id').value = clienteActual.id;
+        document.getElementById('btn-tab-sedes').disabled   = false;
+        document.getElementById('btn-tab-modulos').disabled = false;
+
+        renderSedes();
+        renderModulosCheckbox();
+        switchTabById('tab-sedes');
+        renderClientes(clientes);
+        mostrarConfirmacion('Cliente guardado correctamente');
+    }
+
+    // ============================================================
+    //  SEDES
+    // ============================================================
+    function renderSedes() {
+        const container = document.getElementById('lista-sedes');
+        if (!sedesActuales.length) {
+            container.innerHTML = '<p class="text-gray-400 text-sm text-center py-6">No hay sedes. Agregue la primera sede.</p>';
+            return;
+        }
+        container.innerHTML = sedesActuales.map(s => `
+            <div class="sede-card flex justify-between items-center">
+                <div>
+                    <div class="font-semibold text-gray-800">${s.nombre}</div>
+                    <div class="text-sm text-gray-500">${[s.ciudad, s.departamento].filter(Boolean).join(' - ')}${s.codigoHabilitacion ? ' · Hab: '+s.codigoHabilitacion : ''}</div>
+                    ${s.responsable ? `<div class="text-xs text-gray-400">Resp: ${s.responsable}</div>` : ''}
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openModalSede(${s.id})" class="text-[var(--mysiss-purple)] hover:text-purple-900 text-sm px-2 py-1 rounded hover:bg-purple-50">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarSede(${s.id})" class="text-red-400 hover:text-red-600 text-sm px-2 py-1 rounded hover:bg-red-50">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>`).join('');
+    }
+
+    function openModalSede(id) {
+        const sede = id ? sedesActuales.find(s => s.id === id) : null;
+        document.getElementById('titulo-modal-sede').textContent = id ? 'Editar Sede' : 'Nueva Sede';
+        document.getElementById('sede-id').value           = id || '';
+        document.getElementById('sede-nombre').value       = sede?.nombre       || '';
+        document.getElementById('sede-codigo').value       = sede?.codigoHabilitacion || '';
+        document.getElementById('sede-telefono').value     = sede?.telefono     || '';
+        document.getElementById('sede-direccion').value    = sede?.direccion    || '';
+        document.getElementById('sede-ciudad').value       = sede?.ciudad       || '';
+        document.getElementById('sede-departamento').value = sede?.departamento || '';
+        document.getElementById('sede-responsable').value  = sede?.responsable  || '';
+        document.getElementById('sede-email').value        = sede?.email        || '';
+        document.getElementById('sede-observacion').value  = sede?.observacion  || '';
+        openModal('sede');
+    }
+
+    async function guardarSede(e) {
+        e.preventDefault();
+        const id = document.getElementById('sede-id').value;
+        const payload = {
+            clienteId:          clienteActual.id,
+            nombre:              document.getElementById('sede-nombre').value.trim(),
+            codigoHabilitacion:  document.getElementById('sede-codigo').value.trim(),
+            telefono:            document.getElementById('sede-telefono').value.trim(),
+            direccion:           document.getElementById('sede-direccion').value.trim(),
+            ciudad:              document.getElementById('sede-ciudad').value.trim(),
+            departamento:        document.getElementById('sede-departamento').value.trim(),
+            responsable:         document.getElementById('sede-responsable').value.trim(),
+            email:               document.getElementById('sede-email').value.trim(),
+            observacion:         document.getElementById('sede-observacion').value.trim(),
+            estado:              'A',
+        };
+
+        const newId = id ? parseInt(id) : Date.now();
+        if (id) {
+            const idx = sedesActuales.findIndex(s => s.id === newId);
+            if (idx >= 0) sedesActuales[idx] = {id: newId, ...payload};
+        } else {
+            sedesActuales.push({id: newId, ...payload});
+        }
+
+        // Guardar en cliente local
+        if (clienteActual) {
+            clienteActual.sedes = sedesActuales;
+            const idx = clientes.findIndex(c => c.id === clienteActual.id);
+            if (idx >= 0) clientes[idx].sedes = sedesActuales;
+            localStorage.setItem('ms_clientes', JSON.stringify(clientes));
+        }
+
+        // Intentar API
+        await apiCall('/ms/clientes/'+clienteActual.id+'/sedes'+(id?'/'+id:''), id?'PUT':'POST', payload);
+
+        renderSedes();
+        renderClientes(clientes);
+        closeModal('sede');
+        mostrarConfirmacion('Sede guardada correctamente');
+    }
+
+    function eliminarSede(id) {
+        if (!confirm('¿Eliminar esta sede?')) return;
+        sedesActuales = sedesActuales.filter(s => s.id !== id);
+        if (clienteActual) {
+            clienteActual.sedes = sedesActuales;
+            const idx = clientes.findIndex(c => c.id === clienteActual.id);
+            if (idx >= 0) clientes[idx].sedes = sedesActuales;
+            localStorage.setItem('ms_clientes', JSON.stringify(clientes));
+        }
+        renderSedes();
+        renderClientes(clientes);
+        mostrarConfirmacion('Sede eliminada');
+    }
+
+    // ============================================================
+    //  MÓDULOS
+    // ============================================================
+    function renderModulosCheckbox() {
+        const container = document.getElementById('lista-modulos-cliente');
+        container.innerHTML = modulosSistema.map(m => `
+            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-purple-50 ${modulosSeleccionados.has(m.id)?'border-[var(--mysiss-purple)] bg-[var(--mysiss-light-purple)]':'border-gray-200'}">
+                <input type="checkbox" value="${m.id}" ${modulosSeleccionados.has(m.id)?'checked':''} onchange="toggleModulo(${m.id},this)"
+                    class="w-4 h-4" style="accent-color:var(--mysiss-purple)">
+                <i class="fas ${m.icono} text-[var(--mysiss-purple)] w-5 text-center"></i>
+                <div>
+                    <div class="font-semibold text-gray-800">${m.nombre}</div>
+                    <div class="text-xs text-gray-500">Código: ${m.codigo}</div>
+                </div>
+            </label>`).join('');
+    }
+
+    function toggleModulo(id, chk) {
+        if (chk.checked) modulosSeleccionados.add(id);
+        else modulosSeleccionados.delete(id);
+        renderModulosCheckbox();
+    }
+
+    async function guardarModulos() {
+        const mods = modulosSistema.filter(m => modulosSeleccionados.has(m.id));
+        if (clienteActual) {
+            clienteActual.modulos = mods;
+            const idx = clientes.findIndex(c => c.id === clienteActual.id);
+            if (idx >= 0) clientes[idx].modulos = mods;
+            localStorage.setItem('ms_clientes', JSON.stringify(clientes));
+            await apiCall('/ms/clientes/'+clienteActual.id+'/modulos', 'PUT', {modulos: mods.map(m=>m.id)});
+        }
+        renderClientes(clientes);
+        closeModal('cliente');
+        mostrarConfirmacion('Configuración de módulos guardada');
+    }
+
+    // ============================================================
+    //  TOGGLE ESTADO
+    // ============================================================
+    async function toggleEstado(id) {
+        const c = clientes.find(c => c.id === id);
+        if (!c) return;
+        if (!confirm(`¿${c.estado==='A'?'Inactivar':'Activar'} el cliente "${c.nombre}"?`)) return;
+        c.estado = c.estado === 'A' ? 'I' : 'A';
+        localStorage.setItem('ms_clientes', JSON.stringify(clientes));
+        await apiCall('/ms/clientes/'+id+'/estado', 'PUT', {estado: c.estado});
+        renderClientes(clientes);
+        mostrarConfirmacion(`Cliente ${c.estado==='A'?'activado':'inactivado'}`);
+    }
+
+    // ============================================================
+    //  TABS
+    // ============================================================
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        if (btn) btn.classList.add('active');
+    }
+
+    function switchTabById(tabId) {
+        const btn = document.querySelector(`[onclick*="${tabId}"]`);
+        switchTab(tabId, btn);
+    }
+
+    // ============================================================
+    //  UTILES
+    // ============================================================
+    function openModal(id) { document.getElementById('modal-'+id).style.display='block'; }
+    function closeModal(id) { document.getElementById('modal-'+id).style.display='none'; }
+    function mostrarConfirmacion(msg) { document.getElementById('msg-confirmacion').textContent=msg; openModal('confirmacion'); }
+    function toggleSubmenu(id, el) {
+        document.getElementById(id).classList.toggle('active');
+        el.querySelector('svg').classList.toggle('rotate-180');
+    }
+    function verDetalle(id) { openModalCliente(id); }
+</script>
+</body>
+</html>

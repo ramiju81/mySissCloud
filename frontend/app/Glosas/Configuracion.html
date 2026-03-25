@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Configuración datos maestros - mySiss Cloud</title>
+<style>
+  :root {
+    --mysiss-purple: #800080;
+    --mysiss-light-purple: #EBE3F2;
+    --mysiss-hover-purple: #DFD1EE;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #fff;
+    min-height: 100vh;
+  }
+
+  .app-container {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 200px;
+    background: var(--mysiss-light-purple);
+    padding: .8rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo {
+    font-size: 3.4rem;
+    font-weight: bold;
+    color: var(--mysiss-purple);
+    margin-bottom: 2rem;
+  }
+
+  .nav-link {
+    display: block;
+    padding: .75rem 1rem;
+    color: var(--mysiss-purple);
+    text-decoration: none;
+    border-radius: .5rem;
+    font-weight: 500;
+    margin-bottom: .5rem;
+    transition: .2s;
+  }
+
+  .nav-link:hover {
+    background: var(--mysiss-hover-purple);
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+  }
+
+  .section-title {
+    font-size: 1.875rem;
+    font-weight: bold;
+    color: var(--mysiss-purple);
+    margin-bottom: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: .5rem;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: .5rem;
+    border: 1px solid #D1D5DB;
+    border-radius: .375rem;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--mysiss-purple);
+    box-shadow: 0 0 0 2px rgba(128,0,128,.1);
+  }
+
+  .radio-group {
+    display: grid !important;
+    gap: .75rem;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 680px) {
+    .radio-group {
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .radio-group {
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+    }
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    cursor: pointer;
+    border: 1px solid #E5E7EB;
+    padding: .6rem .8rem;
+    border-radius: .5rem;
+    background: #fff;
+  }
+
+  .radio-option:hover {
+    background: #F9FAFB;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+  }
+
+  .data-table th {
+    background: var(--mysiss-light-purple);
+    color: var(--mysiss-purple);
+    font-weight: 600;
+    text-align: left;
+    padding: .75rem 1rem;
+  }
+
+  .data-table td {
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .btn {
+    padding: .5rem 1rem;
+    border-radius: .375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: .2s;
+  }
+
+  .btn-primary {
+    background: var(--mysiss-purple);
+    color: #fff;
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background: #6b006b;
+  }
+
+  .btn-secondary {
+    background: #fff;
+    color: var(--mysiss-purple);
+    border: 1px solid var(--mysiss-purple);
+  }
+
+  .btn-secondary:hover {
+    background: var(--mysiss-light-purple);
+  }
+
+  .btn-danger {
+    background: #DC2626;
+    color: #fff;
+    border: none;
+  }
+
+  .btn-danger:hover {
+    background: #B91C1C;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  .modal-content {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 32rem;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,.1);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--mysiss-purple);
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6B7280;
+    cursor: pointer;
+  }
+
+  .modal-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #E5E7EB;
+    display: flex;
+    justify-content: flex-end;
+    gap: .75rem;
+  }
+
+  .fixed-fields-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    background: #F9FAFB;
+    padding: 1.5rem;
+    border-radius: .5rem;
+    margin-bottom: 2rem;
+  }
+
+  .fixed-field {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .estado-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+  }
+
+  .empty-table {
+    text-align: center;
+    padding: 2rem;
+    background: #F9FAFB;
+    border-radius: .5rem;
+    color: #6B7280;
+  }
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    margin-top: 6px;
+  }
+
+  .table-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--mysiss-purple);
+  }
+</style>
+</head>
+<body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="logo">mySiss</div>
+        <nav>
+          <a
+            href="configuracion.html"
+            class="nav-link active"
+            data-section="config"
+            ><strong>Configuración</strong></a
+          >
+          <a href="cargue_data.html" class="nav-link" data-section="masters"
+            ><strong>Datos Maestros</strong></a
+          >
+
+          <br /><br /><br /><br /><br /><br /><br /><br />
+          <a href="../login.html" class="nav-link" data-section="logout"
+            ><strong>Cerrar Sesión</strong></a
+          >
+        </nav>
+      </aside>
+
+
+    <main class="main-content">
+      <section id="config-section">
+        <h2 class="section-title">Configuración</h2>
+        <div class="radio-group">
+          <label class="radio-option"><input type="radio" name="config-option" value="institucion" checked><span>Institución</span></label>
+          <label class="radio-option"><input type="radio" name="config-option" value="periodos"><span>Rango Radicado</span></label>
+          <label class="radio-option"><input type="radio" name="config-option" value="estado_factura"><span>Estado Factura</span></label>
+          <label class="radio-option"><input type="radio" name="config-option" value="estado_servicio"><span>Estado Servicio</span></label>
+          <!-- <label class="radio-option"><input type="radio" name="config-option" value="motivos_auditores"><span>Motivos Auditores</span></label>
+          --><label class="radio-option"><input type="radio" name="config-option" value="auditores_x_motivo"><span>Auditores x Motivo</span></label>
+          <label class="radio-option"><input type="radio" name="config-option" value="iteracciones_pagador"><span>Iteracciones Pagador</span></label>
+          <label class="radio-option"><input type="radio" name="config-option" value="servicios_clinicos"><span>Servicios Clínicos</span></label>
+          <label class="radio-option"><input type="radio" name="config-option" value="documento_soporte"><span>Documento Soporte</span></label>
+          <label class="radio-option"><input type="radio" name="config-option" value="soporte_por_pagador"><span>Soporte por Pagador</span></label>
+        </div>
+        <div id="data-container"></div>
+      </section>
+
+      <section id="masters-section" style="display:none">
+        <h2 class="section-title">Datos Maestros</h2>
+        <p>En desarrollo.</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /* ================= Storage ================= */
+    const loadFromStorage = () => {
+      try { const data = localStorage.getItem('mysissData'); return data ? JSON.parse(data) : null; }
+      catch { return null; }
+    };
+    const saveToStorage = (data) => {
+      try { localStorage.setItem('mysissData', JSON.stringify(data)); } catch {}
+    };
+
+    /* ================= Secciones ================= */
+    const configSections = {
+      institucion: {
+        title: 'Institución',
+        fields: [
+          { id:'nombre', label:'Nombre Institución', type:'text'},
+          { id:'nit', label:'NIT', type:'text'},
+          { id:'telefono', label:'Teléfono', type:'tel'},
+          { id:'direccion', label:'Dirección', type:'text'},
+          { id:'contacto', label:'Contacto', type:'text'},
+          { id:'email', label:'Email', type:'email'}
+        ],
+        hasSedes: true
+      },
+      periodos: {
+        title: 'Rangos de radicados',
+        fields: [
+          { id:'id_periodo', label:'ID Periodo', type:'text'},
+          { id:'fecha_ini', label:'Fecha Ini. Vigencia', type:'date'},
+          { id:'fecha_fin', label:'Fecha Fin Vigencia', type:'date'},
+          { id:'estado', label:'Activo/Inactivo', type:'checkbox'}
+        ]
+      },
+      estado_factura: {
+        title: 'Estado Factura',
+        fields: [
+          { id:'id', label:'ID Estado', type:'text'},
+          { id:'descripcion', label:'Descripción', type:'text'}
+        ]
+      },
+      estado_servicio: {
+        title: 'Estado Servicio',
+        fields: [
+          { id:'id', label:'ID Estado Posición', type:'text'},
+          { id:'descripcion', label:'Descripción Estado Pos.', type:'text'}
+        ]
+      },
+      motivos_auditores: {
+        title: 'Motivos Auditores',
+        fields: [
+          { id:'id_clase_auditor', label:'ID Clase Auditor', type:'text'},
+          { id:'id_motivo_objecion', label:'ID Motivo Objeción', type:'text'}
+        ]
+      },
+      auditores_x_motivo: {
+        title: 'Auditores x Motivo',
+        fields: [
+          { id:'id_clase_auditor', label:'ID Clase Auditor', type:'text'},
+          { id:'id_motivo_objecion', label:'ID Motivo Objeción', type:'text'}
+        ]
+      },
+      iteracciones_pagador: {
+        title: 'Iteracciones Pagador',
+        fields: [
+          { id:'aseguradora', label:'Aseguradora', type:'select', options:['Nueva EPS','Sura','Comfenalco'] },
+          { id:'iteracciones', label:'Iteracciones', type:'number', min:'0' }
+        ]
+      },
+      servicios_clinicos: {
+        title: 'Servicios Clínicos',
+        fields: [
+          { id:'id_servicio', label:'ID Servicio', type:'text'},
+          { id:'descripcion', label:'Descripción Servicio', type:'text'},
+          { id:'id_grupo', label:'ID Grupo', type:'text'},
+          { id:'grupo', label:'Grupo Servicio', type:'text'},
+          { id:'valor_homologacion', label:'Valor Homologación', type:'text'}
+        ]
+      },
+      documento_soporte: {
+        title: 'Documento Soporte',
+        fields: [
+          { id:'id', label:'Abreviación Soporte', type:'text'},
+          { id:'descripcion', label:'Descripción Soporte', type:'text'}
+        ]
+      },
+      soporte_por_pagador: {
+        title: 'Soporte por Pagador',
+        fields: [
+          { id:'nombre_pagador', label:'Nombre Pagador', type:'text' },
+          { id:'modalidad_pago', label:'Modalidad de Pago', type:'text' },
+          { id:'id_servicio', label:'ID Servicio', type:'text' },
+          { id:'descripcion_servicio', label:'Descripción Servicio', type:'text' },
+          { id:'id_soporte', label:'ID Soporte', type:'text' },
+          { id:'descripcion_soporte', label:'Descripción Soporte', type:'text' }
+        ]
+      }
+    };
+
+    /* ================= Campos de sedes ================= */
+    const sedesFields = [
+      { id:'codigo', label:'Código Sede', type:'text' },
+      { id:'descripcion', label:'Descripción', type:'text' },
+      { id:'telefono', label:'Teléfono', type:'tel' }
+    ];
+
+    /* ================= Estado (con seeds) ================= */
+    let sectionData = loadFromStorage() || {
+      institucion: [],
+      sedes: {},
+      periodos: [],
+      estado_factura: [],
+      estado_servicio: [],
+      motivos_auditores: [],
+      auditores_x_motivo: [],
+      iteracciones_pagador: [],
+      servicios_clinicos: [],
+      documento_soporte: [],
+      soporte_por_pagador: [],
+      liquidacion: { config:{ salario_minimo:'', valor_uvr:'' }, items:[] },
+      descuentos: [],
+      horarios: [],
+      tareas: []
+    };
+
+    // Seeds seguros (solo si faltan)
+    (function seed(){
+      // Pagadores
+      ['Nueva EPS','Sura','Comfenalco'].forEach(n=>{
+        if (!sectionData.iteracciones_pagador.find(p=>p.aseguradora===n)){
+          sectionData.iteracciones_pagador.push({ aseguradora:n, iteracciones:0 });
+        }
+      });
+      // Servicios
+      [
+        { id_servicio:'890101', descripcion:'Consulta Medicina General' },
+        { id_servicio:'39145',  descripcion:'Consulta de urgencias' },
+        { id_servicio:'N/A',    descripcion:'N/A' }
+      ].forEach(s=>{
+        if (!sectionData.servicios_clinicos.find(x=>x.id_servicio===s.id_servicio)){
+          sectionData.servicios_clinicos.push({ ...s, id_grupo:'', grupo:'', valor_homologacion:'' });
+        }
+      });
+      // Soportes
+      [
+        { id:'FACVEN', descripcion:'Factura de Venta' },
+        { id:'DEV',    descripcion:'Devolucion' },
+        { id:'N/A',    descripcion:'N/A' }
+      ].forEach(s=>{
+        if (!sectionData.documento_soporte.find(x=>x.id===s.id)){
+          sectionData.documento_soporte.push(s);
+        }
+      });
+      saveToStorage(sectionData);
+    })();
+
+    /* ================= Render de tablas ================= */
+    function showConfigTable(option){
+      const container = document.getElementById('data-container');
+      const section = configSections[option];
+      if (!section){ container.innerHTML = ''; return; }
+
+      let html = `
+        <div class="table-header">
+          <h3 class="table-title">${section.title}</h3>
+          <button class="btn btn-primary" onclick="showModal('${option}')">Agregar</button>
+        </div>
+      `;
+
+      const data = option === 'liquidacion' ? sectionData[option].items : sectionData[option];
+      if (!data || data.length === 0){
+        html += `<div class="empty-table">No hay datos registrados.</div>`;
+      } else {
+        html += `
+          <table class="data-table">
+            <thead>
+              <tr>
+                ${section.fields.map(f=>`<th>${f.label}</th>`).join('')}
+                <th style="text-align:right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map((row, i)=>`
+                <tr>
+                  ${section.fields.map(f=>{
+                    if (f.type==='checkbox') {
+                      return `<td>${row[f.id] ? 'Activo' : 'Inactivo'}</td>`;
+                    }
+                    return `<td>${row[f.id] ?? ''}</td>`;
+                  }).join('')}
+                  <td style="text-align:right">
+                    ${section.hasSedes ? `<button class="btn btn-secondary" style="margin-right:.5rem" onclick="manageSedes(${i})">Sedes</button>`:''}
+                    <button class="btn btn-secondary" style="margin-right:.5rem" onclick="showModal('${option}', ${i})">Editar</button>
+                    <button class="btn btn-danger" onclick="deleteItem('${option}', ${i})">Eliminar</button>
+                  </td>
+                </tr>
+                ${section.hasSedes && row.id && sectionData.sedes[row.id] ? `
+                  <tr>
+                    <td colspan="${section.fields.length+1}">
+                      <div style="padding:1rem;background:#F9FAFB">
+                        <h4 style="color:var(--mysiss-purple);margin-bottom:1rem">Sedes</h4>
+                        ${sectionData.sedes[row.id].length ? `
+                          <table class="data-table" style="margin:0">
+                            <thead>
+                              <tr>
+                                ${sedesFields.map(f=>`<th>${f.label}</th>`).join('')}
+                                <th style="text-align:right">Acciones</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              ${sectionData.sedes[row.id].map((s, si)=>`
+                                <tr>
+                                  ${sedesFields.map(f=>`<td>${s[f.id]||''}</td>`).join('')}
+                                  <td style="text-align:right">
+                                    <button class="btn btn-secondary" style="margin-right:.5rem" onclick="editSede(${i}, ${si})">Editar</button>
+                                    <button class="btn btn-danger" onclick="deleteSede(${i}, ${si})">Eliminar</button>
+                                  </td>
+                                </tr>
+                              `).join('')}
+                            </tbody>
+                          </table>
+                        ` : `<div class="empty-table">No hay sedes registradas. Use "Sedes" para agregar.</div>`}
+                      </div>
+                    </td>
+                  </tr>
+                ` : ``}
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      container.innerHTML = html;
+      saveToStorage(sectionData);
+    }
+
+    /* ================= Modales ================= */
+    function showModal(option, editIndex=null){
+      const section = configSections[option];
+      const data = option === 'liquidacion' ? sectionData[option].items : sectionData[option];
+      const editItem = editIndex !== null ? data[editIndex] : null;
+
+      // Modal especial: Soporte por Pagador
+      if (option === 'soporte_por_pagador') {
+        const pagadores = Array.from(new Set((sectionData.iteracciones_pagador||[]).map(p=>p.aseguradora).filter(Boolean)));
+        const servicios = sectionData.servicios_clinicos || [];
+        const soportes  = sectionData.documento_soporte || [];
+
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title">${editItem?'Editar':'Agregar'} Soporte por Pagador</h3>
+              <button class="modal-close" onclick="closeModal(this)">&times;</button>
+            </div>
+            <form id="modal-form" onsubmit="return false;">
+              <div class="form-group">
+                <label class="form-label">Nombre Pagador</label>
+                <select id="nombre_pagador" class="form-input" required>
+                  <option value="">-- Seleccione --</option>
+                  ${pagadores.map(n=>`<option value="${n}" ${editItem&&editItem.nombre_pagador===n?'selected':''}>${n}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Modalidad de Pago</label>
+                <input id="modalidad_pago" class="form-input" value="${editItem?.modalidad_pago||''}" placeholder="Prospectivo / Por evento / etc.">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">ID Servicio</label>
+                <select id="id_servicio" class="form-input" required>
+                  <option value="">-- Seleccione --</option>
+                  ${servicios.map(s=>`<option value="${s.id_servicio}" ${editItem&&editItem.id_servicio===s.id_servicio?'selected':''}>${s.id_servicio}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descripción Servicio</label>
+                <input id="descripcion_servicio" class="form-input" value="${editItem?.descripcion_servicio||''}" readonly>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">ID Soporte</label>
+                <select id="id_soporte" class="form-input" required>
+                  <option value="">-- Seleccione --</option>
+                  ${soportes.map(s=>`<option value="${s.id}" ${editItem&&editItem.id_soporte===s.id?'selected':''}>${s.id}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descripción Soporte</label>
+                <input id="descripcion_soporte" class="form-input" value="${editItem?.descripcion_soporte||''}" readonly>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal(this)">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarSPP">Guardar</button>
+              </div>
+            </form>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Autocompletar descripciones al cambiar selects
+        const selServ = modal.querySelector('#id_servicio');
+        const inServ  = modal.querySelector('#descripcion_servicio');
+        const selSop  = modal.querySelector('#id_soporte');
+        const inSop   = modal.querySelector('#descripcion_soporte');
+
+        function fillServicio(){
+          const f = servicios.find(x=>x.id_servicio === selServ.value);
+          inServ.value = f ? (f.descripcion || '') : '';
+        }
+        function fillSoporte(){
+          const f = soportes.find(x=>x.id === selSop.value);
+          inSop.value = f ? (f.descripcion || '') : '';
+        }
+
+        selServ.addEventListener('change', fillServicio);
+        selSop .addEventListener('change', fillSoporte);
+
+        // Si es nuevo → NO preseleccionar; mantener vacío.
+        // Si es edición → sincronizar de una vez.
+        if (editItem){ fillServicio(); fillSoporte(); }
+        else { inServ.value = ''; inSop.value = ''; }
+
+        // Guardar
+        modal.querySelector('#btnGuardarSPP').onclick = function(){
+          const payload = {
+            nombre_pagador: modal.querySelector('#nombre_pagador').value,
+            modalidad_pago: modal.querySelector('#modalidad_pago').value,
+            id_servicio: selServ.value,
+            descripcion_servicio: inServ.value,
+            id_soporte: selSop.value,
+            descripcion_soporte: inSop.value
+          };
+          if (!payload.nombre_pagador || !payload.id_servicio || !payload.id_soporte) {
+            alert('Por favor complete los campos requeridos.');
+            return;
+          }
+          if (editIndex !== null) sectionData.soporte_por_pagador[editIndex] = payload;
+          else sectionData.soporte_por_pagador.push(payload);
+          saveToStorage(sectionData);
+          showConfigTable('soporte_por_pagador');
+          closeModal(modal.querySelector('.modal-close'));
+        };
+        return;
+      }
+
+      // Modal genérico (otras secciones)
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">${editItem?'Editar':'Agregar'} ${section.title}</h3>
+            <button class="modal-close" onclick="closeModal(this)">&times;</button>
+          </div>
+          <form id="modal-form" onsubmit="saveItem(event, '${option}', ${editIndex})">
+            ${section.fields.map(field => `
+              <div class="form-group">
+                <label class="form-label" for="${field.id}">${field.label}</label>
+                ${
+                  field.type==='checkbox'
+                  ? `<label class="form-checkbox-label"><input id="${field.id}" type="checkbox" ${editItem&&editItem[field.id]?'checked':''}><span>Activo/Inactivo</span></label>`
+                  : field.type==='select'
+                  ? `<select class="form-input" id="${field.id}" required>
+                       <option value="">-- Seleccione --</option>
+                       ${(field.options||[]).map(opt=>`<option value="${opt}" ${editItem&&editItem[field.id]===opt?'selected':''}>${opt}</option>`).join('')}
+                     </select>`
+                  : `<input class="form-input" id="${field.id}" type="${field.type}" value="${editItem ? (editItem[field.id] ?? '') : ''}" ${field.step?`step="${field.step}"`:''} ${field.min?`min="${field.min}"`:''} required>`
+                }
+              </div>
+            `).join('')}
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeModal(this)">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function closeModal(btn){ btn.closest('.modal-overlay').remove(); }
+
+    function saveItem(event, option, editIndex){
+      event.preventDefault();
+      const form = event.target;
+      const formData = {};
+      const section = configSections[option];
+
+      section.fields.forEach(f=>{
+        formData[f.id] = (f.type==='checkbox') ? form[f.id].checked : form[f.id].value;
+      });
+
+      if (option === 'liquidacion'){
+        if (editIndex !== null) sectionData[option].items[editIndex] = formData;
+        else sectionData[option].items.push(formData);
+      } else {
+        if (editIndex !== null) sectionData[option][editIndex] = formData;
+        else {
+          if (option === 'institucion') formData.id = Date.now();
+          sectionData[option].push(formData);
+        }
+      }
+
+      saveToStorage(sectionData);
+      showConfigTable(option);
+      closeModal(form.closest('.modal-overlay').querySelector('.modal-close'));
+    }
+
+    /* ================= Sedes ================= */
+    function manageSedes(i){
+      const inst = sectionData.institucion[i];
+      if (!inst.id) inst.id = Date.now();
+      if (!sectionData.sedes[inst.id]) sectionData.sedes[inst.id] = [];
+      showSedesModal(inst.id); saveToStorage(sectionData);
+    }
+    function showSedesModal(instId, editIndex=null){
+      const editItem = editIndex!==null ? sectionData.sedes[instId][editIndex] : null;
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">${editItem?'Editar':'Agregar'} Sede</h3>
+            <button class="modal-close" onclick="closeModal(this)">&times;</button>
+          </div>
+          <form id="modal-form" onsubmit="saveSede(event, '${instId}', ${editIndex})">
+            ${sedesFields.map(f=>`
+              <div class="form-group">
+                <label class="form-label" for="${f.id}">${f.label}</label>
+                <input class="form-input" id="${f.id}" type="${f.type}" value="${editItem?(editItem[f.id]||''):''}" required>
+              </div>
+            `).join('')}
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeModal(this)">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    function saveSede(e, instId, editIndex){
+      e.preventDefault();
+      const form = e.target; const payload = {};
+      sedesFields.forEach(f=>payload[f.id]=form[f.id].value);
+      if (editIndex!==null) sectionData.sedes[instId][editIndex]=payload;
+      else {
+        if (!sectionData.sedes[instId]) sectionData.sedes[instId]=[];
+        sectionData.sedes[instId].push(payload);
+      }
+      saveToStorage(sectionData); showConfigTable('institucion');
+      closeModal(form.closest('.modal-overlay').querySelector('.modal-close'));
+    }
+    function deleteItem(option, idx){
+      if (!confirm('¿Eliminar este elemento?')) return;
+      if (option==='institucion'){
+        const inst = sectionData[option][idx];
+        delete sectionData.sedes[inst.id];
+      }
+      (option==='liquidacion'? sectionData[option].items : sectionData[option]).splice(idx,1);
+      saveToStorage(sectionData); showConfigTable(option);
+    }
+    function deleteSede(instIdx, sedeIdx){
+      if (!confirm('¿Eliminar esta sede?')) return;
+      const inst = sectionData.institucion[instIdx];
+      sectionData.sedes[inst.id].splice(sedeIdx,1);
+      saveToStorage(sectionData); showConfigTable('institucion');
+    }
+
+/* ================= Navegación (como antes) ================= */
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', (e) => {
+    const section = e.currentTarget.dataset.section;
+    const href = e.currentTarget.getAttribute('href');
+
+    // Solo interceptar "Configuración" (SPA dentro de esta página)
+    if (section === 'config') {
+      e.preventDefault();
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+      document.getElementById('config-section').style.display = 'block';
+      return;
+    }
+
+    // "Datos Maestros" → dejar que el navegador vaya a cargue.html
+    if (section === 'masters') {
+      // NO hacer preventDefault
+      return;
+    }
+
+    // "Cerrar Sesión" → confirmar y si acepta, navegar a ../login.html
+    if (section === 'logout') {
+      if (!confirm('¿Seguro que deseas cerrar sesión?')) {
+        e.preventDefault(); // cancelar si el usuario dice No
+      }
+      // si dice Sí, no hacemos preventDefault → el navegador navega al href
+      return;
+    }
+  });
+});
+
+
+    // Radios → render sección
+    document.querySelectorAll('input[name="config-option"]').forEach(r=>{
+      r.addEventListener('change', (e)=> showConfigTable(e.target.value));
+    });
+
+    // Cargar vista inicial SIN depender de click programático
+    showConfigTable('institucion');
+  </script>
+</body>
+</html>

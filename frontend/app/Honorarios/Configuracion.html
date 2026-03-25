@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced mySiss Administration System with Persistent Data Storage</title>
+  <style>
+    :root {
+      --mysiss-purple: #800080;
+      --mysiss-light-purple: #EBE3F2;
+      --mysiss-hover-purple: #DFD1EE;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: white;
+      min-height: 100vh;
+    }
+
+    .focus-outline:focus {
+      outline: 2px solid var(--mysiss-purple);
+      outline-offset: 2px;
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 200px;
+      background: var(--mysiss-light-purple);
+      padding: 0.8rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      font-size: 3.4rem;
+      font-weight: bold;
+      color: var(--mysiss-purple);
+      margin-bottom: 2rem;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      color: var(--mysiss-purple);
+      text-decoration: none;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      transition: background-color 0.2s;
+    }
+
+    .nav-link:hover {
+      background: var(--mysiss-hover-purple);
+    }
+
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 1.875rem;
+      font-weight: bold;
+      color: var(--mysiss-purple);
+      margin-bottom: 1rem;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #D1D5DB;
+      border-radius: 0.375rem;
+      font-size: 1rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--mysiss-purple);
+      box-shadow: 0 0 0 2px rgba(128, 0, 128, 0.1);
+    }
+
+    /* Radio Options */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .radio-option input[type="radio"] {
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 2px solid var(--mysiss-purple);
+    }
+
+    .radio-label {
+      font-size: 1.125rem;
+      color: #1F2937;
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+    }
+
+    .data-table th {
+      background: var(--mysiss-light-purple);
+      color: var(--mysiss-purple);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.75rem 1rem;
+    }
+
+    .data-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .data-table tr:hover {
+      background: #F9FAFB;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--mysiss-purple);
+      color: white;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: #6b006b;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--mysiss-purple);
+      border: 1px solid var(--mysiss-purple);
+    }
+
+    .btn-secondary:hover {
+      background: var(--mysiss-light-purple);
+    }
+
+    .btn-danger {
+      background: #DC2626;
+      color: white;
+      border: none;
+    }
+
+    .btn-danger:hover {
+      background: #B91C1C;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 32rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--mysiss-purple);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #6B7280;
+      cursor: pointer;
+    }
+
+    .modal-footer {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #E5E7EB;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
+
+    /* Fixed fields for Liquidacion */
+    .fixed-fields-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      background-color: #F9FAFB;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .fixed-field {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    /* Checkbox styles */
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .estado-checkbox {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+    }
+
+    .status-label {
+      font-weight: 500;
+    }
+
+    .form-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .form-checkbox-label input[type="checkbox"] {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .empty-table {
+      text-align: center;
+      padding: 2rem;
+      background: #F9FAFB;
+      border-radius: 0.5rem;
+      color: #6B7280;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .table-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--mysiss-purple);
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--mysiss-purple);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">mySiss</div>
+      <nav>
+
+        <a href="configuracion.html" class="nav-link active" text-decoration: underline data-section="config"><strong>Configuración</strong></a>
+        <a href="cargue.html" class="nav-link" data-section="masters"><strong>Datos Maestros</strong></a>
+        <a href="contratos.html" class="nav-link" id="contracts-link" ><strong>Contratos</strong></a>
+
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+        <a href="../login.html" class="nav-link" data-section="logout"><strong>Cerrar Sesión</strong></a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Config Section -->
+      <section id="config-section" class="fade-in">
+        <h2 class="section-title">Configuración</h2>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="config-option" value="institucion" checked>
+            <span class="radio-label">Institución</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="config-option" value="esquema">
+            <span class="radio-label">Esquema de estatus</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="config-option" value="periodos">
+            <span class="radio-label">Periodos</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="config-option" value="descuentos">
+            <span class="radio-label">Descuentos</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="config-option" value="horarios">
+            <span class="radio-label">Horarios</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="config-option" value="liquidacion">
+            <span class="radio-label">Liquidación</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="config-option" value="tareas">
+            <span class="radio-label">Tareas</span>
+          </label>
+        </div>
+
+        <!-- Data Table Container -->
+        <div id="data-container"></div>
+      </section>
+
+      <!-- Masters Section -->
+      <section id="masters-section" class="fade-in" style="display: none;">
+        <h2 class="section-title">Datos Maestros</h2>
+        <p>Esta sección está en desarrollo.</p>
+      </section>
+
+      <!-- Contratos Section -->
+      <!-- <section id="contratos-section" class="fade-in" style="display: none;">
+        <h2 class="section-title">Contratos</h2>
+        <p>Esta sección está en desarrollo.</p>
+      </section> -->
+    </main>
+  </div>
+
+  <script>
+    // Load data from localStorage
+    const loadFromStorage = () => {
+      try {
+        const data = localStorage.getItem('mysissData');
+        return data ? JSON.parse(data) : null;
+      } catch (error) {
+        console.error('Error loading data from localStorage:', error);
+        return null;
+      }
+    };
+
+    // Save data to localStorage
+    const saveToStorage = (data) => {
+      try {
+        localStorage.setItem('mysissData', JSON.stringify(data));
+      } catch (error) {
+        console.error('Error saving data to localStorage:', error);
+      }
+    };
+
+    // Configuration data
+    const configSections = {
+      institucion: {
+        title: 'Institución',
+        fields: [
+          { id: 'nombre', label: 'Nombre Institución', type: 'text' },
+          { id: 'nit', label: 'NIT', type: 'text' },
+          { id: 'telefono', label: 'Teléfono', type: 'tel' },
+          { id: 'direccion', label: 'Dirección', type: 'text' },
+          { id: 'contacto', label: 'Contacto', type: 'text' },
+          { id: 'email', label: 'Email', type: 'email' }
+        ],
+        hasSedes: true
+      },
+      esquema: {
+        title: 'Esquema de Estatus',
+        fields: [
+          { id: 'codigo', label: 'Código', type: 'text' },
+          { id: 'descripcion', label: 'Descripción', type: 'text' },
+          { id: 'anterior', label: 'Anterior', type: 'text' },
+          { id: 'siguiente', label: 'Siguiente', type: 'text' }
+        ]
+      },
+      periodos: {
+        title: 'Periodos',
+        fields: [
+          { id: 'id_periodo', label: 'ID Periodo', type: 'text' },
+          { id: 'ejercicio', label: 'Ejercicio', type: 'text' },
+          { id: 'fecha_ini', label: 'Fecha Ini. Vigencia', type: 'date' },
+          { id: 'fecha_fin', label: 'Fecha Fin Vigencia', type: 'date' },
+          { id: 'estado', label: 'Activo/Inactivo', type: 'checkbox' }
+        ]
+      },
+      descuentos: {
+        title: 'Descuentos',
+        fields: [
+          { id: 'id_descuento', label: 'ID Descuento', type: 'text' },
+          { id: 'descripcion', label: 'Descripción', type: 'text' },
+          { id: 'valor', label: 'Valor', type: 'number', step: '0.01' }
+        ]
+      },
+      horarios: {
+        title: 'Horarios',
+        fields: [
+          { id: 'web_service', label: 'Web Service', type: 'text' },
+          { id: 'hora', label: 'Hora de Actualización', type: 'time' }
+        ]
+      },
+      liquidacion: {
+        title: 'Liquidación',
+        fixedFields: [
+          { id: 'salario_minimo', label: 'Salario Mínimo', type: 'number', step: '0.01' },
+          { id: 'valor_uvr', label: 'Valor UVR', type: 'number', step: '0.01' }
+        ],
+        fields: [
+          { id: 'codigo', label: 'Código', type: 'text' },
+          { id: 'descripcion', label: 'Descripción', type: 'text' }
+        ]
+      },
+      tareas: {
+        title: 'Tareas',
+        fields: [
+          { id: 'id_tarea', label: 'ID Tarea', type: 'text' },
+          { id: 'descripcion', label: 'Descripción', type: 'text' }
+        ]
+      }
+    };
+
+    // Sedes configuration
+    const sedesFields = [
+      { id: 'codigo', label: 'Código Sede', type: 'text' },
+      { id: 'descripcion', label: 'Descripción', type: 'text' },
+      { id: 'telefono', label: 'Teléfono', type: 'tel' }
+    ];
+
+    // Initialize or load stored data
+    let sectionData = loadFromStorage() || {
+      institucion: [],
+      sedes: {},
+      esquema: [],
+      periodos: [],
+      descuentos: [],
+      horarios: [],
+      liquidacion: {
+        config: {
+          salario_minimo: '',
+          valor_uvr: ''
+        },
+        items: []
+      },
+      tareas: []
+    };
+
+    function showConfigTable(option) {
+      const container = document.getElementById('data-container');
+      const section = configSections[option];
+      
+      let html = `
+        <div class="slide-in" style="margin-top: 2rem;">
+          <div class="table-header">
+            <h3 class="table-title">${section.title}</h3>
+      `;
+
+      if (option === 'liquidacion') {
+        html += `
+          <div class="fixed-fields-container">
+            ${section.fixedFields.map(field => `
+              <div class="fixed-field">
+                <label class="form-label" for="${field.id}">${field.label}</label>
+                <input 
+                  class="form-input"
+                  id="${field.id}"
+                  type="${field.type}"
+                  step="${field.step}"
+                  value="${sectionData.liquidacion.config[field.id]}"
+                  onchange="updateLiquidacionConfig(event)"
+                >
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      html += `<button class="btn btn-primary" onclick="showModal('${option}')">Agregar</button>
+          </div>`;
+
+      const data = option === 'liquidacion' ? sectionData[option].items : sectionData[option];
+
+      if (data.length === 0) {
+        html += `
+          <div class="empty-table">
+            <p>No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.</p>
+          </div>
+        `;
+      } else {
+        html += `
+          <table class="data-table">
+            <thead>
+              <tr>
+                ${section.fields.map(field => `<th>${field.label}</th>`).join('')}
+                <th style="text-align: right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map((item, index) => `
+                <tr>
+                  ${section.fields.map(field => {
+                    if (field.type === 'checkbox') {
+                      return `
+                        <td>
+                          <div class="checkbox-container">
+                            <input 
+                              type="checkbox" 
+                              ${item[field.id] ? 'checked' : ''} 
+                              onchange="toggleEstado('${option}', ${index})"
+                              class="estado-checkbox"
+                            />
+                            <span class="status-label">
+                              ${item[field.id] ? 'Activo' : 'Inactivo'}
+                            </span>
+                          </div>
+                        </td>
+                      `;
+                    }
+                    return `<td>${item[field.id] || ''}</td>`;
+                  }).join('')}
+                  <td style="text-align: right;">
+                    ${section.hasSedes ? `
+                      <button class="btn btn-secondary" style="margin-right: 0.5rem;" onclick="manageSedes(${index})">Sedes</button>
+                    ` : ''}
+                    <button class="btn btn-secondary" style="margin-right: 0.5rem;" onclick="editItem('${option}', ${index})">Editar</button>
+                    <button class="btn btn-danger" onclick="deleteItem('${option}', ${index})">Eliminar</button>
+                  </td>
+                </tr>
+                ${section.hasSedes && item.id && sectionData.sedes[item.id] ? `
+                  <tr>
+                    <td colspan="${section.fields.length + 1}">
+                      <div style="padding: 1rem; background: #F9FAFB;">
+                        <h4 style="color: var(--mysiss-purple); margin-bottom: 1rem;">Sedes</h4>
+                        ${sectionData.sedes[item.id].length > 0 ? `
+                          <table class="data-table" style="margin: 0;">
+                            <thead>
+                              <tr>
+                                ${sedesFields.map(field => `<th>${field.label}</th>`).join('')}
+                                <th style="text-align: right;">Acciones</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              ${sectionData.sedes[item.id].map((sede, sedeIndex) => `
+                                <tr>
+                                  ${sedesFields.map(field => `<td>${sede[field.id] || ''}</td>`).join('')}
+                                  <td style="text-align: right;">
+                                    <button class="btn btn-secondary" style="margin-right: 0.5rem;" onclick="editSede(${index}, ${sedeIndex})">Editar</button>
+                                    <button class="btn btn-danger" onclick="deleteSede(${index}, ${sedeIndex})">Eliminar</button>
+                                  </td>
+                                </tr>
+                              `).join('')}
+                            </tbody>
+                          </table>
+                        ` : `
+                          <div class="empty-table">
+                            <p>No hay sedes registradas. Haga clic en "Sedes" para agregar una nueva sede.</p>
+                          </div>
+                        `}
+                      </div>
+                    </td>
+                  </tr>
+                ` : ''}
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      html += '</div>';
+      container.innerHTML = html;
+      
+      // Save to localStorage after any change
+      saveToStorage(sectionData);
+    }
+
+    function updateLiquidacionConfig(event) {
+      const { id, value } = event.target;
+      sectionData.liquidacion.config[id] = value;
+      saveToStorage(sectionData);
+    }
+
+    function toggleEstado(option, index) {
+      const data = option === 'liquidacion' ? sectionData[option].items : sectionData[option];
+      data[index].estado = !data[index].estado;
+      showConfigTable(option);
+      saveToStorage(sectionData);
+    }
+
+    function manageSedes(institutionIndex) {
+      const institution = sectionData.institucion[institutionIndex];
+      if (!institution.id) {
+        institution.id = Date.now();
+      }
+      
+      if (!sectionData.sedes[institution.id]) {
+        sectionData.sedes[institution.id] = [];
+      }
+
+      showSedesModal(institution.id);
+      saveToStorage(sectionData);
+    }
+
+    function showSedesModal(institutionId, editIndex = null) {
+      const editItem = editIndex !== null ? sectionData.sedes[institutionId][editIndex] : null;
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay fade-in';
+      modal.innerHTML = `
+        <div class="modal-content slide-in">
+          <div class="modal-header">
+            <h3 class="modal-title">${editItem ? 'Editar' : 'Agregar'} Sede</h3>
+            <button class="modal-close" onclick="closeModal(this)">&times;</button>
+          </div>
+          <form id="modal-form" onsubmit="saveSede(event, '${institutionId}', ${editIndex})">
+            ${sedesFields.map(field => `
+              <div class="form-group">
+                <label class="form-label" for="${field.id}">${field.label}</label>
+                <input 
+                  class="form-input"
+                  id="${field.id}"
+                  type="${field.type}"
+                  value="${editItem ? (editItem[field.id] || '') : ''}"
+                  required
+                >
+              </div>
+            `).join('')}
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeModal(this)">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+    }
+
+    function saveSede(event, institutionId, editIndex) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = {};
+      
+      sedesFields.forEach(field => {
+        formData[field.id] = form[field.id].value;
+      });
+
+      if (editIndex !== null) {
+        sectionData.sedes[institutionId][editIndex] = formData;
+      } else {
+        if (!sectionData.sedes[institutionId]) {
+          sectionData.sedes[institutionId] = [];
+        }
+        sectionData.sedes[institutionId].push(formData);
+      }
+
+      saveToStorage(sectionData);
+      showConfigTable('institucion');
+      closeModal(form.closest('.modal-overlay').querySelector('.modal-close'));
+    }
+
+    function editSede(institutionIndex, sedeIndex) {
+      const institution = sectionData.institucion[institutionIndex];
+      showSedesModal(institution.id, sedeIndex);
+    }
+
+    function deleteSede(institutionIndex, sedeIndex) {
+      if (confirm('¿Está seguro que desea eliminar esta sede?')) {
+        const institution = sectionData.institucion[institutionIndex];
+        sectionData.sedes[institution.id].splice(sedeIndex, 1);
+        saveToStorage(sectionData);
+        showConfigTable('institucion');
+      }
+    }
+
+    // Navigation handling
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+		window.location.href = e.currentTarget.href;  // 🔁 Redirección explícita
+        const section = e.target.dataset.section;
+        
+        // Handle logout
+        if (section === 'logout') {
+          if (confirm('¿Está seguro que desea cerrar sesión?')) {
+            alert('Sesión cerrada exitosamente');
+            return;
+          }
+          return;
+        }
+
+        // Update active link
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Show correct section
+        document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+        document.getElementById(`${section}-section`).style.display = 'block';
+      });
+    });
+
+    // Config section handling
+    document.querySelectorAll('input[name="config-option"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        showConfigTable(e.target.value);
+      });
+    });
+
+    function showModal(option, editIndex = null) {
+      const section = configSections[option];
+      const data = option === 'liquidacion' ? sectionData[option].items : sectionData[option];
+      const editItem = editIndex !== null ? data[editIndex] : null;
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay fade-in';
+      modal.innerHTML = `
+        <div class="modal-content slide-in">
+          <div class="modal-header">
+            <h3 class="modal-title">${editItem ? 'Editar' : 'Agregar'} ${section.title}</h3>
+            <button class="modal-close" onclick="closeModal(this)">&times;</button>
+          </div>
+          <form id="modal-form" onsubmit="saveItem(event, '${option}', ${editIndex})">
+            ${section.fields.map(field => `
+              <div class="form-group">
+                <label class="form-label" for="${field.id}">${field.label}</label>
+                ${field.type === 'checkbox' ? `
+                  <label class="form-checkbox-label">
+                    <input 
+                      id="${field.id}"
+                      type="checkbox"
+                      ${editItem && editItem[field.id] ? 'checked' : ''}
+                    >
+                    <span>Activo/Inactivo</span>
+                  </label>
+                ` : `
+                  <input 
+                    class="form-input"
+                    id="${field.id}"
+                    type="${field.type}"
+                    ${field.step ? `step="${field.step}"` : ''}
+                    value="${editItem ? (editItem[field.id] || '') : ''}"
+                    required
+                  >
+                `}
+              </div>
+            `).join('')}
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeModal(this)">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+    }
+
+    function closeModal(button) {
+      button.closest('.modal-overlay').remove();
+    }
+
+    function saveItem(event, option, editIndex) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = {};
+      
+      const section = configSections[option];
+      section.fields.forEach(field => {
+        if (field.type === 'checkbox') {
+          formData[field.id] = form[field.id].checked;
+        } else {
+          formData[field.id] = form[field.id].value;
+        }
+      });
+
+      if (option === 'liquidacion') {
+        if (editIndex !== null) {
+          sectionData[option].items[editIndex] = formData;
+        } else {
+          sectionData[option].items.push(formData);
+        }
+      } else {
+        if (editIndex !== null) {
+          sectionData[option][editIndex] = formData;
+        } else {
+          if (option === 'institucion') {
+            formData.id = Date.now();
+          }
+          sectionData[option].push(formData);
+        }
+      }
+
+      saveToStorage(sectionData);
+      showConfigTable(option);
+      closeModal(form.closest('.modal-overlay').querySelector('.modal-close'));
+    }
+
+    function editItem(option, index) {
+      showModal(option, index);
+    }
+
+    function deleteItem(option, index) {
+      if (confirm('¿Está seguro que desea eliminar este elemento?')) {
+        if (option === 'institucion') {
+          const institution = sectionData[option][index];
+          delete sectionData.sedes[institution.id];
+          sectionData[option].splice(index, 1);
+        } else if (option === 'liquidacion') {
+          sectionData[option].items.splice(index, 1);
+        } else {
+          sectionData[option].splice(index, 1);
+        }
+        saveToStorage(sectionData);
+        showConfigTable(option);
+      }
+    }
+
+
+    // Initialize the first view
+    document.querySelector('input[name="config-option"]').click();
+  </script>
+</body>
+</html>

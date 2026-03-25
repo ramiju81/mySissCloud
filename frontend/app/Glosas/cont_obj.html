@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <title>Contestar objeción - mySiss</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#fff}
+    .container{display:flex}
+    .sidebar{width:180px;background:#eee6f8;padding:20px;height:100vh;position:fixed;top:0;left:0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto;z-index:1000}
+    .sidebar h1{color:purple;font-weight:bold;font-size:50px;margin-bottom:30px}
+    .sidebar a{display:block;margin:10px 0;color:purple;text-decoration:none;font-weight:bold}
+    .logout{color:purple;text-decoration:none;font-weight:bold}
+    .main{margin-left:240px;flex:1;background:#fff;padding:20px 40px}
+
+    [hidden]{display:none !important}
+
+    .submenu-radicacion,.submenu-devolucion,.submenu-objecion,.submenu-gestion,.submenu-conciliacion{
+      display:flex;flex-direction:column;gap:4px;margin:4px 0 8px 12px}
+    .submenu-radicacion a,.submenu-devolucion a,.submenu-objecion a,.submenu-gestion a,.submenu-conciliacion a{
+      margin:0;font-weight:normal;font-size:14px}
+
+    :root{
+      --morado:#800080;
+      --morado-borde:#8b3b98;
+      --fondo-suave:#F5F1F9;
+      --pill:#f6f2fa;
+      --sombra:#b9a8c6;
+    }
+    .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px 18px 12px;margin-bottom:22px}
+    .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+    .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .title-row h3{font-size:22px;margin:0;font-weight:400}
+
+    /* ======= FILTROS ======= */
+    .filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+    .colL{display:grid;grid-template-columns:180px 220px;gap:6px;align-items:center}
+    .colR-row1{display:grid;grid-template-columns:160px 220px 24px 220px;gap:6px;align-items:center}
+    .colR-row2{display:grid;grid-template-columns:160px 220px 1fr;gap:6px;align-items:center}
+
+    .row select, .row input[type="text"], .row input[list]{border:1px solid var(--morado-borde);border-radius:10px;padding:10px 12px;min-width:200px;outline:none;background:#fff}
+    select,input[type="date"]{border:1px solid var(--morado-borde);border-radius:10px;padding:10px 12px;background:#fff;outline:none}
+
+    .input-wrapper{position:relative;width:100%}
+    .input-wrapper > select,
+    .input-wrapper > input{width:100%;padding-right:38px}
+    .icon-btn{
+      position:absolute;right:6px;top:50%;transform:translateY(-50%);
+      width:28px;height:28px;border:none;background:transparent;cursor:pointer;
+      display:flex;align-items:center;justify-content:center
+    }
+    .icon-btn i{color:var(--morado);font-size:14px}
+
+    #fSelFactura{
+      -webkit-appearance:none;-moz-appearance:none;appearance:none;
+      border:2px solid var(--morado);
+      border-radius:16px;
+      background-image:none;
+      padding:10px 12px;
+    }
+    #fRadExt{
+      -webkit-appearance:none;-moz-appearance:none;appearance:none;
+      border:2px solid var(--morado);
+      border-radius:16px;
+      background-image:none;
+      padding:10px 12px;
+    }
+
+    .section--sticky-filtros{
+      position:sticky; top:0; z-index:1;
+      background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.06);
+    }
+
+    .btn{background:var(--morado);color:#fff;border:none;border-radius:10px;padding:12px 18px;cursor:pointer;box-shadow:0 3px 0 var(--sombra);transition:.15s transform ease;font-weight:400}
+    .empty{padding:12px 0 0;text-align:center;color:#666}
+    .actions{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:10px}
+
+    .table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+    .table th, .table td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400;vertical-align:top}
+    .table th{background:var(--fondo-suave);font-size:13px;text-align:left}
+    .table--factura{table-layout:fixed}
+    .table--factura th, .table--factura td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table--detalle th{background:var(--fondo-suave)}
+
+    .semaforo{width:16px;height:16px;border-radius:50%;border:2px solid #888;background:#fff;display:inline-block}
+
+    #toast{position:fixed;right:22px;bottom:22px;background:#3b7e3b;color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);transition:.2s}
+    #toast.show{opacity:1;transform:none}
+
+    .ellip{display:flex;align-items:flex-start;gap:6px}
+    .ellip__txt{-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+    .ellip__btn{width:22px;height:22px;border:1px solid var(--morado-borde);border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:auto}
+    .popover{position:absolute;z-index:9999;max-width:480px;background:#fff;border:1px solid var(--morado-borde);border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.18);padding:14px 36px 14px 14px}
+    .popover-close{position:absolute;right:8px;top:6px;border:none;background:transparent;font-size:16px;cursor:pointer}
+    .nota-pagador{width:100%}
+
+    /* Solo lectura visual para “Valor no aceptado prestador” */
+    .readonly-badge{
+      display:inline-block;
+      min-width:120px;
+      padding:10px 12px;
+      border:1px dashed #c9bed2;
+      border-radius:10px;
+      background:#faf7ff;
+      color:#444;
+      user-select:none;
+      cursor:not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <h1>mySiss</h1>
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div class="submenu-radicacion" id="submenu-radicacion" hidden>
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html" id="devolucion-link">Devolución facturas</a>
+        <div class="submenu-devolucion" id="submenu-devolucion" hidden>
+          <a href="reg_dev.html">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+        <a href="cargue.html" id="objecion-link">Cargue objeciones</a>
+        <div class="submenu-objecion" id="submenu-objecion" hidden>
+          <a href="carg_obj.html">Cargar archivo objeción</a>
+          <a href="conr_obj.html" style="text-decoration: underline;">Consultar responsable objeción</a>
+          <a href="cam_obj.html">Cambiar responsable objeción</a>
+          <a href="conc_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+        <div class="submenu-gestion" id="submenu-gestion" hidden>
+          <a href="cont_obj.html" style="text-decoration: underline;">Contestar objeción</a>
+          <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+          <a href="cons_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="conciliacion.html" id="conciliacion-link">Conciliación objeciones</a>
+        <div class="submenu-conciliacion" id="submenu-conciliacion" hidden>
+          <a href="con_glo.html">Conciliación glosa a conciliar</a>
+          <a href="con_glo.html">Conciliación glosa</a>
+          <a href="cons_glo.html">Consultar glosas conciliadas</a>
+        </div>
+      </div>
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <div class="main">
+      <div class="title-row"><h3 class="h2">Contestar objeción</h3></div>
+
+      <!-- Criterios (STICKY) -->
+      <div class="section section--sticky-filtros">
+        <h3 class="h2">Criterios de búsqueda</h3>
+
+        <div class="filters">
+          <div class="colL">
+            <label for="fRadExt">No. Radicado Externo</label>
+            <div class="input-wrapper">
+              <input type="text" id="fRadExt" list="radicadosList" placeholder="Ej: 00000" autocomplete="off" inputmode="numeric" />
+              <datalist id="radicadosList">
+                <option value="202510"></option>
+              </datalist>
+              <button type="button" id="btnLupaRadExt" class="icon-btn" title="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+
+            <label for="fSelFactura">No. Factura</label>
+            <div class="input-wrapper">
+              <input id="fSelFactura" list="facturasList" placeholder="Ej: 0000000000" autocomplete="off" inputmode="numeric" />
+              <datalist id="facturasList">
+                <option value="90007472"></option>
+                <option value="90003577"></option>
+                <option value="90007491"></option>
+                <option value="90007512"></option>
+              </datalist>
+              <button type="button" id="btnLupaFactura" class="icon-btn" title="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <div class="colR-row1">
+              <label for="fDesde">Fecha Objeción</label>
+              <input id="fDesde" type="date">
+              <div style="text-align:center">a</div>
+              <input id="fHasta" type="date">
+            </div>
+
+            <div class="colR-row2" style="margin-top:4px">
+              <label for="fEstado">Estado Factura</label>
+              <select id="fEstado">
+                <option value="" selected>Seleccione…</option>
+                <option value="GE">GE – Generada</option>
+                <option value="RA">RA – Radicada</option>
+                <option value="DE">DE – Devuelta</option>
+                <option value="OB">OB – Objetada</option>
+                <option value="CO">CO – Conciliada</option>
+                <option value="AN">AN – Anulada</option>
+              </select>
+              <div class="actions" style="margin:0;">
+                <button class="btn" id="btnBuscar"><i class="fas fa-search"></i>&nbsp;Buscar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Apartado Factura -->
+      <div class="section" id="secFactura">
+        <div class="title-row">
+          <h3 class="h2">Factura</h3>
+          <div class="actions" id="accionesFactura" hidden></div>
+        </div>
+
+        <div id="panelFactura"></div>
+        <div class="empty" id="msgFactura">Selecciona una factura y pulsa Buscar.</div>
+      </div>
+
+      <!-- Detalle -->
+      <div class="section">
+        <div class="title-row"><h3 class="h2">Detalle</h3></div>
+        <div id="panelDetalle"></div>
+        <div class="empty" id="msgDetalle">Pulsa “Detalle” para ver la información.</div>
+
+        <!-- Botón movido aquí, parte inferior derecha del área Detalle -->
+        <div class="actions" style="justify-content:flex-end">
+          <button class="btn" id="btnRegistrar"><i class="fas fa-save"></i>&nbsp;Contestar objeción</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">Se guardó respuesta correctamente.</div>
+
+  <script>
+    (function(){
+      const SEED_KEY="objeciones_data_v2";
+      const seed={
+        facturas:[{
+          pagador:"SURA",no_factura:"90007472",radicado_ext:"202510",
+          fecha_radicacion_ext:"06.10.2025",estado_factura_id:"OB",
+          estado_factura_desc:"OBJETADA",valor_factura:"692.010",
+          fecha_objecion:"2025-10-07",hora_objecion:"07:36:00"
+        }],
+        detalle:{
+          "90007472":[{
+            consecutivo_servicio:"1",cod_servicio:"21201",desc_servicio:"RADIOGRAFÍA TÓRAX",
+            valor_servicio:"67.000",cantidad_servicio:"1",valor_total:"67.000",
+            id_estado_servicio:"ORA",desc_estado_posicion:"OBJECIÓN REGISTRADA Y ASIGNADA",
+            id_motivo_obj:"TA08",motivo_obj:"Apoyo diagnóstico",id_motivo_esp:"TA0801",
+            motivo_esp:"Los cargos por apoyo diagnóstico que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+            usuario_asignado:"AGUAJO",valor_objetado:"27.000",valor_no_objetado:"40.000",
+            nota_pagador:"Se objeta por inconsistencia en valores.",
+            valor_aceptado_prestador:"",
+            valor_no_aceptado_prestador:"",
+            nota_contestar:"",
+            fecha_contestar:"07.10.2025",
+            hora_contestar:"10:00:00."
+          }]
+        }
+      };
+      if(!localStorage.getItem(SEED_KEY)){
+        localStorage.setItem(SEED_KEY,JSON.stringify(seed));
+      }
+      const $=s=>document.querySelector(s);
+      function loadData(){try{return JSON.parse(localStorage.getItem(SEED_KEY)||'{}')}catch(e){return seed}}
+      function saveData(d){localStorage.setItem(SEED_KEY,JSON.stringify(d))}
+
+      function escapeHtml(str){return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;")}
+      function ellipHTML(text){
+        const t=escapeHtml(text||"");
+        return `<div class="ellip" data-full="${t}">
+                  <span class="ellip__txt">${t}</span>
+                  <button type="button" class="ellip__btn" title="Ver completo"><i class="fas fa-chevron-down" style="font-size:12px"></i></button>
+                </div>`;
+      }
+      function attachEllipHandlers(root){
+        root.querySelectorAll('.ellip__btn').forEach(btn=>{
+          btn.addEventListener('click',(e)=>{
+            e.stopPropagation();
+            const wrap=btn.closest('.ellip');
+            const full=wrap?wrap.getAttribute('data-full'):'';
+            const pop=document.createElement('div');
+            pop.className='popover';
+            pop.innerHTML=`<button class="popover-close" aria-label="Cerrar">×</button>
+                           <div style="white-space:pre-wrap;line-height:1.25">${full}</div>`;
+            document.body.appendChild(pop);
+            const r=btn.getBoundingClientRect();
+            const top=window.scrollY + r.bottom + 6;
+            const left=window.scrollX + r.right - pop.offsetWidth;
+            pop.style.top=top+'px';
+            pop.style.left=Math.max(12,left)+'px';
+            const close=()=>{pop.remove();document.removeEventListener('click',outside);};
+            function outside(ev){ if(!pop.contains(ev.target)) close(); }
+            pop.querySelector('.popover-close').addEventListener('click',close);
+            setTimeout(()=>document.addEventListener('click',outside),0);
+          });
+        });
+      }
+
+      /* ===== Factura ===== */
+      function renderFacturaHeader(){
+        return `
+        <table class="table table--factura">
+          <thead>
+            <tr>
+              <th style="width:90px">Selección</th>
+              <th style="width:90px">Detalle</th>
+              <th style="width:90px">Semáforo</th>
+              <th>Nombre pagador</th>
+              <th>Número de factura</th>
+              <th>Número radicado externo</th>
+              <th>Fecha radicación externa</th>
+              <th>ID Estado factura</th>
+              <th>Estado factura</th>
+              <th>Valor factura</th>
+              <th>Fecha objeción</th>
+              <th>Hora objeción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>`;
+      }
+
+      /* Ícono folio inline (Detalle) */
+      const FOLIO_SVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b008b"/><stop offset="1" stop-color="#5a0a60"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#g)" d="M16 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 2v2H8V4h8zM9 12h6v2H9v-2zm0 4h6v2H9v-2zM9 8h6v2H9V8z"/>
+        </svg>`;
+
+      function renderFacturaRow(f){
+        return `
+          <tr>
+            <td style="text-align:center"><input id="chkSel" type="checkbox"></td>
+            <td style="text-align:center">
+              <a class="portfolio-link" id="lnkDetalle" title="Ver detalle" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">
+                ${FOLIO_SVG}
+              </a>
+            </td>
+            <td style="text-align:center"><span id="semaforo" class="semaforo" title="Pendiente"></span></td>
+            <td>${escapeHtml(f.pagador)}</td>
+            <td>${escapeHtml(f.no_factura)}</td>
+            <td>${escapeHtml(f.radicado_ext)}</td>
+            <td>${escapeHtml(f.fecha_radicacion_ext)}</td>
+            <td>${escapeHtml(f.estado_factura_id)}</td>
+            <td>${escapeHtml(f.estado_factura_desc)}</td>
+            <td>${escapeHtml(f.valor_factura)}</td>
+            <td>${escapeHtml(f.fecha_objecion)}</td>
+            <td>${escapeHtml(f.hora_objecion)}</td>
+          </tr>`;
+      }
+
+      /* ===== Detalle ===== */
+      function renderDetalleHeader(){
+        return `
+        <table class="table table--detalle">
+          <thead>
+            <tr>
+              <th>Consecutivo servicio</th>
+              <th>Código servicio facturado</th>
+              <th>Descripción servicio</th>
+              <th>Valor servicio</th>
+              <th>Cantidad servicio</th>
+              <th>Valor total</th>
+              <th>ID estado Servicio</th>
+              <th>Descripción Estado Posición</th>
+              <th>ID motivo Objeción</th>
+              <th>Motivo Objeción</th>
+              <th>ID motivo Específico</th>
+              <th>Motivo Específico</th>
+              <th>Usuario Asignado</th>
+              <th>Valor objetado</th>
+              <th>Valor no objetado</th>
+              <th>Nota pagador</th>
+              <th>Valor aceptado prestador</th>
+              <th>Valor no aceptado prestador</th>
+              <th>Nota contestar objeción</th>
+              <th>Fecha contestar objeción</th>
+              <th>Hora contestar objeción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>`;
+      }
+
+      // Helpers de moneda
+      const toNumber = (v)=> {
+        if(v==null) return 0;
+        const s = String(v).replace(/\./g,'').replace(/,/g,'').trim();
+        const n = parseInt(s,10);
+        return isNaN(n)?0:n;
+      };
+      const toMoney = (n)=> {
+        const s = Math.max(0, parseInt(n||0,10)).toString();
+        return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      };
+
+      function renderDetalleRows(items){
+        const FECHA_FIJA = "07.10.2025";
+        const HORA_FIJA  = "10:00:00.";
+        return items.map((it,idx)=>{
+          const aceptado = toNumber(it.valor_aceptado_prestador||0);
+          const objetado = toNumber(it.valor_objetado||0);
+          const noAceptado = toMoney(Math.max(0, objetado - aceptado));
+          return `
+          <tr data-row="${idx}">
+            <td>${escapeHtml(it.consecutivo_servicio)}</td>
+            <td>${escapeHtml(it.cod_servicio)}</td>
+            <td>${escapeHtml(it.desc_servicio)}</td>
+            <td>${escapeHtml(it.valor_servicio)}</td>
+            <td>${escapeHtml(it.cantidad_servicio)}</td>
+            <td>${escapeHtml(it.valor_total)}</td>
+            <td>${escapeHtml(it.id_estado_servicio)}</td>
+            <td>${escapeHtml(it.desc_estado_posicion)}</td>
+            <td>${escapeHtml(it.id_motivo_obj)}</td>
+            <td>${escapeHtml(it.motivo_obj)}</td>
+            <td>${escapeHtml(it.id_motivo_esp)}</td>
+            <td>${ellipHTML(it.motivo_esp)}</td>
+            <td>${escapeHtml(it.usuario_asignado)}</td>
+            <td>${escapeHtml(it.valor_objetado)}</td>
+            <td>${escapeHtml(it.valor_no_objetado)}</td>
+            <td class="nota-pagador">${escapeHtml(it.nota_pagador||"")}</td>
+            <td><input type="text" class="inp-det" data-index="${idx}" data-field="valor_aceptado_prestador" value="${escapeHtml(it.valor_aceptado_prestador||'')}" placeholder="0"></td>
+            <td aria-readonly="true" title="Solo lectura">
+              <span class="calc-no-aceptado readonly-badge" data-index="${idx}">${noAceptado}</span>
+            </td>
+            <td><input type="text" class="inp-det" data-index="${idx}" data-field="nota_contestar" value="${escapeHtml(it.nota_contestar||'')}"></td>
+            <td>${FECHA_FIJA}</td>
+            <td>${HORA_FIJA}</td>
+          </tr>`}).join('');
+      }
+
+      /* ===== Helpers ===== */
+      function paintSkeletons(){
+        $('#panelFactura').innerHTML=renderFacturaHeader();
+        $('#panelDetalle').innerHTML=renderDetalleHeader();
+        $('#msgFactura').style.display='block';
+        $('#msgDetalle').style.display='block';
+      }
+
+      function filtraFactura(rec){
+        const nof=($('#fSelFactura').value||'').trim();
+        const rad=($('#fRadExt').value||'').trim();
+        const est=($('#fEstado').value||'').trim();
+        const desde=$('#fDesde').value;
+        const hasta=$('#fHasta').value;
+
+        if(nof && rec.no_factura!==nof) return false;
+        if(rad && rec.radicado_ext!==rad) return false;
+        if(est && rec.estado_factura_id!==est) return false;
+
+        if(desde){
+          const r=rec.fecha_objecion || rec.fecha_radicacion_ext;
+          const rIso = (r && r.includes('.')) ? r.split('.').reverse().join('-') : r;
+          if(!rIso || rIso < desde) return false;
+        }
+        if(hasta){
+          const r=rec.fecha_objecion || rec.fecha_radicacion_ext;
+          const rIso = (r && r.includes('.')) ? r.split('.').reverse().join('-') : r;
+          if(!rIso || rIso > hasta) return false;
+        }
+        return true;
+      }
+
+      function buscar(){
+        $('#panelFactura').innerHTML=renderFacturaHeader();
+        $('#panelDetalle').innerHTML=renderDetalleHeader();
+        const tbodyF=document.querySelector('#panelFactura tbody');
+        const data=loadData();
+        const lista=(data.facturas||[]).filter(filtraFactura);
+
+        if(lista.length===0){
+          $('#msgFactura').textContent='No se encuentra información.';
+          $('#msgFactura').style.display='block';
+          $('#msgDetalle').textContent='No se encuentra información.';
+          $('#msgDetalle').style.display='block';
+          const accionesFactura=document.getElementById('accionesFactura');
+          if(accionesFactura) accionesFactura.hidden=true;
+          return;
+        }
+
+        const f=lista[0];
+        tbodyF.insertAdjacentHTML('beforeend',renderFacturaRow(f));
+        $('#msgFactura').style.display='none';
+
+        const lnk=document.getElementById('lnkDetalle');
+        if(lnk) lnk.addEventListener('click',()=>detalle(f.no_factura));
+        const accionesFactura=document.getElementById('accionesFactura');
+        if(accionesFactura) accionesFactura.hidden=false;
+
+        $('#msgDetalle').textContent='Pulsa “Detalle” para ver la información.';
+        $('#msgDetalle').style.display='block';
+      }
+
+      function detalle(nof){
+        const data=loadData();
+        const facturaSel = nof || ($('#fSelFactura').value||'').trim() || '90007472';
+        const items=(data.detalle||{})[facturaSel]||[];
+        $('#panelDetalle').innerHTML=renderDetalleHeader();
+        const tbody=document.querySelector('#panelDetalle tbody');
+        if(items.length===0){
+          $('#msgDetalle').textContent='Sin detalle para esta factura.';
+          $('#msgDetalle').style.display='block';
+          return;
+        }
+        tbody.insertAdjacentHTML('beforeend',renderDetalleRows(items));
+        attachEllipHandlers(document.getElementById('panelDetalle'));
+
+        // Recalcular: Valor no aceptado = Valor objetado - Valor aceptado prestador
+        document.querySelectorAll('#panelDetalle .inp-det[data-field="valor_aceptado_prestador"]').forEach(inp=>{
+          inp.addEventListener('input',()=>{
+            const idx = inp.dataset.index;
+            const aceptado = toNumber(inp.value);
+            const objetado = toNumber(items[idx]?.valor_objetado || 0);
+            const calc = toMoney(Math.max(0, objetado - aceptado));
+            const span = document.querySelector(`.calc-no-aceptado[data-index="${idx}"]`);
+            if(span) span.textContent = calc;
+          });
+        });
+
+        $('#msgDetalle').style.display='none';
+      }
+
+      function registrar(){
+        const sem=document.getElementById('semaforo');
+        if(sem){sem.style.background='#4caf50';sem.style.borderColor='#2e7d32';sem.title='Guardado';}
+        const t=document.getElementById('toast');
+        t.textContent='Se guardó respuesta correctamente.';
+        t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800);
+
+        const facturaSel=($('#fSelFactura').value||'').trim() || "90007472";
+        const d=loadData();
+        const arr=(d.detalle && d.detalle[facturaSel]) ? d.detalle[facturaSel] : (d.detalle["90007472"]||[]);
+
+        document.querySelectorAll('#panelDetalle .inp-det').forEach(inp=>{
+          const idx=parseInt(inp.dataset.index,10);
+          const field=inp.dataset.field;
+          if(arr[idx]) arr[idx][field]=inp.value;
+          const td=inp.parentElement; td.textContent=inp.value;
+        });
+
+        // Persistir el calculado bloqueado
+        document.querySelectorAll('#panelDetalle .calc-no-aceptado').forEach(span=>{
+          const idx=parseInt(span.dataset.index,10);
+          if(arr[idx]) arr[idx]['valor_no_aceptado_prestador']=span.textContent;
+        });
+
+        if(d.detalle && d.detalle[facturaSel]) d.detalle[facturaSel]=arr;
+        else if(d.detalle && d.detalle["90007472"]) d.detalle["90007472"]=arr;
+        saveData(d);
+      }
+
+      /* Init */
+      paintSkeletons();
+      const btnBuscar=document.getElementById('btnBuscar');
+      if(btnBuscar) btnBuscar.addEventListener('click',buscar);
+      const btnRegistrar=document.getElementById('btnRegistrar');
+      if(btnRegistrar) btnRegistrar.addEventListener('click',registrar);
+
+      /* LUPAS: disparan buscar() sin alterar el campo */
+      const btnLupaRadExt=document.getElementById('btnLupaRadExt');
+      if(btnLupaRadExt) btnLupaRadExt.addEventListener('click',buscar);
+      const btnLupaFactura=document.getElementById('btnLupaFactura');
+      if(btnLupaFactura) btnLupaFactura.addEventListener('click',buscar);
+    })();
+  </script>
+
+  <script>
+    (function(){
+      const page = location.pathname.split('/').pop();
+      const groups = { gestion: ["gestion.html","cont_obj.html"] };
+      const submenuEls = { gestion: document.getElementById('submenu-gestion') };
+      const parentLinks = { gestion: document.getElementById('gestion-link') };
+      let activeGroup = null;
+      for (const [group, files] of Object.entries(groups)) { if (files.includes(page)) { activeGroup = group; break; } }
+      for (const [group, el] of Object.entries(submenuEls)) {
+        if (!el) continue;
+        if (group === activeGroup) { el.removeAttribute('hidden'); if (parentLinks[group]) parentLinks[group].style.textDecoration = 'underline'; }
+        else { el.setAttribute('hidden',''); if (parentLinks[group]) parentLinks[group].style.textDecoration = 'none'; }
+      }
+      document.querySelectorAll('.submenu-gestion a').forEach(a => {
+        const isCurrent = a.getAttribute('href') === page;
+        a.style.textDecoration = isCurrent ? 'underline' : 'none';
+        a.style.fontWeight = isCurrent ? 'bold' : 'normal';
+      });
+    })();
+  </script>
+</body>
+</html>
+

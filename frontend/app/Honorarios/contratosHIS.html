@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contratos - mySiss</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style> 
+        :root {
+            --mysiss-purple: #800080;
+            --mysiss-light-purple: #EBE3F2;
+            --mysiss-hover-purple: #DFD1EE;
+        }
+
+        .hidden { display: none; }
+
+        #specialty {
+            width: 200px;
+            min-width: 150px;
+        }
+
+        /* Tablas más compactas */
+        .contract-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        
+        .contract-table th, .contract-table td {
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            text-align: left;
+        }
+        
+        .contract-table th {
+            background-color: var(--mysiss-light-purple);
+            position: sticky;
+            top: 0;
+        }
+        
+        .contract-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .position-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        .position-table th, .position-table td {
+            border: 1px solid #ddd;
+            padding: 3px 6px;
+            text-align: left;
+        }
+        
+        .position-table th {
+            background-color: #EBE3F2;
+            position: sticky;
+            top: 0;
+        }
+        
+        /* Estilos de la barra lateral */
+        .sidebar {
+            width: 200px;
+            background-color: #eee6f8;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar h1 {
+            color: var(--mysiss-purple);
+            font-weight: bold;
+            font-size: 50px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            margin: 20px 0;
+            color: var(--mysiss-purple);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+
+        .sidebar a[href="login.html"] {
+            position: relative;
+            bottom: 30px;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            flex: 1;
+            background-color: white;
+            padding: 20px 40px;
+            overflow-x: auto;
+        }
+        
+        /* Ajustes de espaciado */
+        #search-results {
+            margin-top: 10px;
+        }
+
+        .position-results-title {
+            margin-top: 8px;
+            margin-bottom: 5px;
+        }
+        
+        /* Estilos para los modales */
+        .search-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .search-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .search-filters {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .help-modal-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            max-width: 90%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1002;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .help-modal-container {
+            border: 1px solid #ccc;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Estilo para filas inactivas en tabla de contratos */
+        .row-inactiva {
+            background-color: #f3f4f6 !important;
+            color: #6b7280;
+        }
+
+        /* Estilo para filas inactivas en tabla de posiciones */
+        .position-inactiva {
+            background-color: #f3f4f6 !important;
+            color: #6b7280;
+        }
+
+        /* Checkbox de selección en filas inactivas sigue funcionando */
+        .position-inactiva .position-select {
+            opacity: 1 !important;
+            pointer-events: all !important;
+        }
+
+        #info-contrato {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            display: none;
+        }
+
+        #info-contrato label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        #info-contrato input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        #info-contrato button {
+            padding: 8px 12px;
+            margin-right: 10px;
+            background-color: #6c63ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #info-contrato button:hover {
+            background-color: #574ee6;
+        }
+        
+        /* Estilos para el modal de modificación */
+        #modify-modal-overlay {
+            z-index: 1001;
+        }
+
+        #modify-modal-overlay .bg-white {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #modify-modal-overlay input[readonly] {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+        
+        /* Estilos para los inputs ocultos inicialmente */
+        #formulario-contrato {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        /* Modal de modificación más compacto */
+        .compact-modal {
+            width: 700px;
+            max-width: 90%;
+        }
+        
+        .compact-modal .grid-cols-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        
+        .compact-modal .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .compact-modal input, .compact-modal select {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Nuevos estilos para el formulario de nuevo contrato */
+        .checkbox-activo {
+            margin-left: 15px;
+        }
+
+        .input-with-search {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--mysiss-purple);
+        }
+
+        .professional-search-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            max-width: 90%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .professional-search-modal h3 {
+            margin-bottom: 15px;
+            color: var(--mysiss-purple);
+        }
+
+        .professional-search-filters {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .professional-search-filters input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .professional-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .professional-table th, .professional-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .professional-table th {
+            background-color: var(--mysiss-light-purple);
+        }
+
+        .professional-table tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+
+        .file-upload-container {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            margin-top: 10px;
+        }
+
+        .file-upload-container input[type="file"] {
+            flex: 1;
+        }
+
+        .file-upload-container button {
+            background-color: var(--mysiss-purple);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .file-upload-container button:hover {
+            background-color: #6a1b9a;
+        }
+
+        .confirmation-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .confirmation-modal button {
+            background-color: var(--mysiss-purple);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .confirmation-modal button:hover {
+            background-color: #6a1b9a;
+        }
+
+        /* Estilo para elementos deshabilitados en filas inactivas */
+        .row-inactiva td:not(:last-child) input,
+        .row-inactiva td:not(:last-child) select {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Estilo para filas seleccionadas en búsqueda */
+        .bg-purple-100 {
+            background-color: #f3e8ff;
+        }
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-content">
+            <h1>mySiss</h1>
+            <a href="configuracionHIS.html">Configuración</a>
+            <a href="cargueHIS.html">Datos Maestros</a>
+            <a href="contratosHIS.html" style="text-decoration: underline;">Contratos</a>
+        </div>
+        <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div id="contracts-section" class="mt-2 max-w-6xl">
+            <div class="flex flex-col gap-2">
+                <h3 class="text-lg font-medium">Contratos</h3>
+                <div class="flex gap-2">
+                    <!-- Botón de búsqueda -->
+                    <button id="search-btn" class="flex items-center gap-2 bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                        </svg>
+                        Buscar
+                    </button>
+
+                    <!-- Botón Nuevo -->
+                    <button id="new-contract-btn" class="flex items-center gap-2 bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6z" />
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1h3.5a.5.5 0 010 1H5v9h10V5h-1.5a.5.5 0 010-1H15V3a1 1 0 00-1-1H6z" clip-rule="evenodd" />
+                        </svg>
+                        Nuevo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resultados de búsqueda (inicialmente ocultos) -->
+            <div id="search-results" class="hidden">
+                <!-- Tabla HO_Contratos -->
+                <table class="contract-table w-full">
+                    <thead>
+                        <tr>
+                            <th>Selección</th>
+                            <th>ID_Contrato</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Tipo Contrato</th>
+                            <th>Inactivo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contracts-table-body">
+                        <!-- Resultados dinámicos -->
+                    </tbody>
+                </table>
+
+                <!-- Formulario de contrato (oculto inicialmente) -->
+                <div id="formulario-contrato" class="w-full flex flex-wrap items-center justify-start gap-4 p-2">
+                    <div class="flex flex-col items-start w-[17%] -ml-[5px]">
+                        <label for="codigoContrato" class="text-[#800080] font-semibold mb-1">Código Contrato</label>
+                        <input type="text" id="codigoContrato" readonly 
+                            class="w-full bg-gray-300 text-center border-2 border-[#800080] rounded-md px-2 py-1 font-semibold uppercase" />
+                    </div>
+
+                    <div class="flex flex-col items-start w-[20%]">
+                        <label id="labelNombre" class="text-[#800080] font-semibold mb-1">Nombre Profesional</label>
+                        <input type="text" id="nombreProf" readonly 
+                            class="w-full bg-gray-300 text-center border-2 border-[#800080] rounded-md px-2 py-1 font-semibold uppercase" />
+                    </div>
+
+                    <div class="flex flex-col items-start w-[20%]">
+                        <label id="labelApellido" class="text-[#800080] font-semibold mb-1">Cod. Médico</label>
+                        <input type="text" id="apellidoProf" readonly 
+                            class="w-full bg-gray-300 text-center border-2 border-[#800080] rounded-md px-2 py-1 font-semibold uppercase" />
+                    </div>
+
+                    <button onclick="modificarDatos()"
+                        class="bg-[#800080] hover:bg-[#6a1b9a] text-white font-semibold px-4 mt-4 py-2.5 rounded flex items-center gap-1 text-sm">
+                        <i class="fas fa-edit"></i> Modificar
+                    </button>
+                    <button onclick="inactivarFila()"
+                        class="bg-[#800080] hover:bg-[#6a1b9a] text-white font-semibold px-3 mt-4 py-2.5 rounded flex items-center gap-1 text-sm">
+                        <i class="fas fa-toggle-on"></i> Inactivar/Activar
+                    </button>
+                </div>
+
+                <!-- Tabla HO_Posicion_Contrato (oculta inicialmente) -->
+                <div id="position-results" class="hidden">
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table class="position-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Sel.</th>
+                                    <th>Posición</th>
+                                    <th>ID_Contrato</th>
+                                    <th>ID_Aseguradora</th>
+                                    <th>CUPS</th>
+                                    <th>Procedimiento</th>
+                                    <th>Valor CUPS</th>
+                                    <th>Valor fijo</th>
+                                    <th>Valor</th>
+                                    <th>Porcentaje</th>
+                                    <th>ID_Tarea</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Fin</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positions-table-body">
+                                <!-- Resultados dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de búsqueda -->
+    <div id="search-modal-overlay" class="search-modal-overlay hidden"></div>
+    <div id="search-modal" class="search-modal hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Búsqueda de Contratos</h3>
+            <button id="close-search-modal" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="search-filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Activo</label>
+                    <select id="active-filter" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                        <option value="all">Todos</option>
+                        <option value="1">Sí</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Código contrato</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="contract-code" class="flex-1 border border-gray-300 rounded-md px-3 py-2">
+                        <button id="contract-code-help" class="bg-[var(--mysiss-light-purple)] hover:bg-[var(--mysiss-hover-purple)] px-3 rounded-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[var(--mysiss-purple)]" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Vigencia desde</label>
+                    <input type="date" id="validity-from" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Vigencia hasta</label>
+                    <input type="date" id="validity-to" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+            </div>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+                    <select id="contract-type" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                        <option value="">Todos</option>
+                        <option value="propio">A nombre propio</option>
+                        <option value="sociedad">Sociedad</option>
+                    </select>
+                </div>
+                
+                <div id="professional-group" class="filter-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Profesional</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="professional" class="flex-1 border border-gray-300 rounded-md px-3 py-2">
+                        <button id="professional-help" class="bg-[var(--mysiss-light-purple)] hover:bg-[var(--mysiss-hover-purple)] px-3 rounded-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[var(--mysiss-purple)]" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Especialidad</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="specialty" class="flex-1 border border-gray-300 rounded-md px-3 py-2">
+                        <button id="specialty-help" class="bg-[var(--mysiss-light-purple)] hover:bg-[var(--mysiss-hover-purple)] px-3 rounded-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[var(--mysiss-purple)]" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="society-group" class="filter-group hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sociedad Médica</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="society" class="flex-1 border border-gray-300 rounded-md px-3 py-2">
+                        <button id="society-help" class="bg-[var(--mysiss-light-purple)] hover:bg-[var(--mysiss-hover-purple)] px-3 rounded-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[var(--mysiss-purple)]" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end mt-4">
+                <button id="execute-search" class="bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors">
+                    Buscar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de ayuda -->
+    <div id="help-modal" class="hidden">
+      <div class="help-modal-container">
+        <div class="help-modal-header">
+          <h3 class="help-modal-title" id="help-modal-title">Ayuda</h3>
+          <button id="close-help-modal" class="help-modal-close">
+            &times;
+          </button>
+        </div>
+        <div id="help-modal-content">
+          <!-- JavaScript insertará contenido aquí automáticamente -->
+        </div>
+        <button id="apply-help-selection" class="help-modal-apply"></button>
+      </div>
+    </div>
+
+    <!-- Modal de búsqueda de profesional -->
+    <div id="professional-search-modal" class="professional-search-modal hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-[var(--mysiss-purple)]" id="professional-search-title">Buscar Profesional</h3>
+            <button id="close-professional-search-modal" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="professional-search-filters">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1" id="filter1-label">Nombre</label>
+                <input type="text" id="search-professional-name" class="w-full border rounded px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1" id="filter2-label">Apellido</label>
+                <input type="text" id="search-professional-lastname" class="w-full border rounded px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1" id="filter3-label">Cédula/NIT</label>
+                <input type="text" id="search-professional-id" class="w-full border rounded px-3 py-2">
+            </div>
+        </div>
+        
+        <button id="search-professional-btn" class="bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors mb-4">
+            Buscar
+        </button>
+        
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table class="professional-table">
+                <thead>
+                    <tr id="professional-search-headers">
+                        <th>ID Profesional</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Cédula</th>
+                    </tr>
+                </thead>
+                <tbody id="professional-search-results">
+                    <!-- Resultados dinámicos -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="flex justify-end mt-4">
+            <button id="select-professional-btn" class="bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors">
+                Seleccionar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div id="confirmation-modal" class="confirmation-modal hidden">
+        <h3 class="text-lg font-semibold mb-4">¿Realmente desea cargar la información?</h3>
+        <button id="confirm-upload-btn">Aceptar</button>
+    </div>
+
+    <script>
+        // Datos de ejemplo para HO_Contratos
+        let contractCounter = 35;
+        let isNewContractVisible = false;
+
+        const contractsData = [ 
+            { id: 1, ID_Contrato: "CON000010", fecha_vigencia_inicio: "2025-01-01", fecha_vigencia_fin: "2025-12-31", 
+              Tipo_Contrato: "A nombre Propio", "ID Medico": "PR035", "Razon Social": "Julian ramirez", 
+              Sede: "SEDE01", "ID Sociedad": "", Activo: "X" },
+            { id: 2, ID_Contrato: "CON000027", fecha_vigencia_inicio: "2025-01-01", fecha_vigencia_fin: "2025-12-31", 
+              Tipo_Contrato: "Sociedad", "ID Medico": "", "Razon Social": "Radiologos Asociados", 
+              Sede: "SEDE01", "ID Sociedad": "SM002", Activo: "X" },
+            { id: 3, ID_Contrato: "CON000022", fecha_vigencia_inicio: "2025-01-01", fecha_vigencia_fin: "2025-12-31", 
+              Tipo_Contrato: "Sociedad", "ID Medico": "", "Razon Social": "Intensivistas Asociado", 
+              Sede: "SEDE01", "ID Sociedad": "SM008", Activo: "X" },
+            { id: 4, ID_Contrato: "CON000005", fecha_vigencia_inicio: "2025-01-01", fecha_vigencia_fin: "2025-12-31", 
+              Tipo_Contrato: "Sociedad", "ID Medico": "", "Razon Social": "Terapistas Asociados", 
+              Sede: "SEDE01", "ID Sociedad": "SM010", Activo: "X" }
+        ];
+
+        // Datos de ejemplo para HO_Posicion_Contrato
+        const positionsData = {        
+            "CON000027": [
+                { id: 1,  Posicion: 1, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "870003", Procedimiento: "RADIOGRAFIA DE BASE DE CRANEO", ValorCUPS: "130000", Valorfijo: "Valor Fijo", Valor: "85000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 2,  Posicion: 2, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "870004", Procedimiento: "RADIOGRAFIA DE SILLA TURCA", ValorCUPS: "130000", Valorfijo: "Valor Fijo", Valor: "88000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 3,  Posicion: 3, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "870005", Procedimiento: "RADIOGRAFIA DE MASTOIDES COMPARATIVAS", ValorCUPS: "130000", Valorfijo: "Valor Fijo", Valor: "85000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 4,  Posicion: 4, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "870006", Procedimiento: "RADIOGRAFIA DE PENASCOS", ValorCUPS: "130000", Valorfijo: "Valor Fijo", Valor: "85000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 5,  Posicion: 5, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "870007", Procedimiento: "RADIOGRAFIA DE CONDUCTO AUDITIVO INTERNO", ValorCUPS: "130000", Valorfijo: "Valor Fijo", Valor: "85000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 6,  Posicion: 6, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "870101", Procedimiento: "RADIOGRAFIA DE CARA (PERFILOGRAMA)", ValorCUPS: "130000", Valorfijo: "Valor Fijo", Valor: "85000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 7,  Posicion: 7, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "881302", Procedimiento: "ECOGRAFIA DE ABDOMEN TOTAL", ValorCUPS: "250000", Valorfijo: "Valor Fijo", Valor: "100000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 8,  Posicion: 8, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "870103", Procedimiento: "RADIOGRAFIA DE AGUJEROSOPTICOS", ValorCUPS: "130000", Valorfijo: "Valor Fijo", Valor: "88000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 9,  Posicion: 9, ID_Contrato: "CON000027", ID_Aseguradora: "EPS CONVIDA EPS", CUPS: "870104", Procedimiento: "RADIOGRAFIA DE MALAR", ValorCUPS: "130000", Valorfijo: "Valor Fijo", Valor: "88000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" }
+            ],
+            "CON000010": [
+                { id: 10,  Posicion: 1, ID_Contrato: "CON000010", ID_Aseguradora: "Nueva EPS", CUPS: "890216", Procedimiento: "CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN SALUD FAMILIAR Y COMUNITARIA", ValorCUPS: "180000", Valorfijo: "Valor Fijo", Valor: "120000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 11,  Posicion: 2, ID_Contrato: "CON000010", ID_Aseguradora: "Nueva EPS", CUPS: "890402", Procedimiento: "INTERCONSULTA POR OTRAS ESPECIALIDADES MEDICAS", ValorCUPS: "180000", Valorfijo: "Valor Fijo", Valor: "120000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 12,  Posicion: 3, ID_Contrato: "CON000010", ID_Aseguradora: "Nueva EPS", CUPS: "890202", Procedimiento: "CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES MEDICAS", ValorCUPS: "220000", Valorfijo: "Valor Fijo", Valor: "180000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" }
+            ],
+            "CON000022": [
+                { id: 13,  Posicion: 1, ID_Contrato: "CON000022", ID_Aseguradora: "Sanitas EPS", CUPS: "502103", Procedimiento: "DRENAJE DE LESION HEPATICA VIA LAPAROSCOPICA", ValorCUPS: "1600000", Valorfijo: "", Valor: "", Porcentaje: "5%", ID_Tarea: "CIRU", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 14,  Posicion: 2, ID_Contrato: "CON000022", ID_Aseguradora: "Sanitas EPS", CUPS: "502103", Procedimiento: "DRENAJE DE LESION HEPATICA VIA LAPAROSCOPICA", ValorCUPS: "1600000", Valorfijo: "", Valor: "", Porcentaje: "3%", ID_Tarea: "AYU1", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 15,  Posicion: 3, ID_Contrato: "CON000022", ID_Aseguradora: "Sanitas EPS", CUPS: "502103", Procedimiento: "DRENAJE DE LESION HEPATICA VIA LAPAROSCOPICA", ValorCUPS: "1600000", Valorfijo: "", Valor: "", Porcentaje: "2%", ID_Tarea: "AYU2", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 16,  Posicion: 4, ID_Contrato: "CON000022", ID_Aseguradora: "Sanitas EPS", CUPS: "510301", Procedimiento: "DRENAJE BILIAR VIA PERCUTANEA Y COLOCACION DE DISPOSITIVO", ValorCUPS: "2500000", Valorfijo: "", Valor: "", Porcentaje: "", ID_Tarea: "CIRU", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 17,  Posicion: 5, ID_Contrato: "CON000022", ID_Aseguradora: "Sanitas EPS", CUPS: "510301", Procedimiento: "DRENAJE BILIAR VIA PERCUTANEA Y COLOCACION DE DISPOSITIVO", ValorCUPS: "2500000", Valorfijo: "", Valor: "", Porcentaje: "5%", ID_Tarea: "ANES", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 18,  Posicion: 6, ID_Contrato: "CON000022", ID_Aseguradora: "Nueva EPS", CUPS: "502103", Procedimiento: "DRENAJE DE LESION HEPATICA VIA LAPAROSCOPICA", ValorCUPS: "1275000", Valorfijo: "", Valor: "", Porcentaje: "5%", ID_Tarea: "CIRU", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 19,  Posicion: 7, ID_Contrato: "CON000022", ID_Aseguradora: "Nueva EPS", CUPS: "502103", Procedimiento: "DRENAJE DE LESION HEPATICA VIA LAPAROSCOPICA", ValorCUPS: "1275000", Valorfijo: "", Valor: "", Porcentaje: "5%", ID_Tarea: "AYU1", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 20,  Posicion: 8, ID_Contrato: "CON000022", ID_Aseguradora: "Nueva EPS", CUPS: "502103", Procedimiento: "DRENAJE DE LESION HEPATICA VIA LAPAROSCOPICA", ValorCUPS: "1275000", Valorfijo: "", Valor: "", Porcentaje: "3$", ID_Tarea: "AYU2", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" }
+            ],
+            "CON000005": [
+                { id: 21,  Posicion: 1, ID_Contrato: "CON00005", ID_Aseguradora: "Sanitas EPS", CUPS: "939403", Procedimiento: "TERAPIA RESPIRATORIA INTEGRAL", ValorCUPS: "120000", Valorfijo: "Valor Fijo", Valor: "50000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 22,  Posicion: 2, ID_Contrato: "CON00005", ID_Aseguradora: "Sanitas EPS", CUPS: "937101", Procedimiento: "TERAPIA FONOAUDIOLOGICA PARA PROBLEMAS EVOLUTIVOS Y ADQUIRIDOS DEL LENGUAJE ORAL Y ESCRITO", ValorCUPS: "120000", Valorfijo: "Valor Fijo", Valor: "80000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" },
+                { id: 23,  Posicion: 3, ID_Contrato: "CON00005", ID_Aseguradora: "Sanitas EPS", CUPS: "890201", Procedimiento: "CONSULTA DE PRIMERA VEZ POR MEDICINA GENERAL", ValorCUPS: "210000", Valorfijo: "Valor Fijo", Valor: "100000", Porcentaje: "", ID_Tarea: "", fecha_vig_Ini: "01/01/2025", fecha_vig_fin: "31/12/2025" }
+            ]
+        };
+
+        // Datos de ejemplo para profesionales
+        const professionalsData = [
+            { id: "PR001", nombre: "Juan David Maldonado Espitia", nit: "79879891" },
+            { id: "PR002", nombre: "Oscar Javier Modragon Mora", nit: "1156200547" },
+            { id: "PR003", nombre: "Diana Marcela Ayala contreras", nit: "1789654987" },
+            { id: "PR004", nombre: "Claudia regina Muñoz Maldonado", nit: "1789654989" },
+            { id: "PR005", nombre: "Joge Jaramillo Alvarado Martinez", nit: "79879895" },
+            { id: "PR006", nombre: "Julian Ramiro Jimenez Roman", nit: "1162003200" },
+            { id: "PR007", nombre: "Juan Carlos Rosas Rodriguez", nit: "79879897" },
+            { id: "PR008", nombre: "Maria Eugenia Rodriguez", nit: "1789654988" },
+            { id: "PR009", nombre: "Sofia Patricia Orjuela Muñoz", nit: "1789654943" },
+            { id: "PR010", nombre: "Mario Jose Torres Rodriguez", nit: "1562005470" },
+            { id: "PR011", nombre: "Luis Carlos Fernandez Figueroa", nit: "79879901" },
+            { id: "PR012", nombre: "Javier Ricardo Lopez", nit: "1432400547" },
+            { id: "PR013", nombre: "Rosa Maria Lopez Muñoz", nit: "1789654123" },
+            { id: "PR014", nombre: "Juana Patricia Muñoz Niño", nit: "1543244988" },
+            { id: "PR015", nombre: "Laura Daniela Bohorquez Martinez", nit: "1789653753" },
+            { id: "PR016", nombre: "Jorge Mario Espitia Maldonado", nit: "1156209999" },
+            { id: "PR017", nombre: "Jhon Alberto Martinez Martinez", nit: "79879907" },
+            { id: "PR018", nombre: "Sandra Martiza Aparicio Bernal", nit: "1234634438" },
+            { id: "PR019", nombre: "Milena Yadira Berlan Beltral", nit: "1531234648" },
+            { id: "PR020", nombre: "Diego Fernando Orjuela Aldana", nit: "1156208888" },
+            { id: "PR021", nombre: "Jorge Moreno Montaño", nit: "79879911" },
+            { id: "PR022", nombre: "Ricardo Alarcon Pajarito", nit: "1156209999" },
+            { id: "PR023", nombre: "Yaneth Mendez Martinez", nit: "1529654988" },
+            { id: "PR024", nombre: "Mauricio Jose Ramirez Rodriguez", nit: "1158888547" },
+            { id: "PR025", nombre: "Leonardo Loaiza Tovar", nit: "79879915" },
+            { id: "PR026", nombre: "Maritza Rodriguez", nit: "1789654988" },
+            { id: "PR027", nombre: "Pedro Jose Arana camargo", nit: "79879917" },
+            { id: "PR028", nombre: "Jhonny Montaño rosas", nit: "1156660547" },
+            { id: "PR029", nombre: "Pedro Jose Rodriguez Gonzalez", nit: "79879919" },
+            { id: "PR030", nombre: "Laura Gomez", nit: "1111556433" },
+            { id: "PR031", nombre: "Juan Ortega", nit: "1002345654" },
+            { id: "PR032", nombre: "Camila Reyez", nit: "74567454" },
+            { id: "PR033", nombre: "Mario Lopez", nit: "97564243" },
+            { id: "PR034", nombre: "Yeny Palacio", nit: "1020234567" },
+            { id: "PR035", nombre: "Julian Andres Ramirez", nit: "94435555" }
+        ];
+
+        // Datos de ejemplo para sociedades médicas
+        const societiesData = [
+            { id: "SM001", nombre: "Cardiologos Asociados", nit: "8600359922" },
+            { id: "SM002", nombre: "Radiologos Asociados", nit: "8600358822" },
+            { id: "SM003", nombre: "Grupo Anestesia", nit: "8609759922" },
+            { id: "SM004", nombre: "Sociedad de Cirugia Plastica", nit: "8600359942" },
+            { id: "SM005", nombre: "Maxilo Group", nit: "8600359442" },
+            { id: "SM006", nombre: "Urologos Asociados", nit: "8601135552" },
+            { id: "SM007", nombre: "Gienco group", nit: "8600359112" },
+            { id: "SM008", nombre: "Intensivistas Asociado", nit: "8600353242" },
+            { id: "SM009", nombre: "Anestesia center group", nit: "8600343252" },
+            { id: "SM010", nombre: "Terapistas Asociados", nit: "8600388792" }
+        ];
+
+        // Mostrar modal de búsqueda
+        document.getElementById('search-btn').addEventListener('click', function () {
+            // Ocultar formulario de nuevo si estaba visible
+            document.getElementById('new-contract-form')?.remove();
+            isNewContractVisible = false;
+
+            resetSearchForm();
+            document.getElementById('search-modal-overlay').classList.remove('hidden');
+            document.getElementById('search-modal').classList.remove('hidden');
+        });
+
+        // Ejecutar búsqueda
+        document.getElementById('execute-search').addEventListener('click', function () {
+            const filtered = filterContracts();
+            displayContracts(filtered);
+            document.getElementById('search-modal-overlay').classList.add('hidden');
+            document.getElementById('search-modal').classList.add('hidden');
+        });
+
+        // Función para filtrar contratos
+        function filterContracts() {
+            const activeFilter = document.getElementById('active-filter').value;
+            const codeFilter = document.getElementById('contract-code').value.toLowerCase();
+            const typeFilter = document.getElementById('contract-type').value;
+            const professionalFilter = document.getElementById('professional').value.toLowerCase();
+            const societyFilter = document.getElementById('society').value.toLowerCase();
+            const validityFromFilter = document.getElementById('validity-from').value;
+            const validityToFilter = document.getElementById('validity-to').value;
+
+            return contractsData.filter(contract => {
+                if (activeFilter !== 'all') {
+                    const activeStatus = activeFilter === '1' ? 'X' : '';
+                    if (contract.Activo !== activeStatus) return false;
+                }
+                
+                if (codeFilter && !contract.ID_Contrato.toLowerCase().includes(codeFilter)) {
+                    return false;
+                }
+                
+                if (typeFilter) {
+                    if (typeFilter === 'propio' && contract.Tipo_Contrato !== 'A nombre Propio') {
+                        return false;
+                    }
+                    if (typeFilter === 'sociedad' && contract.Tipo_Contrato !== 'Sociedad') {
+                        return false;
+                    }
+                }
+                
+                if (professionalFilter && contract["ID Medico"] && 
+                    !contract["ID Medico"].toLowerCase().includes(professionalFilter)) {
+                    return false;
+                }
+                
+                if (societyFilter && contract["ID Sociedad"] && 
+                    !contract["ID Sociedad"].toLowerCase().includes(societyFilter)) {
+                    return false;
+                }
+                
+                if (validityFromFilter && new Date(contract.fecha_vigencia_inicio) < new Date(validityFromFilter)) {
+                    return false;
+                }
+                
+                if (validityToFilter && new Date(contract.fecha_vigencia_fin) > new Date(validityToFilter)) {
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+
+        // Mostrar contratos en la tabla
+        function displayContracts(contracts) {
+            const tbody = document.getElementById('contracts-table-body');
+            tbody.innerHTML = '';
+            
+            contracts.forEach(contract => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="text-center"><input type="checkbox" class="contract-select" data-id="${contract.ID_Contrato}" 
+                         data-tipo="${contract.Tipo_Contrato}" data-medico="${contract["ID Medico"] || ''}" 
+                         data-razon="${contract["Razon Social"] || ''}" data-sociedad="${contract["ID Sociedad"] || ''}"></td>
+                    <td>${contract.ID_Contrato}</td>
+                    <td>${formatDate(contract.fecha_vigencia_inicio)}</td>
+                    <td>${formatDate(contract.fecha_vigencia_fin)}</td>
+                    <td>${contract.Tipo_Contrato}</td>
+                    <td class="text-center"><input type="checkbox" class="inactivo-toggle" ${contract.Activo === 'X' ? '' : 'checked'}></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Asegurar que ningún checkbox esté seleccionado inicialmente
+            document.querySelectorAll('.contract-select').forEach(cb => cb.checked = false);
+
+            // Agregar event listeners a los checkboxes de selección
+            document.querySelectorAll('.contract-select').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Desmarcar otros checkboxes
+                        document.querySelectorAll('.contract-select').forEach(cb => {
+                            if (cb !== this) cb.checked = false;
+                        });
+                        
+                        // Obtener datos del contrato seleccionado
+                        const contractId = this.getAttribute('data-id');
+                        const tipoContrato = this.getAttribute('data-tipo');
+                        const idMedico = this.getAttribute('data-medico');
+                        const razonSocial = this.getAttribute('data-razon');
+                        const idSociedad = this.getAttribute('data-sociedad');
+                        
+                        // Mostrar el formulario de contrato
+                        document.getElementById('formulario-contrato').style.display = 'flex';
+                        
+                        // Actualizar los inputs
+                        document.getElementById('codigoContrato').value = contractId;
+                        
+                        if (tipoContrato === 'A nombre Propio') {
+                            document.getElementById('labelNombre').textContent = 'Nombre Profesional';
+                            document.getElementById('labelApellido').textContent = 'Código Médico';
+                            document.getElementById('nombreProf').value = razonSocial || '';
+                            document.getElementById('apellidoProf').value = idMedico || '';
+                        } else {
+                            document.getElementById('labelNombre').textContent = 'Razón Social';
+                            document.getElementById('labelApellido').textContent = 'ID Sociedad';
+                            document.getElementById('nombreProf').value = razonSocial || '';
+                            document.getElementById('apellidoProf').value = idSociedad || '';
+                        }
+                        
+                        // Mostrar las posiciones del contrato seleccionado
+                        displayPositions(contractId);
+                    } else {
+                        // Ocultar la tabla de posiciones si se desmarca
+                        document.getElementById('position-results').classList.add('hidden');
+                        document.getElementById('formulario-contrato').style.display = 'none';
+                    }
+                });
+            });
+            
+            // Agregar event listeners a los checkboxes de inactivo
+            document.querySelectorAll('.inactivo-toggle').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const row = this.closest('tr');
+                    if (this.checked) {
+                        row.classList.add('row-inactiva');
+                        // Deshabilitar todos los elementos excepto el checkbox de inactivo
+                        row.querySelectorAll('td:not(:last-child) input, td:not(:last-child) select').forEach(el => {
+                            el.disabled = true;
+                        });
+                    } else {
+                        row.classList.remove('row-inactiva');
+                        // Habilitar todos los elementos
+                        row.querySelectorAll('td input, td select').forEach(el => {
+                            el.disabled = false;
+                        });
+                    }
+                });
+                
+                // Estado inicial
+                if (cb.checked) {
+                    const row = cb.closest('tr');
+                    row.classList.add('row-inactiva');
+                    row.querySelectorAll('td:not(:last-child) input, td:not(:last-child) select').forEach(el => {
+                        el.disabled = true;
+                    });
+                }
+            });
+            
+            // Mostrar la sección de resultados
+            document.getElementById('search-results').classList.remove('hidden');
+        }
+
+        // Mostrar posiciones del contrato seleccionado
+        function displayPositions(contractId) {
+            const positions = positionsData[contractId] || [];
+            const tbody = document.getElementById('positions-table-body');
+            tbody.innerHTML = '';
+            
+            positions.forEach(position => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="text-center"><input type="checkbox" class="position-select" data-id="${position.Posicion}"></td>
+                    <td>${position.Posicion}</td>
+                    <td>${position.ID_Contrato}</td>
+                    <td>${position.ID_Aseguradora}</td>
+                    <td>${position.CUPS}</td>
+                    <td>${position.Procedimiento}</td>
+                    <td>${position.ValorCUPS}</td>
+                    <td>${position.Valorfijo || ''}</td>
+                    <td>${position.Valor || ''}</td>
+                    <td>${position.Porcentaje || ''}</td>
+                    <td>${position.ID_Tarea || ''}</td>
+                    <td>${position.fecha_vig_Ini}</td>
+                    <td>${position.fecha_vig_fin}</td>
+                `;
+                tbody.appendChild(row);
+                
+                // Agregar evento para seleccionar fila
+                row.querySelector('.position-select').addEventListener('change', function() {
+                    if (this.checked) {
+                        // Desmarcar otros checkboxes
+                        document.querySelectorAll('.position-select').forEach(cb => {
+                            if (cb !== this) cb.checked = false;
+                        });
+                    }
+                });
+            });
+            
+            // Mostrar la tabla de posiciones
+            document.getElementById('position-results').classList.remove('hidden');
+        }
+
+        // Formatear fecha
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES');
+        }
+
+        // Resetear formulario de búsqueda
+        function resetSearchForm() {
+            document.getElementById('active-filter').value = 'all';
+            document.getElementById('contract-code').value = '';
+            document.getElementById('validity-from').value = '';
+            document.getElementById('validity-to').value = '';
+            document.getElementById('contract-type').value = '';
+            document.getElementById('professional').value = '';
+            document.getElementById('society').value = '';
+            document.getElementById('specialty').value = '';
+        }
+
+        // Función para mostrar el modal de modificación
+        function modificarDatos() {
+            // Verificar si hay una posición seleccionada
+            const selectedPosition = document.querySelector('.position-select:checked');
+            if (!selectedPosition) {
+                alert('Por favor seleccione una posición para modificar');
+                return;
+            }
+            
+            const positionRow = selectedPosition.closest('tr');
+            const positionData = {
+                posicion: positionRow.cells[1].textContent,
+                aseguradora: positionRow.cells[3].textContent,
+                cups: positionRow.cells[4].textContent,
+                procedimiento: positionRow.cells[5].textContent,
+                valorCups: positionRow.cells[6].textContent,
+                valorFijo: positionRow.cells[7].textContent,
+                valor: positionRow.cells[8].textContent,
+                porcentaje: positionRow.cells[9].textContent,
+                tarea: positionRow.cells[10].textContent,
+                fechaIni: positionRow.cells[11].textContent,
+                fechaFin: positionRow.cells[12].textContent
+            };
+            
+            // Crear el modal de modificación
+            const modalHTML = `
+                <div id="modify-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div class="bg-white rounded-lg compact-modal">
+                        <div class="flex justify-between items-center border-b p-4">
+                            <h3 class="text-lg font-semibold text-[#800080]">Modificar Posición</h3>
+                            <button id="close-modify-modal" class="text-gray-500 hover:text-gray-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ID Contrato</label>
+                                    <input type="text" value="${document.getElementById('codigoContrato').value}" 
+                                           class="w-full border rounded px-2 py-1 mt-1 bg-gray-100" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Posición</label>
+                                    <input type="text" value="${positionData.posicion}" 
+                                           class="w-full border rounded px-2 py-1 mt-1 bg-gray-100" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Aseguradora</label>
+                                    <input type="text" value="${positionData.aseguradora}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">CUPS</label>
+                                    <input type="text" value="${positionData.cups}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Procedimiento</label>
+                                    <input type="text" value="${positionData.procedimiento}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Valor CUPS</label>
+                                    <input type="text" value="${positionData.valorCups}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Valor Fijo</label>
+                                    <input type="text" value="${positionData.valorFijo}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Valor</label>
+                                    <input type="text" value="${positionData.valor}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Porcentaje</label>
+                                    <input type="text" value="${positionData.porcentaje}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">ID Tarea</label>
+                                    <input type="text" value="${positionData.tarea}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
+                                    <input type="text" value="${positionData.fechaIni}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Fecha Fin</label>
+                                    <input type="text" value="${positionData.fechaFin}" 
+                                           class="w-full border rounded px-2 py-1 mt-1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end p-4 border-t">
+                            <button id="save-modify" class="bg-[#800080] text-white px-4 py-2 rounded hover:bg-[#6a1b9a]">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Insertar el modal en el DOM
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Evento para cerrar el modal
+            document.getElementById('close-modify-modal').addEventListener('click', function() {
+                document.getElementById('modify-modal-overlay').remove();
+            });
+            
+            // Evento para guardar los cambios
+            document.getElementById('save-modify').addEventListener('click', function() {
+                // Actualizar los datos en la tabla
+                const inputs = document.querySelectorAll('#modify-modal-overlay input:not([readonly])');
+                inputs.forEach(input => {
+                    const fieldName = input.previousElementSibling.textContent.trim();
+                    switch(fieldName) {
+                        case 'Aseguradora': positionRow.cells[3].textContent = input.value; break;
+                        case 'CUPS': positionRow.cells[4].textContent = input.value; break;
+                        case 'Procedimiento': positionRow.cells[5].textContent = input.value; break;
+                        case 'Valor CUPS': positionRow.cells[6].textContent = input.value; break;
+                        case 'Valor Fijo': positionRow.cells[7].textContent = input.value; break;
+                        case 'Valor': positionRow.cells[8].textContent = input.value; break;
+                        case 'Porcentaje': positionRow.cells[9].textContent = input.value; break;
+                        case 'ID Tarea': positionRow.cells[10].textContent = input.value; break;
+                        case 'Fecha Inicio': positionRow.cells[11].textContent = input.value; break;
+                        case 'Fecha Fin': positionRow.cells[12].textContent = input.value; break;
+                    }
+                });
+                
+                // Desmarcar el checkbox de posición
+                selectedPosition.checked = false;
+                
+                alert('Datos guardados correctamente');
+                document.getElementById('modify-modal-overlay').remove();
+            });
+        }
+
+        // Función para inactivar/activar fila
+        function inactivarFila() {
+            // Verificar si hay una posición seleccionada
+            const selectedPosition = document.querySelector('.position-select:checked');
+            if (!selectedPosition) {
+                alert('Por favor seleccione una posición para inactivar/activar');
+                return;
+            }
+            
+            const positionRow = selectedPosition.closest('tr');
+            positionRow.classList.toggle('position-inactiva');
+            selectedPosition.checked = false;
+        }
+
+        // Función para mostrar el modal de búsqueda de profesionales/sociedades
+        function openProfessionalSearchModal() {
+            const tipoContrato = document.querySelector('#tipo-contrato').value;
+            const modal = document.getElementById('professional-search-modal');
+            const title = document.getElementById('professional-search-title');
+            const headers = document.getElementById('professional-search-headers');
+            const filter1Label = document.getElementById('filter1-label');
+            const filter2Label = document.getElementById('filter2-label');
+            const filter3Label = document.getElementById('filter3-label');
+            
+            if (tipoContrato === "Sociedad") {
+                title.textContent = "Buscar Sociedad Médica";
+                headers.innerHTML = `
+                    <th>Código Sociedad</th>
+                    <th>Nombre Sociedad</th>
+                    <th>NIT</th>
+                `;
+                filter1Label.textContent = "Nombre";
+                filter2Label.textContent = "";
+                filter3Label.textContent = "NIT";
+                document.getElementById('search-professional-lastname').style.display = 'none';
+            } else {
+                title.textContent = "Buscar Profesional";
+                headers.innerHTML = `
+                    <th>Código Profesional</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Cédula</th>
+                `;
+                filter1Label.textContent = "Nombre";
+                filter2Label.textContent = "Apellido";
+                filter3Label.textContent = "Cédula";
+                document.getElementById('search-professional-lastname').style.display = 'block';
+            }
+            
+            modal.classList.remove('hidden');
+            searchProfessionals();
+        }
+
+        // Función para buscar profesionales/sociedades
+        function searchProfessionals() {
+            const tipoContrato = document.querySelector('#tipo-contrato').value;
+            const nameFilter = document.getElementById('search-professional-name').value.toLowerCase();
+            const lastnameFilter = document.getElementById('search-professional-lastname').value.toLowerCase();
+            const idFilter = document.getElementById('search-professional-id').value.toLowerCase();
+            
+            let data = [];
+            if (tipoContrato === "Sociedad") {
+                data = societiesData;
+            } else {
+                data = professionalsData;
+            }
+            
+            const filtered = data.filter(item => {
+                if (nameFilter && !item.nombre.toLowerCase().includes(nameFilter)) return false;
+                if (idFilter && !item.nit.toLowerCase().includes(idFilter)) return false;
+                if (tipoContrato !== "Sociedad" && lastnameFilter) {
+                    const nombreCompleto = item.nombre.split(' ');
+                    const apellido = nombreCompleto.slice(2).join(' ');
+                    if (!apellido.toLowerCase().includes(lastnameFilter)) return false;
+                }
+                return true;
+            });
+            
+            displayProfessionalSearchResults(filtered, tipoContrato);
+        }
+
+        // Mostrar resultados de búsqueda de profesionales/sociedades
+        function displayProfessionalSearchResults(items, tipoContrato) {
+            const tbody = document.getElementById('professional-search-results');
+            tbody.innerHTML = '';
+            
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                
+                if (tipoContrato === "Sociedad") {
+                    row.innerHTML = `
+                        <td>${item.id}</td>
+                        <td>${item.nombre}</td>
+                        <td>${item.nit}</td>
+                    `;
+                } else {
+                    // Dividir nombre completo en nombre y apellido
+                    const nombreCompleto = item.nombre.split(' ');
+                    const nombre = nombreCompleto.slice(0, 2).join(' ');
+                    const apellido = nombreCompleto.slice(2).join(' ');
+                    
+                    row.innerHTML = `
+                        <td>${item.id}</td>
+                        <td>${nombre}</td>
+                        <td>${apellido}</td>
+                        <td>${item.nit}</td>
+                    `;
+                }
+                
+                row.addEventListener('click', function() {
+                    document.querySelectorAll('#professional-search-results tr').forEach(r => {
+                        r.classList.remove('bg-purple-100');
+                    });
+                    this.classList.add('bg-purple-100');
+                    this.setAttribute('data-selected', 'true');
+                    this.setAttribute('data-id', item.id);
+                    
+                    if (tipoContrato === "Sociedad") {
+                        this.setAttribute('data-nombre', item.nombre);
+                        this.setAttribute('data-apellido', item.nit);
+                    } else {
+                        const nombreCompleto = item.nombre.split(' ');
+                        this.setAttribute('data-nombre', nombreCompleto.slice(0, 2).join(' '));
+                        this.setAttribute('data-apellido', nombreCompleto.slice(2).join(' '));
+                    }
+                });
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Función para seleccionar un profesional/sociedad
+        function selectProfessional() {
+            const tipoContrato = document.querySelector('#tipo-contrato').value;
+            const selectedRow = document.querySelector('#professional-search-results tr[data-selected="true"]');
+            if (!selectedRow) {
+                alert('Por favor seleccione un ' + (tipoContrato === "Sociedad" ? 'sociedad médica' : 'profesional'));
+                return;
+            }
+            
+            const id = selectedRow.getAttribute('data-id');
+            const nombre = selectedRow.getAttribute('data-nombre');
+            const apellido = selectedRow.getAttribute('data-apellido');
+            
+            // Actualizar los campos en el formulario
+            document.getElementById('codigo-profesional').value = id;
+            document.getElementById('nombre-profesional').value = nombre;
+            document.getElementById('apellido-profesional').value = apellido;
+            
+            // Cerrar el modal
+            document.getElementById('professional-search-modal').classList.add('hidden');
+        }
+
+        // Función para mostrar el modal de confirmación
+        function showConfirmationModal() {
+            document.getElementById('confirmation-modal').classList.remove('hidden');
+        }
+
+        // Función para confirmar la carga de información
+        function confirmUpload() {
+            // Limpiar el formulario
+            document.getElementById('new-contract-form').remove();
+            isNewContractVisible = false;
+            
+            // Mostrar mensaje de éxito
+            alert('Información cargada correctamente');
+            
+            // Cerrar el modal
+            document.getElementById('confirmation-modal').classList.add('hidden');
+        }
+
+        // Botón Nuevo Contrato con Popup y validación de visibilidad
+        document.getElementById('new-contract-btn').addEventListener('click', function () {
+            // Ocultar resultados de búsqueda si están visibles
+            document.getElementById('search-results')?.classList.add('hidden');
+            document.getElementById('position-results')?.classList.add('hidden');
+            document.getElementById('formulario-contrato').style.display = 'none';
+
+            if (document.getElementById('new-contract-form')) return;
+
+            if (confirm("¿Desea crear un nuevo contrato?")) {
+                const formContainer = document.createElement('div');
+                formContainer.id = 'new-contract-form';
+                formContainer.classList.add("mt-6");
+
+                formContainer.innerHTML = `
+                    <div class="border border-gray-300 p-4 rounded-lg">
+                        <h2 class="text-xl font-semibold text-[var(--mysiss-purple)] mb-4">Nuevo Contrato Detallado</h2>
+
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Código Contrato</label>
+                                <input type="text" value="CON${String(contractCounter).padStart(6, '0')}" readonly class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Vigencia</label>
+                                <div class="flex gap-2">
+                                    <input type="date" class="w-full border rounded px-3 py-2" />
+                                    <input type="date" class="w-full border rounded px-3 py-2" />
+                                </div>
+                            </div>
+                            <div class="flex items-center mt-6">
+                                <input type="checkbox" checked class="mr-2 checkbox-activo" />
+                                <label class="text-sm text-gray-700">Activo</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de contrato</label>
+                                <select class="w-full border rounded px-3 py-2" id="tipo-contrato">
+                                    <option value="Nombre propio">Nombre propio</option>
+                                    <option value="Sociedad">Sociedad</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" id="codigo-label">Código Profesional</label>
+                                <div class="input-with-search">
+                                    <input type="text" id="codigo-profesional" class="w-full border rounded px-3 py-2 pr-10" />
+                                    <i class="fas fa-search search-icon" onclick="openProfessionalSearchModal()"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" id="nombre-label">Nombre Profesional</label>
+                                <input type="text" id="nombre-profesional" class="w-full border rounded px-3 py-2" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" id="apellido-label">Código Profesional</label>
+                                <input type="text" id="apellido-profesional" class="w-full border rounded px-3 py-2" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Sede</label>
+                                <select class="w-full border rounded px-3 py-2">
+                                    <option value="">Seleccione una sede</option>
+                                    <option value="SEDE01">Sede Norte</option>
+                                    <option value="SEDE02">Sede Sur</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Liquidación</label>
+                                <select class="w-full border rounded px-3 py-2">
+                                    <option selected>Servicio Facturado</option>
+                                    <option>Servicio Realizado</option>
+                                </select>
+                            </div>
+
+                        </div>
+						<!-- Agregar esta sección para cargar archivo -->
+						<div class="file-upload-container mb-4">
+							<div class="flex-1">
+								<label class="block text-sm font-medium text-gray-700 mb-1">Cargar archivo de aseguradoras</label>
+								<input type="file" id="contract-upload" class="w-full border rounded px-3 py-2" accept=".xlsx,.xls,.csv" />
+							</div>
+						<!-- <button onclick="showConfirmationModal()" class="bg-[var(--mysiss-purple)] hover:bg-[#6a1b9a] text-white font-semibold px-4 py-2 rounded">
+								<i class="fas fa-upload mr-2"></i>Cargar
+							</button> -->
+						</div>
+
+                        <div class="overflow-x-auto hidden" id="aseguradora-table-container">
+                            <table class="contract-table w-full">
+                                <thead>
+                                    <tr>
+                                        <th>CÓDIGO ASEGURADORA</th>
+                                        <th>ASEGURADORA</th>
+                                        <th>CUPS</th>
+                                        <th>Tarifario</th>
+                                        <th>Valor CUPS</th>
+                                        <th>Tipo Liquidación</th>
+                                        <th>Valor</th>
+                                        <th>Especialidad</th>
+                                        <th>Porcentaje</th>
+                                        <th>ID_Tarea</th>
+                                    </tr>
+                                </thead>
+								
+                                <tbody>
+                                    <tr>
+                                        <td>EPS003</td><td>COMFANDI</td><td>890201</td><td>ISS</td><td>$180,000</td><td>Valor Fijo</td><td>$18,000</td><td>Cirugía General</td><td></td><td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>EPS003</td><td>COMFANDI</td><td>890216</td><td>ISS</td><td>$200,000</td><td>Valor Fijo</td><td>$20,000</td><td>Cirugía General</td><td></td><td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>EPS003</td><td>COMFANDI</td><td>890227</td><td>ISS</td><td>$320,000</td><td>Valor Porcentual</td><td></td><td>Cirugía General</td><td>10%</td><td>03 Ayu</td>
+                                    </tr>
+                                    <tr>
+                                        <td>EPS003</td><td>COMFANDI</td><td>890227</td><td>SOAT</td><td>$1,200,000</td><td>Valor Porcentual</td><td></td><td>Cirugía General</td><td>50%</td><td>01 Ciru</td>
+                                    </tr>
+                                    <tr>
+                                        <td>EPS003</td><td>COMFANDI</td><td>890229</td><td>PROPIO</td><td>$1,000,000</td><td>Valor Porcentual</td><td></td><td>Anestesiólogo</td><td>35%</td><td>02 Anes</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                const section = document.getElementById('contracts-section');
+                section.appendChild(formContainer);
+                isNewContractVisible = true;
+
+                // Evento para cambiar los labels según tipo de contrato
+                document.getElementById('tipo-contrato').addEventListener('change', function() {
+                    const tipoContrato = this.value;
+                    const codigoLabel = document.getElementById('codigo-label');
+                    const nombreLabel = document.getElementById('nombre-label');
+                    const apellidoLabel = document.getElementById('apellido-label');
+                    
+                    if (tipoContrato === "Sociedad") {
+                        codigoLabel.textContent = "Código Sociedad";
+                        nombreLabel.textContent = "Nombre Sociedad";
+                        apellidoLabel.textContent = "NIT";
+                    } else {
+                        codigoLabel.textContent = "Código Profesional";
+                        nombreLabel.textContent = "Nombre Profesional";
+                        apellidoLabel.textContent = "Código Profesional";
+                    }
+                });
+
+                // Mostrar tabla de aseguradora cuando se seleccione un archivo
+                document.getElementById('contract-upload').addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        document.getElementById('aseguradora-table-container').classList.remove('hidden');
+                    } else {
+                        document.getElementById('aseguradora-table-container').classList.add('hidden');
+                    }
+                });
+
+                // Incrementa el número del contrato para el siguiente "Nuevo"
+                contractCounter++;
+            }
+        });
+
+        // Mostrar/Ocultar campos según tipo de contrato en el modal de búsqueda
+        document.getElementById("contract-type").addEventListener("change", function () {
+            const type = this.value;
+            const profGroup = document.getElementById("professional-group");
+            const societyGroup = document.getElementById("society-group");
+
+            if (type === "sociedad") {
+                profGroup.classList.add("hidden");
+                societyGroup.classList.remove("hidden");
+            } else {
+                profGroup.classList.remove("hidden");
+                societyGroup.classList.add("hidden");
+            }
+        });
+
+        // Eventos para el modal de búsqueda de profesionales/sociedades
+        document.getElementById("close-professional-search-modal").addEventListener("click", function() {
+            document.getElementById("professional-search-modal").classList.add("hidden");
+        });
+
+        document.getElementById("search-professional-btn").addEventListener("click", searchProfessionals);
+
+        document.getElementById("select-professional-btn").addEventListener("click", selectProfessional);
+
+        // Evento para el botón de confirmación
+        document.getElementById("confirm-upload-btn").addEventListener("click", confirmUpload);
+
+        // Variables para saber qué campo está activo
+        let currentHelpField = null;
+
+        const helpModal = document.getElementById("help-modal");
+        const helpContent = document.getElementById("help-modal-content");
+        const helpTitle = document.getElementById("help-modal-title");
+
+        // Abre el modal con los datos según campo
+        function openHelpModal(field) {
+            currentHelpField = field;
+            helpModal.classList.remove("hidden");
+            helpContent.innerHTML = "";
+
+            let data = [];
+            switch (field) {
+                case "contract-code":
+                    helpTitle.textContent = "Seleccionar Código de Contrato";
+                    data = ["CON00005", "CON00006", "CON00007", "CON00008", "CON00009", "CON000010", "CON000022", "CON000027"];
+                    break;
+                case "professional":
+                    helpTitle.textContent = "Seleccionar Profesional";
+                    data = ["Julian Ramirez", "Jhonny  Montaño rosas", "Pedro Jose Rodriguez Gonzalez", "Laura Gomez", "Juan Ortega", "Camila Reyez", "Mario Lopez", "Yeny Palacio"];
+                    break;
+                case "society":
+                    helpTitle.textContent = "Seleccionar Sociedad Médica";
+                    data = ["Cardiologos Asociados", "Radiologos Asociados", "Grupo Anestesia", "Sociedad de Cirugia Plastica", "Maxilo Group", "Urologos Asociados", "Gienco group", "Intensivistas Asociado"];
+                    break;
+                case "specialty":
+                    helpTitle.textContent = "Seleccionar Especialidad";
+                    data = ["Cirugía General", "Pediatría", "Radiología", "Anestesia"];
+                    break;
+            }
+
+            data.forEach(item => {
+                const div = document.createElement("div");
+                div.textContent = item;
+                div.className = "p-2 cursor-pointer hover:bg-gray-100 border-b";
+                div.addEventListener("click", () => {
+                    document.getElementById(currentHelpField).value = item;
+                    closeHelpModal();
+                });
+                helpContent.appendChild(div);
+            });
+        }
+
+        function closeHelpModal() {
+            helpModal.classList.add("hidden");
+            helpContent.innerHTML = "";
+            currentHelpField = null;
+        }
+
+        // Eventos lupa
+        document.getElementById("contract-code-help").addEventListener("click", () => openHelpModal("contract-code"));
+        document.getElementById("professional-help").addEventListener("click", () => openHelpModal("professional"));
+        document.getElementById("society-help").addEventListener("click", () => openHelpModal("society"));
+        document.getElementById("specialty-help").addEventListener("click", () => openHelpModal("specialty"));
+
+        // Cerrar modal
+        document.getElementById("close-help-modal").addEventListener("click", closeHelpModal);
+        document.getElementById("close-search-modal").addEventListener("click", () => {
+            document.getElementById("search-modal-overlay").classList.add("hidden");
+            document.getElementById("search-modal").classList.add("hidden");
+        });
+
+        // Función guardarDatos (placeholder)
+        function guardarDatos() {
+            alert("Función guardarDatos() será implementada según tus necesidades específicas");
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Medical Fees mySiss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --mysiss-purple: #800080;
+            --mysiss-light-purple: #EBE3F2;
+            --mysiss-hover-purple: #DFD1EE;
+            --mysiss-active-bg: #D0B8E6;
+        }
+        .custom-radio {
+            accent-color: var(--mysiss-purple);
+        }
+        .focus-outline:focus-visible {
+            outline: 2px solid var(--mysiss-purple);
+            outline-offset: 2px;
+        }
+        .submenu {
+            display: none;
+            padding-left: 1rem;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .nav-link.active {
+            background-color: var(--mysiss-active-bg);
+            font-weight: bold;
+            position: relative;
+        }
+        .nav-link.active::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--mysiss-purple);
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        nav {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 80px);
+            position: relative;
+        }
+        .logout-link {
+            margin-top: auto;
+            position: sticky;
+            bottom: 0;
+            background-color: var(--mysiss-light-purple);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .table-row-inactive, .new-role-activity-row.saved {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        .table-row-inactive button:not(.delete-role-btn),
+        .table-row-inactive input[type="checkbox"],
+        .new-role-activity-row.saved button:not(.delete-individual-activity-btn),
+        .new-role-activity-row.saved input[type="checkbox"] {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .selected-row {
+            background-color: var(--mysiss-hover-purple);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 80%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        #confirmDeleteModal .modal-container {
+            width: auto;
+            max-width: 400px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        .modal-body {
+            padding: 1rem;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        .permission-checkbox {
+            margin: 0 0.25rem;
+        }
+        .hover\:bg-purple-700:hover {
+            background-color: #6b46c1;
+        }
+        .transition-colors {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .input-error {
+            border-color: #ef4444;
+        }
+        .min-w-full th, .min-w-full td {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        .min-w-full .px-6 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        .min-w-full .whitespace-nowrap {
+            white-space: normal;
+            word-break: break-word;
+        }
+        .permission-col {
+            width: 70px;
+            text-align: center;
+        }
+        .action-col {
+            width: 150px;
+            text-align: center;
+        }
+        .readonly-input {
+            background-color: #e2e8f0;
+            border: 1px solid #cbd5e0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            color: #4a5568;
+            pointer-events: none;
+            user-select: none;
+        }
+        .select-all-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .functionality-group {
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .functionality-header {
+            background-color: #f3f4f6;
+            padding: 0.75rem 1rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .functionality-content {
+            padding: 0.5rem 1rem;
+        }
+        .activity-row {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .activity-row:last-child {
+            border-bottom: none;
+        }
+        /* Estilos para los botones de acción con iconos */
+        .action-btn {
+            background-color: var(--mysiss-purple);
+            color: white;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+            margin: 0 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+        .action-btn:hover {
+            background-color: #6b46c1;
+        }
+        .action-btn svg {
+            pointer-events: none;
+        }
+        .delete-btn {
+            background-color: var(--mysiss-purple);
+        }
+        .delete-btn:hover {
+            background-color: #6b46c1;
+        }
+        .action-buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        /* Estilos para el modal de carga de plantilla */
+        .file-input {
+            display: none;
+        }
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        /* Nuevos estilos agregados */
+        .functionality-content.hidden {
+            display: none;
+        }
+        .add-activity-btn {
+            background-color: var(--mysiss-purple);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+            margin-left: 1rem;
+        }
+        .add-activity-btn:hover {
+            background-color: #6b46c1;
+        }
+        #activitiesModal .modal-container {
+            max-width: 900px;
+        }
+        .permission-checkbox {
+            accent-color: var(--mysiss-purple);
+            margin-right: 0.25rem;
+        }
+
+
+        /* Botón rojo fijo en esquina inferior derecha */
+        #devClearBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+			background: transparent;
+			color: transparent;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 9999;
+        }
+		#devRefreshBtn {
+			position: fixed;
+			bottom: 70px; /* Colocado arriba del botón de limpiar */
+			right: 20px;
+			background: transparent;
+			color: transparent;
+			border: none;
+			padding: 10px;
+			border-radius: 5px;
+			cursor: pointer;
+			z-index: 9999;
+		}
+
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-48 h-full bg-[var(--mysiss-light-purple)] flex flex-col">
+        <div class="p-6">
+            <h1 class="text-[var(--mysiss-purple)] text-5xl font-bold">mySiss</h1>
+        </div>
+        <nav class="mt-4 flex flex-col" aria-label="Menú principal">
+            <!-- Configuración -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('config-submenu', this)">
+                    <strong>Configuración</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="config-submenu" class="submenu">
+                    <a href="conf_bas_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Base</a>
+                    <a href="conf_func_3.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>
+                    <a href="conf_role.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block active">Crear Roles</a>
+                </div>
+            </div>
+            
+            <!-- Usuario -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('usuario-submenu', this)">
+                    <strong>Usuario</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="usuario-submenu" class="submenu">
+                    <a href="conf_usua_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Usuario</a>
+                    <a href="conf_rol.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Asignar Rol</a>
+                </div>
+            </div>
+
+            <!-- Módulos - Estructura de tres niveles -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('modulos-submenu', this)">
+                    <strong>Modulos</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="modulos-submenu" class="submenu">
+                    <!-- Honorarios -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('honorarios-submenu', this)">
+                            <span>Honorarios</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="honorarios-submenu" class="submenu">
+                            <a href="../Honorarios/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../Honorarios/Honorarios.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Auditoria -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('auditoria-submenu', this)">
+                            <span>Auditoria</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="auditoria-submenu" class="submenu">
+                            <a href="../auditoria/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../auditoria/auditoria.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Glosas -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('glosas-submenu', this)">
+                            <span>Glosas</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="glosas-submenu" class="submenu">
+                            <a href="../glosas/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../glosas/glosas.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="../login.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors mt-44 focus-outline">
+                <strong>Cerrar Sesión</strong>
+            </a>
+        </nav>
+    </div>
+
+    <div class="flex-1 bg-white p-8 overflow-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-[var(--mysiss-purple)]">Creación roles</h2>
+            <div class="flex space-x-4">
+                <button id="uploadTemplateBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline mr-2">
+                    Carga plantilla
+                </button>
+                <button id="addRoleBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline hover:bg-purple-700 transition-colors">
+                    Agregar Rol
+                </button>
+                <button id="saveAllBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline hover:bg-purple-700 transition-colors" disabled>
+                    Guardar
+                </button>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Módulos</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funcionalidades</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actividades</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider permission-col">Crear</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider permission-col">Modificar</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider permission-col">Visualizar</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider permission-col">Eliminar</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider action-col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="rolesTableBody">
+                    <!-- Filas se generan dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal para carga de plantilla -->
+    <div id="uploadTemplateModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-bold mb-4">Cargar plantilla</h3>
+            <div class="mb-4">
+                <p class="text-gray-700">Suba un archivo Excel con la estructura de roles, módulos, funcionalidades y actividades. El sistema actualizará la información existente o creará nuevos registros según corresponda.</p>
+            </div>
+
+            <div class="mb-4">
+                <label for="fileInput" class="block text-lg font-medium text-gray-700 mb-2"></label>
+                <div class="flex">
+                    <input type="text" id="filePath" class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus-outline cursor-pointer" 
+                        placeholder="Seleccionar archivo..." readonly onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" class="file-input" accept=".xlsx">
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Seleccione un archivo en formato .XLSX</p>
+            </div>
+
+            <div class="flex justify-end space-x-2">
+                <button id="cancelUploadBtn" class="px-4 py-2 bg-gray-200 rounded-md focus-outline">
+                    Cancelar
+                </button>
+                <button id="executeBtn" class="btn-disabled px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Ejecutar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mensajes -->
+    <div id="messageModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 id="modalTitle" class="text-lg font-bold mb-4"></h3>
+            <p id="modalMessage" class="mb-4"></p>
+            <div class="flex justify-end">
+                <button id="modalCloseBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nombre del rol -->
+    <div id="roleNameModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold text-[var(--mysiss-purple)]">Crear Nuevo Rol</h3>
+                <button class="modal-close" onclick="closeModal('roleNameModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label for="roleNameInput" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Rol:</label>
+                    <input type="text" id="roleNameInput" class="border border-gray-300 rounded-md px-3 py-2 w-full focus-outline" placeholder="Ingrese el nombre del rol">
+                    <div id="roleNameError" class="error-message">El nombre del rol no debe contener tildes ni caracteres especiales</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('roleNameModal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 focus-outline">Cancelar</button>
+                <button onclick="proceedToModules()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline hover:bg-purple-700 transition-colors">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para selección de módulos -->
+    <div id="modulesModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold text-[var(--mysiss-purple)]">Seleccionar Módulos</h3>
+                <button class="modal-close" onclick="closeModal('modulesModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="select-all-container">
+                    <input type="checkbox" id="selectAllModules" class="focus-outline custom-radio mr-2">
+                    <label for="selectAllModules">Seleccionar todos</label>
+                </div>
+                <div id="modulesCheckboxContainer"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('modulesModal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 focus-outline">Cancelar</button>
+                <button onclick="proceedToFunctionalities()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline hover:bg-purple-700 transition-colors">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para selección de funcionalidades -->
+    <div id="functionalitiesModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold text-[var(--mysiss-purple)]">Seleccionar Funcionalidades</h3>
+                <button class="modal-close" onclick="closeModal('functionalitiesModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="select-all-container">
+                    <input type="checkbox" id="selectAllFunctionalities" class="focus-outline custom-radio mr-2">
+                    <label for="selectAllFunctionalities">Seleccionar todos</label>
+                </div>
+                <div id="functionalitiesCheckboxContainer"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('functionalitiesModal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 focus-outline">Atrás</button>
+                <button onclick="proceedToActivities()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline hover:bg-purple-700 transition-colors">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para selección de actividades y permisos -->
+    <div id="activitiesModal" class="modal-overlay">
+        <div class="modal-container" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold text-[var(--mysiss-purple)]">Seleccionar Actividades y Permisos</h3>
+                <button class="modal-close" onclick="closeModal('activitiesModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600">Seleccione las actividades y configure los permisos correspondientes. Cada actividad debe tener al menos el permiso de "Visualizar".</p>
+                </div>
+                
+                <div class="functionality-groups-container">
+                    <!-- Los grupos de funcionalidades se generarán dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('activitiesModal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 focus-outline">Atrás</button>
+                <button onclick="addSelectedActivities()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline hover:bg-purple-700 transition-colors">Agregar Actividades</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para confirmar eliminación -->
+    <div id="confirmDeleteModal" class="modal-overlay">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold text-[var(--mysiss-purple)]">Confirmar Eliminación</h3>
+                <button class="modal-close" onclick="closeModal('confirmDeleteModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea eliminar este registro? Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('confirmDeleteModal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 focus-outline">Cancelar</button>
+                <button onclick="deleteConfirmed()" class="px-4 py-2 bg-red-600 text-white rounded-md focus-outline hover:bg-red-700 transition-colors">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón de desarrollo para limpiar localStorage -->
+	<button id="devRefreshBtn">Refrescar</button>
+    <button id="devClearBtn">Limpiar</button>
+
+
+    <script>
+// Datos iniciales y almacenados en localStorage
+// Inicializar datos si no existen
+if (!localStorage.getItem('modulesData')) {
+    const initialModules = [
+        { id: 'MH001', name: 'Honorarios' },
+        { id: 'MG001', name: 'Glosas' },
+        { id: 'MA001', name: 'Auditoria concurrente' },
+        { id: 'MA002', name: 'Auditoria calidad' },
+        { id: 'MA003', name: 'Auditoria médica' }
+    ];
+    localStorage.setItem('modulesData', JSON.stringify(initialModules));
+}
+
+if (!localStorage.getItem('functionalitiesData')) {
+    const initialFunctionalities = [
+        { id: 'FH001', name: 'Preliquidación', module: 'MH001' },
+        { id: 'FH002', name: 'Validaciones', module: 'MH001' },
+        { id: 'FH003', name: 'Reporte', module: 'MH001' },
+        { id: 'FH004', name: 'Liquidación', module: 'MH001' },
+        { id: 'FG001', name: 'Glosas', module: 'MG001' },
+        { id: 'FA001', name: 'Auditoria', module: 'MA001' }
+    ];
+    localStorage.setItem('functionalitiesData', JSON.stringify(initialFunctionalities));
+}
+
+if (!localStorage.getItem('activitiesData')) {
+    const initialActivities = [
+        { id: 'AH001', name: 'Filtrar preliquidación', functionality: 'FH001', module: 'MH001' },
+        { id: 'AH002', name: 'Generar preliquidación', functionality: 'FH001', module: 'MH001' },
+        { id: 'AH003', name: 'Visualizar preliquidación', functionality: 'FH001', module: 'MH001' },
+        { id: 'AH004', name: 'Descargar preliquidación', functionality: 'FH001', module: 'MH001' },
+        { id: 'AH005', name: 'Filtrar Validaciones', functionality: 'FH002', module: 'MH001' },
+        { id: 'AH006', name: 'Ingreso de validaciones', functionality: 'FH002', module: 'MH001' },
+        { id: 'AH007', name: 'Visualizar Validaciones', functionality: 'FH002', module: 'MH001' },
+        { id: 'AH008', name: 'Guardar validaciones', functionality: 'FH002', module: 'MH001' },
+        { id: 'AH009', name: 'Filtrar reportes', functionality: 'FH003', module: 'MH001' },
+        { id: 'AH010', name: 'Generar reportes por Dashboard', functionality: 'FH003', module: 'MH001' },
+        { id: 'AH011', name: 'Descargar reportes', functionality: 'FH003', module: 'MH001' },
+        { id: 'AH012', name: 'Filtrar liquidación', functionality: 'FH004', module: 'MH001' },
+        { id: 'AH013', name: 'Buscar liquidación', functionality: 'FH004', module: 'MH001' },
+        { id: 'AH014', name: 'Generar liquidación', functionality: 'FH004', module: 'MH001' },
+        { id: 'AH015', name: 'Descargar liquidación', functionality: 'FH004', module: 'MH001' },
+        { id: 'AG001', name: 'Gestión de glosas', functionality: 'FG001', module: 'MG001' },
+        { id: 'AA001', name: 'Auditoria concurrente', functionality: 'FA001', module: 'MA001' }
+    ];
+    localStorage.setItem('activitiesData', JSON.stringify(initialActivities));
+}
+
+// Datos almacenados en localStorage
+let modulesData = JSON.parse(localStorage.getItem('modulesData')) || [];
+let functionalitiesData = JSON.parse(localStorage.getItem('functionalitiesData')) || [];
+let activitiesData = JSON.parse(localStorage.getItem('activitiesData')) || [];
+let rolesData = JSON.parse(localStorage.getItem('rolesData')) || [];
+
+let newRole = {
+    name: '',
+    modules: [],
+    functionalities: [],
+    activities: []
+};
+
+let roleIdToDelete = null;
+let roleToModify = null;
+let activityToModify = null;
+let currentUser = 'mySiss';
+
+// Inicializar la aplicación
+document.addEventListener('DOMContentLoaded', function() {
+    renderRolesTable();
+    setupEventListeners();
+    expandAllMenus();
+    setActiveMenu();
+});
+
+function setActiveMenu() {
+    const currentPath = window.location.pathname.split('/').pop();
+    
+    document.querySelectorAll('.nav-link[href]').forEach(link => {
+        const linkPath = link.getAttribute('href').split('/').pop();
+        link.classList.toggle('active', linkPath === currentPath);
+    });
+}
+
+function expandAllMenus() {
+    document.querySelectorAll('.submenu').forEach(menu => menu.classList.add('active'));
+    document.querySelectorAll('.menu-item > a svg').forEach(icon => icon.classList.add('rotate-180'));
+}
+
+function setupEventListeners() {
+    // Botón para agregar nuevo rol
+    document.getElementById('addRoleBtn').addEventListener('click', startNewRoleProcess);
+    
+    // Botón para guardar todo
+    document.getElementById('saveAllBtn').addEventListener('click', saveNewRole);
+    
+    // Botón para cargar plantilla
+    document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
+        document.getElementById('uploadTemplateModal').classList.remove('hidden');
+    });
+    
+    // Botón para cancelar carga
+    document.getElementById('cancelUploadBtn').addEventListener('click', () => {
+        document.getElementById('uploadTemplateModal').classList.add('hidden');
+        document.getElementById('fileInput').value = '';
+        document.getElementById('filePath').value = '';
+        document.getElementById('executeBtn').classList.add('btn-disabled');
+    });
+    
+    // Botón para ejecutar carga
+    document.getElementById('executeBtn').addEventListener('click', handleFileUpload);
+    
+    // Evento para seleccionar archivo
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            document.getElementById('filePath').value = file.name;
+            
+            if (file.name.endsWith('.xlsx')) {
+                document.getElementById('executeBtn').classList.remove('btn-disabled');
+            } else {
+                showMessage('Error', 'El archivo debe ser un Excel (.xlsx)');
+                document.getElementById('executeBtn').classList.add('btn-disabled');
+            }
+        }
+    });
+    
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('uploadTemplateModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('uploadTemplateModal')) {
+            document.getElementById('uploadTemplateModal').classList.add('hidden');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePath').value = '';
+            document.getElementById('executeBtn').classList.add('btn-disabled');
+        }
+    });
+    
+    // Cerrar modal de mensaje
+    document.getElementById('modalCloseBtn').addEventListener('click', () => {
+        document.getElementById('messageModal').classList.add('hidden');
+    });
+
+    // Botón para limpiar localStorage (desarrollo)
+    document.getElementById('devClearBtn').addEventListener('click', () => {
+        localStorage.clear();
+        alert('LocalStorage limpiado ✅');
+        location.reload();
+    });
+    
+    document.getElementById('devRefreshBtn').addEventListener('click', function() {
+        window.location.reload(true);
+    });
+}
+
+// Función para manejar la carga de archivos
+async function handleFileUpload() {
+    const file = document.getElementById('fileInput').files[0];
+    if (!file) {
+        showMessage('Error', 'No se ha seleccionado ningún archivo');
+        return;
+    }
+
+    try {
+        // Mostrar mensaje de carga
+        showMessage('Cargando', 'Procesando archivo, por favor espere...');
+        
+        const data = await readExcelFile(file);
+        const result = await processExcelData(data);
+        
+        // Cerrar modales
+        document.getElementById('uploadTemplateModal').classList.add('hidden');
+        document.getElementById('messageModal').classList.add('hidden');
+        
+        // Limpiar inputs
+        document.getElementById('fileInput').value = '';
+        document.getElementById('filePath').value = '';
+        document.getElementById('executeBtn').classList.add('btn-disabled');
+        
+        // Mostrar resumen de lo cargado
+        const rolesCount = rolesData.length;
+        const lastRole = rolesData[0]; // El más reciente
+        
+        showMessage(
+            'Éxito', 
+            `Datos cargados correctamente.<br><br>
+            Total de roles: ${rolesCount}<br>
+            Último rol cargado: ${lastRole.name}<br>
+            Actividades: ${lastRole.activities.length}`
+        );
+        
+        // Actualizar tabla
+        renderRolesTable();
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage('Error', 'Ocurrió un error al procesar el archivo. Verifique el formato y los datos.');
+    }
+
+// En la función handleFileUpload, después de processExcelData
+console.log('Datos cargados:', {
+    roles: rolesData,
+    activities: activitiesData,
+    modules: modulesData,
+    functionalities: functionalitiesData
+});
+}
+
+// Leer archivo Excel
+function readExcelFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                resolve(jsonData);
+            } catch (error) {
+                reject(error);
+            }
+        };
+        
+        reader.onerror = (error) => reject(error);
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// Procesar datos del Excel
+async function processExcelData(data) {
+    // Validar que el archivo tenga datos
+    if (!data || data.length === 0) {
+        throw new Error('El archivo está vacío');
+    }
+
+    // Obtener nombres de columnas del primer registro
+    const columnNames = Object.keys(data[0]);
+    
+    // Mapear nombres de columnas alternativos
+    const columnMapping = {
+        'codigo': 'Código',
+        'nombre': 'Nombre',
+        'modulos': 'Módulos',
+        'funcionalidades': 'Funcionalidades',
+        'actividades': 'Actividades',
+        'crear': 'Crear',
+        'modificar': 'Modificar',
+        'visualizar': 'Visualizar',
+        'eliminar': 'Eliminar'
+    };
+
+    // Normalizar nombres de columnas
+    const normalizedData = data.map(row => {
+        const newRow = {};
+        Object.keys(row).forEach(key => {
+            const lowerKey = key.toLowerCase().trim();
+            const mappedKey = columnMapping[lowerKey] || key;
+            newRow[mappedKey] = row[key];
+        });
+        return newRow;
+    });
+
+    // Verificar que tenemos las columnas mínimas requeridas
+    const requiredColumns = ['Código', 'Nombre', 'Actividades'];
+    const missingColumns = requiredColumns.filter(col => !normalizedData[0][col]);
+    
+    if (missingColumns.length > 0) {
+        throw new Error(`Faltan columnas requeridas: ${missingColumns.join(', ')}`);
+    }
+
+    const newRoles = {};
+
+    // Procesar cada fila del Excel
+    for (const row of normalizedData) {
+        // Validar fila mínima
+        if (!row['Código'] || !row['Nombre'] || !row['Actividades']) continue;
+        
+        const roleId = row['Código'].toString().trim();
+        if (!roleId) continue;
+        
+        // Procesar rol
+        if (!newRoles[roleId]) {
+            newRoles[roleId] = {
+                id: roleId,
+                name: row['Nombre'].toString().trim() || roleId,
+                modules: [],
+                functionalities: [],
+                activities: []
+            };
+        }
+
+        // Agregar módulo si existe
+        if (row['Módulos']) {
+            const moduleId = row['Módulos'].toString().trim();
+            if (moduleId && !newRoles[roleId].modules.includes(moduleId)) {
+                newRoles[roleId].modules.push(moduleId);
+            }
+        }
+
+        // Agregar funcionalidad si existe
+        if (row['Funcionalidades']) {
+            const funcId = row['Funcionalidades'].toString().trim();
+            if (funcId && !newRoles[roleId].functionalities.includes(funcId)) {
+                newRoles[roleId].functionalities.push(funcId);
+            }
+        }
+
+        // Procesar actividad
+        const activityId = row['Actividades'].toString().trim();
+        if (!activityId) continue;
+        
+        // Validar permisos - al menos debe tener visualización
+        const hasViewPermission = (row['Visualizar'] || '').toString().toUpperCase() === 'X';
+        
+        // Agregar actividad al rol
+        newRoles[roleId].activities.push({
+            id: activityId,
+            create: (row['Crear'] || '').toString().toUpperCase() === 'X',
+            modify: (row['Modificar'] || '').toString().toUpperCase() === 'X',
+            view: hasViewPermission || true, // Forzar visualización si no está marcado
+            delete: (row['Eliminar'] || '').toString().toUpperCase() === 'X'
+        });
+    }
+
+    // Validar que se hayan procesado roles
+    if (Object.keys(newRoles).length === 0) {
+        throw new Error('No se encontraron datos válidos en el archivo');
+    }
+
+    // Actualizar datos en memoria
+    rolesData = [...Object.values(newRoles), ...rolesData.filter(role => !newRoles[role.id])];
+    localStorage.setItem('rolesData', JSON.stringify(rolesData));
+    
+    return {
+        rolesLoaded: Object.keys(newRoles).length,
+        activitiesLoaded: Object.values(newRoles).reduce((sum, role) => sum + role.activities.length, 0)
+    };
+}
+
+function showValidationErrors(errors) {
+    let errorMessage = '<strong>Se encontraron los siguientes problemas en el archivo:</strong><br><br>';
+    errorMessage += '<ul class="list-disc pl-5">';
+    errors.forEach(error => {
+        errorMessage += `<li>${error}</li>`;
+    });
+    errorMessage += '</ul><br>Por favor corrija estos problemas e intente nuevamente.';
+    
+    showMessage('Error de Validación', errorMessage);
+}
+
+// Función para mostrar mensajes
+function showMessage(title, message) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMessage').innerHTML = message;
+    document.getElementById('messageModal').classList.remove('hidden');
+}
+
+// Función para iniciar nuevo rol
+function startNewRoleProcess() {
+    document.getElementById('addRoleBtn').disabled = true;
+    document.getElementById('saveAllBtn').disabled = true;
+    
+    // Deshabilitar filas existentes
+    document.querySelectorAll('#rolesTableBody tr').forEach(row => {
+        row.classList.add('table-row-inactive');
+        row.querySelectorAll('input[type="checkbox"], button').forEach(element => {
+            element.disabled = true;
+        });
+    });
+
+    // Inicializar nuevo rol
+    newRole = {
+        name: '',
+        modules: [],
+        functionalities: [],
+        activities: []
+    };
+    
+    // Limpiar inputs y errores
+    document.getElementById('roleNameInput').value = '';
+    document.getElementById('roleNameError').style.display = 'none';
+    document.getElementById('roleNameInput').classList.remove('input-error');
+    
+    showModal('roleNameModal');
+}
+
+function showModal(modalId) {
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.style.display = 'none';
+    });
+    
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        
+        const firstInput = modal.querySelector('input, select, textarea');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function proceedToModules() {
+    const roleName = document.getElementById('roleNameInput').value.trim();
+    
+    if (!roleName) {
+        document.getElementById('roleNameError').textContent = 'Por favor ingrese un nombre para el rol';
+        document.getElementById('roleNameError').style.display = 'block';
+        document.getElementById('roleNameInput').classList.add('input-error');
+        return;
+    }
+    
+    const specialCharsRegex = /[^\w\s-]/;
+    if (specialCharsRegex.test(roleName) || /[áéíóúÁÉÍÓÚüÜñÑ]/.test(roleName)) {
+        document.getElementById('roleNameError').textContent = 'El nombre del rol no debe contener tildes ni caracteres especiales';
+        document.getElementById('roleNameError').style.display = 'block';
+        document.getElementById('roleNameInput').classList.add('input-error');
+        return;
+    } else {
+        document.getElementById('roleNameError').style.display = 'none';
+        document.getElementById('roleNameInput').classList.remove('input-error');
+    }
+
+    const roleExists = rolesData.some(role => role.name.toLowerCase() === roleName.toLowerCase());
+    if (roleExists) {
+        document.getElementById('roleNameError').textContent = 'Ya existe un rol con ese nombre. Por favor ingrese un nombre diferente.';
+        document.getElementById('roleNameError').style.display = 'block';
+        document.getElementById('roleNameInput').classList.add('input-error');
+        return;
+    }
+    
+    newRole.name = roleName;
+    closeModal('roleNameModal');
+    
+    const container = document.getElementById('modulesCheckboxContainer');
+    container.innerHTML = '';
+    
+    // Asegúrate de que modulesData esté cargado correctamente
+    modulesData = JSON.parse(localStorage.getItem('modulesData')) || [];
+    
+    if (modulesData.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">No hay módulos disponibles. Por favor configure los módulos primero.</p>';
+        return;
+    }
+    
+    modulesData.forEach(module => {
+        const div = document.createElement('div');
+        div.className = 'checkbox-container';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `module-${module.id}`;
+        checkbox.value = module.id;
+        checkbox.className = 'focus-outline custom-radio module-checkbox';
+        
+        const label = document.createElement('label');
+        label.htmlFor = `module-${module.id}`;
+        label.textContent = module.name;
+        
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        container.appendChild(div);
+    });
+
+    // Configurar evento para "Seleccionar todos" en módulos
+    const selectAllModules = document.getElementById('selectAllModules');
+    selectAllModules.checked = false;
+    selectAllModules.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.module-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+    
+    showModal('modulesModal');
+}
+
+function proceedToFunctionalities() {
+    // Obtener módulos seleccionados
+    const selectedModules = [];
+    document.querySelectorAll('.module-checkbox:checked').forEach(checkbox => {
+        selectedModules.push(checkbox.value);
+    });
+    
+    if (selectedModules.length === 0) {
+        showMessage('Error', 'Debe seleccionar al menos un módulo');
+        return;
+    }
+    
+    newRole.modules = selectedModules;
+    
+    // Asegurarse de que functionalitiesData esté cargado correctamente
+    functionalitiesData = JSON.parse(localStorage.getItem('functionalitiesData')) || [];
+    
+    console.log('Todos los módulos:', modulesData);
+    console.log('Módulos seleccionados:', selectedModules);
+    console.log('Todas las funcionalidades:', functionalitiesData);
+    
+    // Filtrar funcionalidades por módulos seleccionados
+    const filteredFunctionalities = functionalitiesData.filter(func => 
+        selectedModules.includes(func.module)
+    );
+    
+    console.log('Funcionalidades filtradas:', filteredFunctionalities);
+    
+    const container = document.getElementById('functionalitiesCheckboxContainer');
+    container.innerHTML = '';
+    
+    if (filteredFunctionalities.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">No hay funcionalidades disponibles para los módulos seleccionados.</p>';
+        return;
+    }
+    
+    // Mostrar todas las funcionalidades filtradas
+    filteredFunctionalities.forEach(func => {
+        const div = document.createElement('div');
+        div.className = 'checkbox-container';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `func-${func.id}`;
+        checkbox.value = func.id;
+        checkbox.className = 'focus-outline custom-radio functionality-checkbox';
+        
+        const label = document.createElement('label');
+        label.htmlFor = `func-${func.id}`;
+        label.textContent = func.name;
+        
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        container.appendChild(div);
+    });
+    
+    // Configurar evento para "Seleccionar todos" en funcionalidades
+    const selectAllFunctionalities = document.getElementById('selectAllFunctionalities');
+    selectAllFunctionalities.checked = false;
+    selectAllFunctionalities.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.functionality-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+    
+    showModal('functionalitiesModal');
+}
+
+function proceedToActivities() {
+    // Obtener funcionalidades seleccionadas
+    const selectedFunctionalities = [];
+    document.querySelectorAll('.functionality-checkbox:checked').forEach(checkbox => {
+        selectedFunctionalities.push(checkbox.value);
+    });
+    
+    if (selectedFunctionalities.length === 0) {
+        showMessage('Error', 'Debe seleccionar al menos una funcionalidad');
+        return;
+    }
+    
+    newRole.functionalities = selectedFunctionalities;
+    
+    // Mostrar actividades agrupadas por funcionalidad
+    showActivitiesByFunctionality();
+    showModal('activitiesModal');
+}
+
+function showActivitiesByFunctionality() {
+    const container = document.querySelector('#activitiesModal .functionality-groups-container');
+    container.innerHTML = '';
+    
+    // Asegurarse de que activitiesData esté cargado correctamente
+    activitiesData = JSON.parse(localStorage.getItem('activitiesData')) || [];
+    functionalitiesData = JSON.parse(localStorage.getItem('functionalitiesData')) || [];
+    
+    console.log('Todas las actividades:', activitiesData);
+    console.log('Funcionalidades seleccionadas:', newRole.functionalities);
+    
+    // Agrupar actividades por funcionalidad
+    const groupedActivities = {};
+    activitiesData.forEach(activity => {
+        if (newRole.functionalities.includes(activity.functionality)) {
+            if (!groupedActivities[activity.functionality]) {
+                groupedActivities[activity.functionality] = [];
+            }
+            groupedActivities[activity.functionality].push(activity);
+        }
+    });
+    
+    console.log('Actividades agrupadas:', groupedActivities);
+    
+    // Crear grupos colapsables para cada funcionalidad
+    for (const funcId in groupedActivities) {
+        const functionality = functionalitiesData.find(f => f.id === funcId);
+        if (!functionality) continue;
+        
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'functionality-group mb-4';
+        
+        const header = document.createElement('div');
+        header.className = 'functionality-header';
+        header.innerHTML = `
+            <span>${functionality.name}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        `;
+        
+        const content = document.createElement('div');
+        content.className = 'functionality-content hidden';
+        
+        groupedActivities[funcId].forEach(activity => {
+            const activityDiv = document.createElement('div');
+            activityDiv.className = 'activity-row';
+            activityDiv.innerHTML = `
+                <div class="flex-1">${activity.name}</div>
+                <div class="flex items-center space-x-4">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" class="permission-checkbox custom-radio" data-permission="create">
+                        <span class="ml-2">Crear</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" class="permission-checkbox custom-radio" data-permission="modify">
+                        <span class="ml-2">Modificar</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" class="permission-checkbox custom-radio" data-permission="view" checked>
+                        <span class="ml-2">Visualizar</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" class="permission-checkbox custom-radio" data-permission="delete">
+                        <span class="ml-2">Eliminar</span>
+                    </label>
+                    <button class="add-activity-btn px-3 py-1 bg-[var(--mysiss-purple)] text-white rounded-md text-sm" 
+                            data-activity-id="${activity.id}">Agregar</button>
+                </div>
+            `;
+            content.appendChild(activityDiv);
+        });
+        
+        header.addEventListener('click', () => {
+            content.classList.toggle('hidden');
+            header.querySelector('svg').classList.toggle('rotate-180');
+        });
+        
+        groupDiv.appendChild(header);
+        groupDiv.appendChild(content);
+        container.appendChild(groupDiv);
+    }
+    
+    // Configurar eventos para los botones de agregar actividad
+    document.querySelectorAll('.add-activity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            addActivityToRole(this.dataset.activityId, this.closest('.activity-row'));
+        });
+    });
+}
+
+function addActivityToRole(activityId, activityRow) {
+    const permissions = {
+        create: activityRow.querySelector('[data-permission="create"]').checked,
+        modify: activityRow.querySelector('[data-permission="modify"]').checked,
+        view: activityRow.querySelector('[data-permission="view"]').checked,
+        delete: activityRow.querySelector('[data-permission="delete"]').checked
+    };
+    
+    // Verificar que al menos tenga permiso de visualización
+    if (!permissions.view) {
+        showMessage('Error', 'Cada actividad debe tener al menos el permiso de visualización');
+        return;
+    }
+    
+    // Verificar si la actividad ya fue agregada
+    if (newRole.activities.some(a => a.id === activityId)) {
+        showMessage('Advertencia', 'Esta actividad ya fue agregada al rol');
+        return;
+    }
+    
+    // Agregar al objeto newRole
+    newRole.activities.push({
+        id: activityId,
+        ...permissions
+    });
+    
+    // Agregar fila a la tabla
+    addActivityRowToTable(activityId, permissions);
+    
+    // Habilitar botón de guardar
+    document.getElementById('saveAllBtn').disabled = false;
+    
+    // Mostrar mensaje de éxito
+    const activity = activitiesData.find(a => a.id === activityId);
+    showMessage('Éxito', `Actividad "${activity?.name || activityId}" agregada al rol`);
+}
+
+function addActivityRowToTable(activityId, permissions) {
+    const activity = activitiesData.find(a => a.id === activityId);
+    if (!activity) return;
+    
+    const functionality = functionalitiesData.find(f => f.id === activity.functionality);
+    const module = modulesData.find(m => m.id === activity.module);
+    
+    const tableBody = document.getElementById('rolesTableBody');
+    const row = document.createElement('tr');
+    row.className = 'new-role-activity-row';
+    row.dataset.activityId = activityId;
+    
+    row.innerHTML = `
+        <td class="px-6 py-2 whitespace-nowrap">${newRole.name}</td>
+        <td class="px-6 py-2 whitespace-nowrap">${module?.name || ''}</td>
+        <td class="px-6 py-2 whitespace-nowrap">${functionality?.name || ''}</td>
+        <td class="px-6 py-2">${activity.name}</td>
+        <td class="px-6 py-2 text-center permission-col">
+            <input type="checkbox" class="permission-checkbox custom-radio" ${permissions.create ? 'checked' : ''} disabled>
+        </td>
+        <td class="px-6 py-2 text-center permission-col">
+            <input type="checkbox" class="permission-checkbox custom-radio" ${permissions.modify ? 'checked' : ''} disabled>
+        </td>
+        <td class="px-6 py-2 text-center permission-col">
+            <input type="checkbox" class="permission-checkbox custom-radio" ${permissions.view ? 'checked' : ''} disabled>
+        </td>
+        <td class="px-6 py-2 text-center permission-col">
+            <input type="checkbox" class="permission-checkbox custom-radio" ${permissions.delete ? 'checked' : ''} disabled>
+        </td>
+        <td class="px-6 py-2 whitespace-nowrap action-col">
+            <div class="action-buttons-container">
+                <button class="action-btn delete-individual-activity-btn focus-outline transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </td>
+    `;
+    
+    // Insertar al principio de la tabla
+    if (tableBody.firstChild) {
+        tableBody.insertBefore(row, tableBody.firstChild);
+    } else {
+        tableBody.appendChild(row);
+    }
+    
+    // Configurar evento para eliminar actividad individual
+    row.querySelector('.delete-individual-activity-btn').addEventListener('click', function() {
+        removeActivityFromRole(activityId);
+    });
+}
+
+function removeActivityFromRole(activityId) {
+    // Eliminar del objeto newRole
+    newRole.activities = newRole.activities.filter(a => a.id !== activityId);
+    
+    // Eliminar fila de la tabla
+    document.querySelector(`.new-role-activity-row[data-activity-id="${activityId}"]`)?.remove();
+    
+    // Deshabilitar botón de guardar si no hay actividades
+    if (newRole.activities.length === 0) {
+        document.getElementById('saveAllBtn').disabled = true;
+    }
+    
+    showMessage('Éxito', 'Actividad removida del rol');
+}
+
+function addSelectedActivities() {
+    closeModal('activitiesModal');
+}
+
+function saveNewRole() {
+    // Validar que haya actividades
+    if (newRole.activities.length === 0) {
+        showMessage('Error', 'Debe agregar al menos una actividad al rol');
+        return;
+    }
+    
+    // Generar ID para el nuevo rol
+    const newId = 'ROL' + (rolesData.length + 1).toString().padStart(3, '0');
+    
+    // Crear el objeto de rol completo
+    const completeRole = {
+        id: newId,
+        name: newRole.name,
+        modules: newRole.modules,
+        functionalities: newRole.functionalities,
+        activities: newRole.activities
+    };
+    
+    // Agregar a los datos y guardar
+    rolesData.unshift(completeRole);
+    localStorage.setItem('rolesData', JSON.stringify(rolesData));
+    
+    // Limpiar las filas temporales y el objeto newRole
+    document.querySelectorAll('.new-role-activity-row').forEach(row => row.remove());
+    newRole = {
+        name: '',
+        modules: [],
+        functionalities: [],
+        activities: []
+    };
+
+    renderRolesTable();
+    updateSaveAllButtonState();
+
+    // Re-habilitar el botón "Agregar Rol" y la tabla principal
+    document.getElementById('addRoleBtn').disabled = false;
+    document.querySelectorAll('#rolesTableBody tr.table-row-inactive').forEach(row => {
+        row.classList.remove('table-row-inactive');
+        row.querySelectorAll('button').forEach(element => {
+            element.disabled = false;
+        });
+    });
+    
+    showMessage('Éxito', 'Nuevo rol creado exitosamente');
+}
+
+function updateSaveAllButtonState() {
+    const hasNewActivities = document.querySelectorAll('.new-role-activity-row').length > 0;
+    document.getElementById('saveAllBtn').disabled = !hasNewActivities;
+}
+
+function renderRolesTable() {
+    const tableBody = document.getElementById('rolesTableBody');
+    tableBody.innerHTML = '';
+    
+    // Ordenar roles para que los más recientes aparezcan primero
+    const sortedRoles = [...rolesData].sort((a, b) => b.id.localeCompare(a.id));
+    
+    sortedRoles.forEach(role => {
+        role.activities.forEach(activity => {
+            const row = document.createElement('tr');
+            row.dataset.roleId = role.id;
+            row.dataset.activityId = activity.id;
+
+            // Buscar información adicional
+            const activityData = activitiesData.find(a => a.id === activity.id) || {};
+            const moduleData = modulesData.find(m => m.id === activityData.module) || {};
+            const functionalityData = functionalitiesData.find(f => f.id === activityData.functionality) || {};
+
+            row.innerHTML = `
+                <td class="px-6 py-2 whitespace-nowrap">${role.name}</td>
+                <td class="px-6 py-2 whitespace-nowrap">${moduleData.name || ''}</td>
+                <td class="px-6 py-2 whitespace-nowrap">${functionalityData.name || ''}</td>
+                <td class="px-6 py-2">${activityData.name || activity.id}</td>
+                <td class="px-6 py-2 text-center permission-col">
+                    <input type="checkbox" class="permission-checkbox custom-radio" ${activity.create ? 'checked' : ''} disabled>
+                </td>
+                <td class="px-6 py-2 text-center permission-col">
+                    <input type="checkbox" class="permission-checkbox custom-radio" ${activity.modify ? 'checked' : ''} disabled>
+                </td>
+                <td class="px-6 py-2 text-center permission-col">
+                    <input type="checkbox" class="permission-checkbox custom-radio" ${activity.view ? 'checked' : ''} disabled>
+                </td>
+                <td class="px-6 py-2 text-center permission-col">
+                    <input type="checkbox" class="permission-checkbox custom-radio" ${activity.delete ? 'checked' : ''} disabled>
+                </td>
+                <td class="px-6 py-2 whitespace-nowrap action-col">
+                    <div class="action-buttons-container">
+                        <button class="action-btn modify-btn focus-outline transition-colors" data-role-id="${role.id}" data-activity-id="${activity.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                        </button>
+                        <button class="action-btn delete-btn focus-outline transition-colors delete-role-btn" data-role-id="${role.id}" data-activity-id="${activity.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    });
+}
+
+
+
+function confirmDelete(event) {
+    const button = event.currentTarget;
+    roleIdToDelete = {
+        roleId: button.dataset.roleId,
+        activityId: button.dataset.activityId,
+        isNewRoleActivity: button.classList.contains('delete-individual-activity-btn')
+    };
+    showModal('confirmDeleteModal');
+}
+
+function deleteConfirmed() {
+    if (!roleIdToDelete) return;
+    
+    if (roleIdToDelete.isNewRoleActivity) {
+        // Eliminar actividad de rol en creación
+        removeActivityFromRole(roleIdToDelete.activityId);
+    } else {
+        // Eliminar actividad de rol existente
+        const roleIndex = rolesData.findIndex(r => r.id === roleIdToDelete.roleId);
+        if (roleIndex !== -1) {
+            const role = rolesData[roleIndex];
+            role.activities = role.activities.filter(a => a.id !== roleIdToDelete.activityId);
+            
+            // Si el rol no tiene más actividades, eliminarlo completamente
+            if (role.activities.length === 0) {
+                rolesData.splice(roleIndex, 1);
+            }
+            
+            // Guardar cambios
+            localStorage.setItem('rolesData', JSON.stringify(rolesData));
+            
+            // Actualizar tabla
+            renderRolesTable();
+            
+            showMessage('Éxito', 'Registro eliminado correctamente');
+        }
+    }
+    
+    closeModal('confirmDeleteModal');
+    roleIdToDelete = null;
+}
+
+function modifyExistingRole(roleId, activityId) {
+    const role = rolesData.find(r => r.id === roleId);
+    if (!role) return;
+    
+    const activity = role.activities.find(a => a.id === activityId);
+    if (!activity) return;
+    
+    const activityInfo = activitiesData.find(a => a.id === activityId);
+    
+    // Crear modal de modificación
+    const modalContent = `
+        <div class="mb-4">
+            <h4 class="font-bold">Modificar permisos para:</h4>
+            <p class="text-sm text-gray-600">${activityInfo?.name || activityId}</p>
+        </div>
+        <div class="space-y-3">
+            <div class="checkbox-container">
+                <input type="checkbox" id="modifyCreate" class="permission-checkbox custom-radio" ${activity.create ? 'checked' : ''}>
+                <label for="modifyCreate">Crear</label>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="modifyModify" class="permission-checkbox custom-radio" ${activity.modify ? 'checked' : ''}>
+                <label for="modifyModify">Modificar</label>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="modifyView" class="permission-checkbox custom-radio" ${activity.view ? 'checked' : ''}>
+                <label for="modifyView">Visualizar</label>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="modifyDelete" class="permission-checkbox custom-radio" ${activity.delete ? 'checked' : ''}>
+                <label for="modifyDelete">Eliminar</label>
+            </div>
+        </div>
+    `;
+    
+    // Mostrar modal de confirmación
+    showMessage('Modificar Permisos', modalContent);
+    
+    // Configurar botones del modal de mensaje para esta acción especial
+    const modalFooter = document.querySelector('#messageModal .flex.justify-end');
+    modalFooter.innerHTML = `
+        <button onclick="closeModal('messageModal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 focus-outline">
+            Cancelar
+        </button>
+        <button onclick="saveModifiedPermissions('${roleId}', '${activityId}')" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+            Guardar Cambios
+        </button>
+    `;
+}
+
+function saveModifiedPermissions(roleId, activityId) {
+    const role = rolesData.find(r => r.id === roleId);
+    if (!role) return;
+    
+    const activity = role.activities.find(a => a.id === activityId);
+    if (!activity) return;
+    
+    // Obtener valores de los checkboxes
+    activity.create = document.getElementById('modifyCreate').checked;
+    activity.modify = document.getElementById('modifyModify').checked;
+    activity.view = document.getElementById('modifyView').checked;
+    activity.delete = document.getElementById('modifyDelete').checked;
+    
+    // Validar que al menos tenga permiso de visualización
+    if (!activity.view) {
+        showMessage('Error', 'Cada actividad debe tener al menos el permiso de visualización');
+        return;
+    }
+    
+    // Guardar cambios
+    localStorage.setItem('rolesData', JSON.stringify(rolesData));
+    
+    // Actualizar tabla
+    renderRolesTable();
+    
+    // Cerrar modal
+    closeModal('messageModal');
+    
+    showMessage('Éxito', 'Permisos actualizados correctamente');
+}
+
+// Función para alternar submenús
+function toggleSubmenu(submenuId, linkElement) {
+    const submenu = document.getElementById(submenuId);
+    const icon = linkElement.querySelector('svg');
+    
+    submenu.classList.toggle('active');
+    icon.classList.toggle('rotate-180');
+    linkElement.classList.toggle('active');
+}
+
+// Función para depuración
+function checkDataLoaded() {
+    console.log('Modules Data:', modulesData);
+    console.log('Functionalities Data:', functionalitiesData);
+    console.log('Activities Data:', activitiesData);
+    console.log('Roles Data:', rolesData);
+}
+
+// Llama a esta función después de cargar los datos
+document.addEventListener('DOMContentLoaded', function() {
+    checkDataLoaded();
+});
+    </script>
+</body>
+</html>

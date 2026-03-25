@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cargue datos maestros - mySiss Cloud</title>
+  <style>
+  
+	:root {
+      --mysiss-purple: #800080;
+      --mysiss-light-purple: #EBE3F2;
+      --mysiss-hover-purple: #DFD1EE;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  
+  
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: white;
+      min-height: 100vh;
+    }
+
+	
+	.focus-outline:focus {
+      outline: 2px solid var(--mysiss-purple);
+      outline-offset: 2px;
+    }
+	
+	
+    .sidebar a {
+      display: block;
+      margin: 5px 9;
+      color: #800080;
+    }
+
+	
+	.logo {
+      font-size: 3.4rem;
+      font-weight: bold;
+      color: var(--mysiss-purple);
+      margin-bottom: 2rem;
+    }
+	
+	
+	.nav-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      color: var(--mysiss-purple);
+      text-decoration: none;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      transition: background-color 0.2s;
+    }
+
+    .nav-link:hover {
+      background: var(--mysiss-hover-purple);
+    }
+	
+	
+	/* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+	
+	.section-title {
+      font-size: 1.875rem;
+      font-weight: bold;
+      color: var(--mysiss-purple);
+      margin-bottom: 1rem;
+    }
+
+	
+	
+
+
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      background-color: white;
+      padding: 20px 40px;
+    }
+
+    .acciones {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 30px;
+    }
+
+    .radio-column {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      min-width: 180px;
+    }
+
+    .radio-column span {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .radio-column label {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+	  white-space: normal; /* Antes estaba nowrap */
+	  word-break: break-word;
+    }
+
+    .archivo-botones {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .archivo-ejecutar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px; 
+	  margin-left: 5px; /* ⬅️ Añade esta línea */
+    }
+
+    .input-mock {
+      padding: 6px;
+      width: 180px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      color: #666;
+      font-style: italic;
+      cursor: pointer;
+      outline: none;
+    }
+
+.btn {
+  background-color: #800080;
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+    width: 130px;
+}
+
+    .btn.small {
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+
+    .acciones-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2e6ff;
+    }
+
+    .acciones-col-extendida {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      align-items: flex-end;
+      margin-top: 0px;
+      margin-left: 335px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+	
+.modal-content h2 {
+  color: #800080;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.btn:hover {
+  background-color: #6a006a;
+}
+
+
+.modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 30px 25px;
+  width: 95%;
+  max-width: 620px;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  font-size: 13px;
+}
+
+.modal-content .close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 22px;
+  color: #666;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 28px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  }
+
+.modal-content .close:hover {
+  background-color: #dcdcdc;
+  color: #000;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: purple;
+  font-size: 20px;
+  margin-bottom: 18px;
+}
+	
+#formEntidad {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 12px;
+}
+
+#formEntidad .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px; /* Espacio vertical entre campos */
+}
+
+#formEntidad label {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #333;
+  display: block;
+}
+
+#formEntidad .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+#formEntidad input,
+#formEntidad select {
+  padding: 8px;
+  font-size: 13px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#formEntidad .form-actions {
+  grid-column: span 2;
+  text-align: center;
+  margin-top: 20px;
+}
+
+#formEntidad button[type="submit"] {
+  grid-column: span 2;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: purple;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+	.inactivo {
+	  opacity: 0.5;
+	  background-color: #f0f0f0;
+	}
+	
+	
+	a[href="login.html"] {
+	  position: relative;
+	  bottom: 10px;
+	}
+	
+	
+	
+    .sidebar {
+      width: 200px;
+      background-color: #EBE3F2;
+      padding: 12.9px;
+      height: 100vh;
+      position: fixed;
+	  display: flex;
+	  flex-direction: column;
+	  justify-content: flex-start;
+	  gap: 0px;
+    }
+	
+
+	.sidebar a[href="login.html"] {
+	  position: relative;
+	  bottom: 30px;
+	}
+
+	
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">mySiss</div>
+      <nav>
+
+        <a href="configuracion.html" class="nav-link active" text-decoration: underline data-section="config"><strong>Configuración</strong></a>
+        <a href="cargue_data.html" class="nav-link" data-section="masters"><strong>Datos Maestros</strong></a>
+
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+        <a href="../login.html" class="nav-link" data-section="logout"><strong>Cerrar Sesión</strong></a>
+      </nav>
+    </aside>
+	
+
+  <div class="main">
+    <h2 style="color: #800080;">Configuración datos maestros</h2>
+	<br>
+	<br>
+    <div class="acciones">
+      <div class="radio-column">
+        <span>Tipo de dato</span>
+        <label><input type="radio" name="tipoEntidad" value="medicos"> Auditores</label>
+        <label><input type="radio" name="tipoEntidad" value="especialidades"> Clase Auditores</label>
+        <label><input type="radio" name="tipoEntidad" value="motivo_dev"> Motivo general devolución</label>
+        <label><input type="radio" name="tipoEntidad" value="submotivo_dev"> Motivo especifico devolución</label>
+        <label><input type="radio" name="tipoEntidad" value="motivo_obj"> Motivo genegal objeción</label>
+        <label><input type="radio" name="tipoEntidad" value="motivo_esp"> Motivo especifico objeción</label>
+      </div>
+      <div class="archivo-ejecutar">
+        <input type="file" id="archivo" style="display:none" onchange="mostrarNombreArchivo(event)">
+        <input type="text" id="nombreArchivo" class="input-mock" value="Seleccione archivo" readonly onclick="document.getElementById('archivo').click()"/>
+        <button type="button" class="btn" onclick="ejecutar()" title="Ejecutar">  <i class="fas fa-play"></i> Ejecutar</button>
+ <!--       <button type="button" class="btn" onclick="mostrarPopup()" title="Visualizar">  <i class="fas fa-file-upload"></i> Visualizar</button>
+ -->     </div>
+      <div class="acciones-col-extendida">
+        <button type="button" class="btn" onclick="abrirModalNuevo()" title="Nuevo registro">  <i class="fas fa-plus"></i> Nuevo</button>
+        <button type="button" class="btn" onclick="modificarRegistro()" title="Modificar registro">  <i class="fas fa-edit"></i> Modificar</button>
+        <button type="button" class="btn" onclick="inactivarSeleccionados()" title="Inactivar registro"><i class="fas fa-toggle-on"></i> Inactivar/Activar</button>
+      </div>
+    </div>
+    <div id="resultados"></div>
+  </div>
+</div>
+
+<div id="modalEntidad" class="modal">
+  <div class="modal-content">
+<i class="fas fa-times close" onclick="cerrarModal()" title="Cerrar"></i>
+    <h2 id="tituloModal"></h2>
+    <form id="formEntidad" onsubmit="guardarEntidad(event)"></form>
+  </div>
+</div>
+
+<script>
+const datosSimulados = {
+  medicos: [
+                { "Codigo Profesional": "PR001", "Nombres ": "Juan David", "Apellidos": "Maldonado Espitia", "Genero": "Masculino", "Tipo de documento": "CC", "Documento": "79879891", "Registro profesional": "79879891", "RUT": "79879891", "Telefono": "+573518305390", "email": "jdmaldonadoe@clinica.com", "Direccion ": "Calle 10 # 6-50", "Activo": "X" },
+                { "Codigo Profesional": "PR002", "Nombres ": "Oscar Javier", "Apellidos": "Modragon Mora", "Genero": "Masculino", "Tipo de documento": "CC", "Documento": "1156200547", "Registro profesional": "1156200547", "RUT": "1156200547", "Telefono": "+573103776087", "email": "ojmondragonm@clinica.com", "Direccion ": "", "Activo": "X" },
+  ],
+  especialidades: [
+                { ID: 1, Descripcion: "Médico" },
+                { ID: 2, Descripcion: "Administrativo" },
+ ],
+  motivo_dev: [
+                { "Codigo": "DE16", "Descripcion": "Persona corresponde a otro responsable de pago." },
+                { "Codigo": "DE44", "Descripcion": "El prestador de servicios de salud que factura no hace parte de la red integral e integrada de la entidad responsable de pago" },
+ ],
+  submotivo_dev: [
+                { "Codigo_motivo": "DE16", "Codigo_submotivo": "01", "Descripcion": "Factura corresponde a una persona que pertenecia a otro responsable de pago en el momento de la atención." },
+                { "Codigo_motivo": "DE44", "Codigo_submotivo": "01", "Descripcion": "El profesional independiente que ordenó el servicio o tecnología de salud no hace parte de la red integral e integrada de la entidad responsable de pago" },
+                { "Codigo_motivo": "DE44", "Codigo_submotivo": "02", "Descripcion": "El profesional que ordenó el servicio o tecnología de salud facturado lo hizo desde una IPS que no hace parte de la red integral e integrada de la entidad responsable de pago" },
+ ],
+  motivo_obj: [
+                { "Codigo_motivo": "FA01", "Descripcion": "Estancia u observacion de urgencias "},
+                { "Codigo_motivo": "FA02", "Descripcion": "Consultas, interconsultas y atenciones (visita) domiciliaria "},
+                { "Codigo_motivo": "FA03", "Descripcion": "Honorarios profesionales en procedimientos"},
+                { "Codigo_motivo": "FA08", "Descripcion": "Apoyo diagnóstico"},
+                { "Codigo_motivo": "TA08", "Descripcion": "Apoyo diagnóstico"},
+ ],
+  motivo_esp: [
+                { "Codigo_motivo": "FA01", "Codigo_submotivo": "01", "Descripcion": "El cargo por estancia u observacion de urgencias, que viene relacionado o justificado en los soportes de cobro, presenta diferencia con las cantidades facturadas." },
+  			    { "Codigo_motivo": "FA01", "Codigo_submotivo": "02", "Descripcion": "Se facturan consultas, interconsultas o atenciones (visitas) domiciliarias que están incluidas en la estancia u observacion de urgencias de acuerdo con lo pactado." },
+			    { "Codigo_motivo": "FA01", "Codigo_submotivo": "03", "Descripcion": "Se cobra estancia u observacion de urgencias que ya se encuentra incluida en una atención agrupada, de acuerdo con lo pactado por las partes." },
+			    { "Codigo_motivo": "FA01", "Codigo_submotivo": "05", "Descripcion": "Se facturan servicios o tecnologias en salud que se encuentran incluidos en la estancia u observacion de urgencias de acuerdo con lo pactado." },
+                { "Codigo_motivo": "FA02", "Codigo_submotivo": "01", "Descripcion": "El cargo por consulta, interconsulta o atención (visita) domiciliaria que viene relacionado o justificado en los soportes de cobro, presenta diferencias con las cantidades facturadas." },
+                { "Codigo_motivo": "FA02", "Codigo_submotivo": "02", "Descripcion": "Se cobran consultas o atenciones (visitas) domiciliarias que se encuentran incluidas en los honorarios profesionales post quirúrgicos." },
+                { "Codigo_motivo": "FA02", "Codigo_submotivo": "03", "Descripcion": "Se cobran consultas o atenciones (visitas) domiciliarias que ya se encuentran incluidas en una atención agrupada, de acuerdo con lo pactado por las partes." },
+                { "Codigo_motivo": "FA02", "Codigo_submotivo": "05", "Descripcion": "Se cobran consultas que se encuentran incluidas en los honorarios profesionales del procedimiento, de acuerdo con lo pactado por las partes." },
+                { "Codigo_motivo": "FA02", "Codigo_submotivo": "06", "Descripcion": "En una factura se registra una interconsulta que originó la práctica de un procedimiento quirúrgico o intervencionista que realizó el mismo prestador." },
+				{ "Codigo_motivo": "FA03", "Codigo_submotivo": "01", "Descripcion": "Los cargos por honorarios profesionales en procedimientos quirurgicos o intervencionistas, que vienen relacionados o justificados en los soportes de cobro, presentan diferencias con las cantidades que fueron facturadas." },
+				{ "Codigo_motivo": "FA03", "Codigo_submotivo": "02", "Descripcion": "Los cargos por honorarios de anestesia que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas." },
+				{ "Codigo_motivo": "FA03", "Codigo_submotivo": "03", "Descripcion": "Se cobran honorarios profesionales que ya se encuentran incluidos en una atencion agrupada, de acuerdo con lo pactado por las partes."  },
+				{ "Codigo_motivo": "FA08", "Codigo_submotivo": "01", "Descripcion": "Los cargos por apoyo diagnóstico que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas."  },
+				{ "Codigo_motivo": "FA08", "Codigo_submotivo": "02", "Descripcion": "Se facturan separadamente apoyos diagnósticos incluidos uno en el otro."  },
+				{ "Codigo_motivo": "FA08", "Codigo_submotivo": "03", "Descripcion": "Se cobran apoyos diagnósticos que ya se encuentran incluidos en una atención agrupada, de acuerdo con lo pactado por las partes."  },
+				{ "Codigo_motivo": "FA08", "Codigo_submotivo": "05", "Descripcion": "Se cobran apoyos diagnósticos que ya se encuentran incluidos en el procedimiento quirúrgico o intervencionista."  },
+				{ "Codigo_motivo": "TA08", "Codigo_submotivo": "01", "Descripcion": "Los cargos por apoyo diagnóstico que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma."  },
+ ],
+  tarifas: [
+                { "Codigo": "827902", "Descripcion": "Injerto de tendon flexor de mano o dedos   (UNO O MAS)", "Catalogo": "ISS", "UVR": "100", "Puntos": "", "Valor": "" },
+                { "Codigo": "827102", "Descripcion": "Injerto de tendon de flexor de un dedo con recosntruccion de poleas", "Catalogo": "ISS", "UVR": "200", "Puntos": "", "Valor": "" },
+                { "Codigo": "383101", "Descripcion": "Reseccion de malformacion arteriovenosa supratentorial spetzler", "Catalogo": "ISS", "UVR": "855", "Puntos": "", "Valor": "" },
+                { "Codigo": "934100", "Descripcion": "Traccion espinal con empredo dispositivo craneal", "Catalogo": "ISS", "UVR": "65", "Puntos": "", "Valor": "" },
+                { "Codigo": "890208", "Descripcion": "Consulta por primera vez por Psicologia", "Catalogo": "ISS", "UVR": "", "Puntos": "", "Valor": "$5515" },
+                { "Codigo": "890209", "Descripcion": "Consulta por primera vez por Trabjo Social", "Catalogo": "ISS", "UVR": "", "Puntos": "", "Valor": "$5515" },
+                { "Codigo": "890801", "Descripcion": "Consulta de ingreso por medicina General", "Catalogo": "ISS", "UVR": "", "Puntos": "", "Valor": "$7795" },
+                { "Codigo": "890201", "Descripcion": "Consulta primer vez medicina General", "Catalogo": "ISS", "UVR": "", "Puntos": "", "Valor": "$8755" },
+                { "Codigo": "36100", "Descripcion": "Consulta especializada", "Catalogo": "ISS", "UVR": "", "Puntos": "1,41", "Valor": "" },
+                { "Codigo": "37701", "Descripcion": "Consulta Socual", "Catalogo": "ISS", "UVR": "", "Puntos": "0,62", "Valor": "" },
+                { "Codigo": "19001", "Descripcion": "Acetaminofén", "Catalogo": "SOAT", "UVR": "", "Puntos": "1,56", "Valor": "" },
+                { "Codigo": "19004", "Descripcion": "Acidos biliares", "Catalogo": "SOAT", "UVR": "", "Puntos": "1,69", "Valor": "" },
+                { "Codigo": "19006", "Descripcion": "Acido Folico", "Catalogo": "SOAT", "UVR": "", "Puntos": "2,13", "Valor": "" },
+                { "Codigo": "19008", "Descripcion": "Acido 5 Hidroxi indolacetico", "Catalogo": "SOAT", "UVR": "", "Puntos": "1,39", "Valor": "" },
+  ],
+  aseguradoras: [
+                { "Cod. Aseguradora": "EPS037", "NIT": "900156264-2", "Nombre Aseguradora": "Nueva EPS", "Telefono": "18000954400", "Correo Electronico": "aseg_nuevaEPS@nuevaeps.com" },
+                { "Cod. Aseguradora": "EPS012", "NIT": "890303093-5", "Nombre Aseguradora": "EPS COMFENALCO VALLE EPS", "Telefono": "6024853530", "Correo Electronico": "notificacioneseps@epsdelagente.com.co" },
+                { "Cod. Aseguradora": "EPS005", "NIT": "800251440-6. ", "Nombre Aseguradora": "EPS SANITAS EPS", "Telefono": "6013759000", "Correo Electronico": "comunicacioneseps@colsanitas.com" },
+                { "Cod. Aseguradora": "EPSC22", "NIT": "800088702-2 ", "Nombre Aseguradora": "EPS CONVIDA EPS", "Telefono": "602 437 88 88", "Correo Electronico": "cna@suramericana.com.co" },
+                { "Cod. Aseguradora": "ESSC91", "NIT": "860001004-7", "Nombre Aseguradora": "EPS ECOOPSOS EPS", "Telefono": "6024898686", "Correo Electronico": "sosatencion@soseps.com" },
+  ],
+  sociedades: [
+                { "ID sociedad": "SM001", "Razon Social": "Cardiologos Asociados", "NIT": "8600359922", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM002", "Razon Social": "Radiologos Asociados", "NIT": "8600358822", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM003", "Razon Social": "Grupo Anestesia", "NIT": "8609759922", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM004", "Razon Social": "Sociedad de Cirugia Plastica", "NIT": "8600359942", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM005", "Razon Social": "Maxilo Group", "NIT": "8600359442", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM006", "Razon Social": "Urologos Asociados", "NIT": "8601135552", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM007", "Razon Social": "Gienco group", "NIT": "8600359112", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM008", "Razon Social": "Intensivistas Asociado", "NIT": "8600353242", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM009", "Razon Social": "Anestesia center group", "NIT": "8600343252", "Telefono": "", "email": "", "Direccion ": "", "Activo": ""},
+                { "ID sociedad": "SM010", "Razon Social": "Terapistas Asociados", "NIT": "8600388792", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+  ]
+};
+
+let tipoActivo = "medicos";
+let datosTabla = [];
+let modoEdicion = false;
+let indiceEditando = null;
+
+document.querySelectorAll('input[name="tipoEntidad"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    tipoActivo = e.currentTarget.value;
+    datosTabla = [...(datosSimulados[tipoActivo] || [])];
+    renderizarTabla();
+  });
+});
+
+
+function mostrarPopup() {
+  datosTabla = [...datosSimulados[tipoActivo]];
+  renderizarTabla();
+}
+
+function mostrarNombreArchivo(e) {
+  const archivo = e.target.files[0];
+  document.getElementById("nombreArchivo").value = archivo ? archivo.name : "Seleccione archivo";
+}
+
+function ejecutar() {
+  const archivo = document.getElementById("archivo").files[0];
+  if (!archivo) return alert("Seleccione un archivo.");
+  const tipo = archivo.name.split('.').pop().toLowerCase();
+  if (!["csv", "txt", "xls", "xlsx"].includes(tipo)) {
+    alert("Archivo no compatible. Solo se permiten CSV, TXT o XLS(X).");
+    return;
+  }
+  alert("Archivo válido cargado.");
+}
+
+function renderizarTabla() {
+  const contenedor = document.getElementById("resultados");
+  if (!datosTabla.length) {
+    contenedor.innerHTML = "<p>No hay datos para mostrar.</p>";
+    return;
+  }
+  const headers = Object.keys(datosTabla[0]);
+  let html = "<table><thead><tr><th></th>";
+  headers.forEach(h => html += `<th>${h}</th>`);
+  html += "</tr></thead><tbody>";
+  datosTabla.forEach((row, i) => {
+    const inactivo = row.inactivo ? "inactivo" : "";
+    html += `<tr class="${inactivo}"><td><input type="checkbox" data-index="${i}" class="seleccionar"></td>`;
+    headers.forEach(h => html += `<td>${row[h]}</td>`);
+    html += "</tr>";
+  });
+  html += "</tbody></table>";
+  contenedor.innerHTML = html;
+}
+
+function abrirModalNuevo() {
+  modoEdicion = false;
+  indiceEditando = null;
+  abrirModal();
+}
+
+function modificarRegistro() {
+  const seleccionados = document.querySelectorAll('.seleccionar:checked');
+  if (seleccionados.length !== 1) {
+    alert("Seleccione solo un registro.");
+    return;
+  }
+  modoEdicion = true;
+  indiceEditando = seleccionados[0].dataset.index;
+  abrirModal(datosTabla[indiceEditando]);
+}
+
+function abrirModal(datos = null) {
+  const modal = document.getElementById("modalEntidad");
+  const form = document.getElementById("formEntidad");
+  const titulo = document.getElementById("tituloModal");
+
+  form.innerHTML = "";
+  const estructura = datosSimulados[tipoActivo][0];
+  const nombresSingulares = {
+  medicos: "Profesional",
+  especialidades: "especialidad",
+  tarifas: "tarifa",
+  aseguradoras: "aseguradora",
+  sociedades: "sociedad"
+};
+titulo.innerText = `${modoEdicion ? "Modificar" : "Crear"} ${nombresSingulares[tipoActivo]}`;
+
+  // Calcular el próximo ID disponible si es un nuevo registro
+  let nextId = 1;
+  if (!modoEdicion && datosTabla.length > 0) {
+    const idField = Object.keys(estructura)[0]; // Asume que el primer campo es el ID
+    const maxId = Math.max(...datosTabla.map(item => parseInt(item[idField])));
+    nextId = maxId + 1;
+  }
+
+  Object.keys(estructura).forEach((campo, index) => {
+    const value = datos ? datos[campo] : (index === 0 && !modoEdicion ? nextId : "");
+    const readonly = index === 0 ? "readonly" : ""; // Bloquea solo el primer campo (ID)
+
+    let inputHTML = "";
+    if (campo.toLowerCase().includes("tipo_documento")) {
+      inputHTML = `
+        <label for="${campo}">Tipo de Documento</label>
+        <select name="${campo}" required>
+          <option value="">Seleccione...</option>
+          <option value="Cédula" ${value === "Cédula" ? "selected" : ""}>Cédula</option>
+          <option value="NIT" ${value === "NIT" ? "selected" : ""}>NIT</option>
+          <option value="Pasaporte" ${value === "Pasaporte" ? "selected" : ""}>Pasaporte</option>
+        </select>
+      `;
+    } else {
+      inputHTML = `
+        <label for="${campo}">${campo.replace(/_/g, " ")}</label>
+        <input type="text" name="${campo}" value="${value}" ${readonly} required />
+      `;
+    }
+
+    form.innerHTML += `<div class="form-group">${inputHTML}</div>`;
+  });
+
+  // --- BLOQUE PARA MÉDICOS ---
+  if (tipoActivo === "medicos") {
+    form.innerHTML += `
+      <div style="grid-column: span 2;">
+        <h4 style="margin-top:20px;">Información de Contacto</h4>
+        <div id="contactoContainer" style="display:none;"></div>
+        <a href="#" onclick="agregarContacto()" style="color:purple; font-weight:bold; display:inline-block; margin-top:8px;">+ Agregar contacto</a>
+      </div>
+    `;
+    // Eliminamos la llamada automática a agregarContacto()
+  }
+
+  // --- BLOQUE PARA SOCIEDADES ---
+  if (tipoActivo === "sociedades") {
+    form.innerHTML += `
+      <div style="grid-column: span 2;">
+        <h4 style="margin-top:20px;">Médicos Asociados</h4>
+        <div id="medicosContainer" style="display:none;"></div>
+        <a href="#" onclick="agregarMedicoAsociado()" style="color:purple; font-weight:bold; display:inline-block; margin-top:8px;">+ Agregar Profesional</a>
+      </div>
+    `;
+    // Eliminamos la llamada automática a agregarMedicoAsociado()
+  }
+  
+  // --- Botón Guardar ---
+  form.innerHTML += `
+    <div class="form-actions">
+      <button type="submit" class="btn">Guardar</button>
+    </div>
+  `;
+
+  modal.style.display = "block";
+}
+
+function agregarContacto() {
+  const container = document.getElementById("contactoContainer");
+  // Mostrar el contenedor si está oculto
+  if (container.style.display === "none") {
+    container.style.display = "block";
+  }
+  
+  const index = container.children.length;
+  const html = `
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>Teléfono</label>
+      <input type="text" name="telefono_${index}" required />
+      <label>Email</label>
+      <input type="email" name="email_${index}" required />
+      <label>Dirección</label>
+      <input type="text" name="direccion_${index}" required />
+      <hr style="margin: 10px 0;" />
+    </div>
+  `;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+
+function agregarMedicoAsociado() {
+  const container = document.getElementById("medicosContainer");
+  // Mostrar el contenedor si está oculto
+  if (container.style.display === "none") {
+    container.style.display = "block";
+  }
+  
+  const index = container.children.length;
+  const html = `
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>Nombre del Profesional</label>
+      <input type="text" name="medico_nombre_${index}" required />
+      <label>Documento</label>
+      <input type="text" name="medico_documento_${index}" required />
+      <hr style="margin: 10px 0;" />
+    </div>
+  `;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+
+function guardarEntidad(e) {
+  e.preventDefault();
+  
+  // Validar campos de contacto si es médico
+  if (tipoActivo === "medicos") {
+    const contactoContainer = document.getElementById("contactoContainer");
+    if (contactoContainer.style.display === "block") {
+      const inputs = contactoContainer.querySelectorAll("input");
+      let hasEmptyFields = false;
+      
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          hasEmptyFields = true;
+        }
+      });
+      
+      if (hasEmptyFields) {
+        alert("Por favor complete todos los campos de contacto o elimine los campos vacíos.");
+        return;
+      }
+    }
+  }
+  
+  // Validar campos de médicos asociados si es sociedad
+  if (tipoActivo === "sociedades") {
+    const medicosContainer = document.getElementById("medicosContainer");
+    if (medicosContainer.style.display === "block") {
+      const inputs = medicosContainer.querySelectorAll("input");
+      let hasEmptyFields = false;
+      
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          hasEmptyFields = true;
+        }
+      });
+      
+      if (hasEmptyFields) {
+        alert("Por favor complete todos los campos de médicos asociados o elimine los campos vacíos.");
+        return;
+      }
+    }
+  }
+
+  const formData = new FormData(e.target);
+  const nuevoRegistro = {};
+  formData.forEach((v, k) => {
+    // Solo guardamos campos principales, no los de contacto/médicos asociados
+    if (!k.includes("_") || k === "Tipo_documento") {
+      nuevoRegistro[k] = v;
+    }
+  });
+  
+  if (modoEdicion && indiceEditando !== null) {
+    datosTabla[indiceEditando] = nuevoRegistro;
+  } else {
+    datosTabla.unshift(nuevoRegistro);
+  }
+  datosSimulados[tipoActivo] = [...datosTabla];
+  cerrarModal();
+  renderizarTabla();
+}
+function cerrarModal() {
+  document.getElementById("modalEntidad").style.display = "none";
+}
+
+
+function inactivarSeleccionados() {
+  const seleccionados = document.querySelectorAll(".seleccionar:checked");
+
+  if (seleccionados.length === 0) {
+    alert("Por favor, selecciona al menos un registro para inactivar.");
+    return;
+  }
+
+  seleccionados.forEach(cb => {
+    const row = cb.closest("tr");
+    row.classList.toggle("inactivo"); // Alterna inactivo/activo
+    cb.checked = false; // Deselecciona el checkbox después
+  });
+}
+function agregarContacto() {
+  const container = document.getElementById("contactoContainer");
+  const index = container.children.length;
+  const html = `
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>Teléfono</label>
+      <input type="text" name="telefono_${index}" />
+      <label>Email</label>
+      <input type="email" name="email_${index}" />
+      <label>Dirección</label>
+      <input type="text" name="direccion_${index}" />
+      <hr style="margin: 10px 0;" />
+    </div>
+  `;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+function agregarMedicoAsociado() {
+  const container = document.getElementById("medicosContainer");
+  const index = container.children.length;
+  const html = `
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>Nombre del Profesional</label>
+      <input type="text" name="medico_nombre_${index}" />
+      <label>Documento</label>
+      <input type="text" name="medico_documento_${index}" />
+      <hr style="margin: 10px 0;" />
+    </div>
+  `;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+
+  // También puedes cerrar el modal haciendo clic fuera de él
+  window.addEventListener('click', function (e) {
+    document.querySelectorAll('.modal').forEach(modal => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  });
+
+</script>
+</body>
+</html>

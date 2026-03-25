@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cloud Medical Fees mySiss</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: white;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    .sidebar {
+      width: 180px;
+      background-color: #eee6f8;
+      padding: 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    .sidebar h1 {
+      color: purple;
+      font-weight: bold;
+      font-size: 50px;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      display: block;
+      margin: 20px 0;
+      color: purple;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      background-color: white;
+      padding: 20px 40px;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      min-width: 140px;
+    }
+
+    input, select {
+      padding: 6px;
+      width: 200px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      margin-top: 10px;
+      margin-right: 10px;
+      background-color: purple;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .table-section {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    .popup {
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      width: 400px;
+    }
+
+    .popup-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: black;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .popup-content {
+      margin-bottom: 15px;
+    }
+
+    .popup-content p {
+      margin: 8px 0;
+    }
+
+    .popup-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background-color: #f0f0f0;
+      color: #888;
+      border: 1px solid #ddd;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .popup-close:hover {
+      background-color: #ddd;
+    }
+
+    textarea {
+      width: 100%;
+      height: 60px;
+      resize: none;
+      margin-top: 10px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .email-icon {
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    tr {
+      cursor: pointer;
+      background-color: white;
+    }
+    
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 15px;
+    }
+
+    .popup-buttons .btn {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h1>mySiss</h1>
+      <a href="honorarios.html">Preliquidación / Liquidación</a>
+      <a href="validacion_liq.html" style="text-decoration: underline;">Validaciones</a>
+      <a href="reportes_liq.html">Reportes</a>
+      <a href="../login.html">Cerrar sesion</a>
+    </div>
+
+    <div class="main">
+      <div class="form-row">
+          <label>Fecha:</label>
+			<input type="date" id="fechaInicio" value="2025-04-01" />
+			<input type="date" id="fechaFin" value="2025-04-30" />
+			<input type="number" id="periodo" min="1" max="12" placeholder="Mes" value="4" />
+			</div>
+      <div class="form-row">
+        <button class="btn" onclick="mostrarTabla()">Buscar</button>
+      </div>
+
+      <div id="tablaPreliq" class="table-section hidden">
+        <h3 id="tituloPreliq">Detalle de preliquidación</h3>
+        <table>
+          <thead>
+            <tr>
+              <th class="col-status">Status</th>
+              <th class="col-motivo">Motivo</th>
+              <th>Orden</th>
+              <th>Caso</th>
+              <th>Profesional</th>
+              <th>CUPS</th>
+              <th>Descripción servicio</th>			  
+              <th>Fecha</th>
+              <th>Aseguradora</th>
+              <th>Especialidad</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <!-- Los datos se cargarán dinámicamente aquí -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="10"><strong>Totales</strong></td>
+              <td id="totalGeneral">$0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Cambio de Estado -->
+  <div id="popupEstado" class="popup hidden">
+    <span class="popup-close" onclick="cerrarFormularioEstado()">×</span>
+    <div class="popup-title">Objeción Médica</div>
+    <div class="popup-content">
+      <p><strong>Fecha:</strong> <span id="estadoFecha"></span></p>
+      <p><strong>Orden:</strong> <span id="estadoOrden"></span></p>
+      <p><strong>Caso:</strong> <span id="estadoCaso"></span></p>
+      <p><strong>Prestación:</strong> <span id="estadoPrestacion"></span></p>
+      <p><strong>Descripción:</strong> <span id="estadoDescripcion"></span></p>
+      <p><strong>Motivo Objecion:</strong> <span id="objecion"></span></p>  
+      <p><strong>Estado actual:</strong> <span id="estadoActual"></span></p>
+      <p><strong>Nuevo estado:</strong></p>
+      <select id="nuevoEstado" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+        <option value="">Seleccione un estado</option>
+        <option value="CONCILIADO">CONCILIADO</option>
+        <option value="ANULADO">ANULADO</option>
+      </select>
+      <p><strong>Detalle:</strong></p>
+      <textarea id="detalleEstado" placeholder="Escriba el detalle aquí..."></textarea>
+    </div>
+    <div class="popup-buttons">
+      <button class="btn" onclick="guardarEstado()">Guardar</button>
+    </div>
+  </div>
+
+<script>
+    let filaSeleccionada = null;
+    let datosTabla = [
+      {estado: "RECHAZADO", orden: "027", profesional: "Ramirez Julian", caso: "50045", CUPS: "870005", desc_servicio: "RADIOGRAFIA DE MASTOIDES COMPARATIVAS", fecha: "26/04/2025", aseguradora: "Nueva EPS", especialidad: "Radiología", total: "$ 270.000", },
+      {estado: "RECHAZADO", orden: "027", profesional: "Ramirez Julian", caso: "50029", CUPS: "870005", desc_servicio: "RADIOGRAFIA DE MASTOIDES COMPARATIVAS", fecha: "23/04/2025", aseguradora: "Coomeva EPS", especialidad: "Radiología", total: "$ 270.000" },
+      {estado: "RECHAZADO", orden: "027", profesional: "Ramirez Julian", caso: "50040", CUPS: "870005", desc_servicio: "RADIOGRAFIA DE MASTOIDES COMPARATIVAS", fecha: "23/04/2025", aseguradora: "Nueva EPS", especialidad: "Radiología", total: "$ 250.000" }
+    ];
+
+    function mostrarTabla() {
+      const fechaInicio = document.getElementById("fechaInicio").value;
+      const fechaFin = document.getElementById("fechaFin").value;
+
+      // Filtrar datos si es necesario
+      let datosFiltrados = datosTabla;
+      if (fechaInicio) {
+        datosFiltrados = datosFiltrados.filter(item => new Date(item.fecha.split('/').reverse().join('-')) >= new Date(fechaInicio));
+      }
+      if (fechaFin) {
+        datosFiltrados = datosFiltrados.filter(item => new Date(item.fecha.split('/').reverse().join('-')) <= new Date(fechaFin));
+      }
+
+      // Generar la tabla
+      const tbody = document.getElementById("tabla-body");
+      tbody.innerHTML = "";
+
+      let totalGeneral = 0;
+
+      datosFiltrados.forEach(item => {
+        const tr = document.createElement("tr");
+        
+        tr.onclick = function() {
+          mostrarFormularioEstado(this);
+        };
+
+        tr.innerHTML = `
+          <td class="col-status">${item.estado}</td>
+          <td class="col-motivo"><span class="email-icon" onclick="event.stopPropagation()">📩</span></td>
+          <td>${item.orden}</td>
+          <td>${item.caso}</td>
+          <td>${item.profesional}</td>
+          <td>${item.CUPS}</td>
+          <td>${item.desc_servicio}</td>
+          <td>${item.fecha}</td>
+          <td>${item.aseguradora}</td>
+          <td>${item.especialidad}</td>
+          <td>${item.total}</td>
+        `;
+
+        tbody.appendChild(tr);
+
+        // Calcular totales - CORRECCIÓN AQUÍ
+        const valorNumerico = parseFloat(item.total.replace(/[^\d.]/g, '').replace('.', '')) || 0;
+        totalGeneral += valorNumerico;
+      });
+
+      // Actualizar totales
+      document.getElementById("totalGeneral").textContent = `$${totalGeneral.toLocaleString()}`;
+
+      document.getElementById("tablaPreliq").classList.remove("hidden");
+    }
+
+    function mostrarFormularioEstado(fila) {
+      filaSeleccionada = fila;
+      const celdas = filaSeleccionada.querySelectorAll("td");
+
+      // Determinar el motivo de objeción según el caso
+      const caso = celdas[3].textContent;
+      const motivoObjecion = caso === "50040" ? "Diferencia en tarifas" : "Deducciones no justificadas";
+      
+      // Llenar los datos en el popup
+      document.getElementById("estadoFecha").textContent = celdas[7].textContent;
+      document.getElementById("estadoOrden").textContent = celdas[2].textContent;
+      document.getElementById("estadoCaso").textContent = caso;
+      document.getElementById("estadoPrestacion").textContent = celdas[5].textContent;
+      document.getElementById("estadoDescripcion").textContent = celdas[6].textContent;
+      document.getElementById("objecion").textContent = motivoObjecion;
+      document.getElementById("estadoActual").textContent = celdas[0].textContent;
+      
+      // Resetear el formulario
+      document.getElementById("nuevoEstado").value = "";
+      document.getElementById("detalleEstado").value = "";
+      
+      document.getElementById("popupEstado").classList.remove("hidden");
+    }
+
+    function guardarEstado() {
+      const nuevoEstado = document.getElementById("nuevoEstado").value;
+      const detalle = document.getElementById("detalleEstado").value;
+
+      if (!nuevoEstado) {
+        alert("Por favor seleccione un estado");
+        return;
+      }
+
+      if (filaSeleccionada) {
+        // Actualizar la fila en la tabla
+        filaSeleccionada.querySelector(".col-status").textContent = nuevoEstado;
+        
+        // Actualizar el estado en los datos originales
+        const orden = filaSeleccionada.querySelector("td:nth-child(3)").textContent;
+        const caso = filaSeleccionada.querySelector("td:nth-child(4)").textContent;
+        
+        const index = datosTabla.findIndex(item => item.orden === orden && item.caso === caso);
+        if (index !== -1) {
+          datosTabla[index].estado = nuevoEstado;
+        }
+
+        cerrarFormularioEstado();
+      }
+    }
+
+    function cerrarFormularioEstado() {
+      document.getElementById("popupEstado").classList.add("hidden");
+    }
+
+    // Cargar datos al iniciar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      // Delegación de eventos para el icono de email
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('email-icon')) {
+          e.stopPropagation();
+          const fila = e.target.closest('tr');
+          const celdas = fila.querySelectorAll('td');
+          const caso = celdas[3].textContent;
+          const motivo = caso === "50040" ? "Diferencia en tarifas" : "Deducciones no justificadas";
+          
+          alert(`Enviando email sobre caso ${caso}\nMotivo: ${motivo}`);
+          // Aquí podrías implementar el envío real del email
+        }
+      });
+      
+      mostrarTabla();
+    });
+</script>
+</body>
+</html>

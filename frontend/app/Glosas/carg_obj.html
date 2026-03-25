@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <title>Cargar archivo objeción - mySiss</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#fff}
+    .container{display:flex}
+    .sidebar{width:180px;background:#eee6f8;padding:20px;height:100vh;position:fixed;top:0;left:0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto}
+    .sidebar h1{color:purple;font-weight:bold;font-size:50px;margin-bottom:30px}
+    .sidebar a{display:block;margin:10px 0;color:purple;text-decoration:none;font-weight:bold}
+    .logout{color:purple;text-decoration:none;font-weight:bold}
+    .main{margin-left:240px;flex:1;background:#fff;padding:20px 40px}
+    [hidden]{display:none !important}
+    .submenu-radicacion,.submenu-devolucion,.submenu-objecion,.submenu-gestion,.submenu-conciliacion{display:flex;flex-direction:column;gap:4px;margin:4px 0 8px 12px}
+    .submenu-radicacion a,.submenu-devolucion a,.submenu-objecion a,.submenu-gestion a,.submenu-conciliacion a{margin:0;font-weight:normal;font-size:14px}
+
+    /* ====== Estilos internos del contenido ====== */
+    .main .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+    .main .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px 18px 12px;margin-bottom:22px}
+    .main .row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+    .main .row label{min-width:180px;font-weight:400}
+    .main input[type="date"], .main select, .main input[type="text"]{border:1px solid #8b3b98;border-radius:10px;padding:10px 12px;min-width:200px;outline:none}
+    .main .btn{background:purple;color:#fff;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6;transition:.15s transform ease;font-weight:400}
+    .main .btn--outline{background:#f3e9f8;color:#3d0a46}
+    .main .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .main .title-row h3{font-size:22px;margin:0;font-weight:400}
+    .main .pill{background:#f6f2fa;padding:6px 10px;border-radius:999px;font-weight:400;color:#3d0a46}
+    .main table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+    .main th, .main td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400}
+    .main th{background:#f5f1f9;font-size:13px;text-align:center}
+    .main .cell-money{text-align:right}
+    .main .col-ico{width:44px;text-align:center}
+    .main .input-icon{position:relative;display:inline-block}
+    .main .input-icon input{padding-right:34px;min-width:240px}
+    .main .input-icon button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;cursor:pointer}
+    .main .input-icon i{color:#7b1e85}
+
+    /* Toast (modo Test) */
+    .main .toast{display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 16px;background:#eaf7ec;border:1px solid #7ad186;color:#165c1b;border-radius:10px;font-weight:400;z-index:9999}
+
+    /* Modales */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:10000;align-items:center;justify-content:center}
+    .modal{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:520px;width:92%;padding:20px}
+    .modal h4{margin:0 0 8px;font-weight:600;color:#2d0b33}
+    .modal p{margin:0 0 16px;color:#333}
+    .modal .actions{display:flex;justify-content:flex-end;gap:10px}
+    .modal .btn-ok{background:purple;color:#fff;border:none;border-radius:10px;padding:8px 14px;cursor:pointer}
+    .modal .btn-cancel{background:#ccc;color:#000;border:none;border-radius:10px;padding:8px 14px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <h1>mySiss</h1>
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div class="submenu-radicacion" id="submenu-radicacion" hidden>
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html" id="devolucion-link">Devolución facturas</a>
+        <div class="submenu-devolucion" id="submenu-devolucion" hidden>
+          <a href="reg_dev.html">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+        <a href="cargue.html" id="objecion-link">Cargue objeciones</a>
+        <div class="submenu-objecion" id="submenu-objecion" hidden>
+          <a href="carg_obj.html">Cargar archivo objeción</a>
+          <a href="conr_obj.html">Consultar/Cambiar responsable objeción</a>
+        </div>
+
+        <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+        <div class="submenu-gestion" id="submenu-gestion" hidden>
+          <a href="cont_obj.html">Contestar objeción</a>
+          <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+          <a href="resp_asig.html">Responder objeción aseguradora</a>
+          <a href="cons_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="conciliacion.html" id="conciliacion-link">Conciliación objeciones</a>
+        <div class="submenu-conciliacion" id="submenu-conciliacion" hidden>
+          <a href="con_glo.html">Conciliación glosa a conciliar</a>
+          <a href="con_glo.html">Conciliación glosa</a>
+          <a href="cons_glo.html">Consultar glosas conciliadas</a>
+        </div>
+      </div>
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <div class="main">
+      <h2>Cargue objeciones</h2>
+      <style>
+        /* Internos de main (respetando tu CSS global) */
+        .main .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+        .main .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px 18px 12px;margin-bottom:22px}
+        .main .row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+        .main .row label{min-width:180px;font-weight:400}
+        .main input[type="date"], .main select, .main input[type="text"]{border:1px solid #8b3b98;border-radius:10px;padding:10px 12px;min-width:200px;outline:none}
+        .main .btn{background:purple;color:#fff;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6;transition:.15s transform ease;font-weight:400}
+        .main .btn--outline{background:#f3e9f8;color:#3d0a46}
+        .main .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+        .main table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+        .main th, .main td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400}
+        .main th{background:#f5f1f9;font-size:13px;text-align:center}
+        .main .input-icon{position:relative;display:inline-block}
+        .main .input-icon input{padding-right:34px;min-width:240px}
+        .main .input-icon button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;cursor:pointer}
+        .main .input-icon i{color:#7b1e85}
+        .main .toast{display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 16px;background:#eaf7ec;border:1px solid #7ad186;color:#165c1b;border-radius:10px;font-weight:400;z-index:9999}
+        .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:10000;align-items:center;justify-content:center}
+        .modal{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:520px;width:92%;padding:20px}
+        .modal h4{margin:0 0 8px;font-weight:600;color:#2d0b33}
+        .modal p{margin:0 0 16px;color:#333}
+        .modal .actions{display:flex;justify-content:flex-end;gap:10px}
+        .modal .btn-ok{background:purple;color:#fff;border:none;border-radius:10px;padding:8px 14px;cursor:pointer}
+      </style>
+
+      <div class="title-row"><h3 class="h2">Cargar archivo objeción</h3></div>
+
+      <div class="section" id="cfg">
+        <div class="row">
+          <label>Modo</label>
+          <div style="display:flex;gap:12px;align-items:center">
+            <label><input type="radio" name="modo" value="Test" checked> Test</label>
+            <label><input type="radio" name="modo" value="Real"> Real</label>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Origen del archivo</label>
+          <div>Archivo desde PC</div>
+        </div>
+
+        <div class="row">
+          <label>Ubicación del Archivo</label>
+          <div class="input-icon">
+            <input type="text" id="filePath" readonly placeholder="C:\Usuarios\...\Carga.xlsx">
+            <button type="button" title="Examinar" id="btnExam"><i class="fas fa-folder-open"></i></button>
+            <input type="file" id="fileXLSX" accept=".xlsx,.xls" style="display:none">
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="btn" id="btnRun">Ejecutar</button>
+        </div>
+      </div>
+
+      <div class="title-row">
+        <h3 class="h2" id="resumenTitle">Resumen modo Test</h3>
+      </div>
+
+      <div class="section">
+        <table id="tblPrev">
+          <thead>
+            <tr>
+              <th>Aseguradora</th>
+              <th>No. Factura</th>
+              <th>No. Radicado Externo</th>
+              <th>Estado</th>
+              <th>Fecha Objeción</th>
+              <th>Responsable</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align:center;color:#777">Sin datos</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Toast para modo Test -->
+      <div id="toast" class="toast">Proceso de carga exitoso en modo test.</div>
+
+      <!-- Modal de confirmación previa -->
+      <div id="modalConfirm" class="modal-backdrop" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalConfirmTitle">
+          <h4 id="modalConfirmTitle">Confirmar carga</h4>
+          <p id="modalConfirmMsg">Se encontraron 0 registros para cargar. ¿Deseas continuar?</p>
+          <div class="actions">
+            <button type="button" class="btn-ok" id="btnOkConfirm">Confirmar</button>
+            <button type="button" class="btn--outline" id="btnCancelConfirm">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal para modo Real -->
+      <div id="modalReal" class="modal-backdrop" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalRealTitle">
+          <h4 id="modalRealTitle">Resumen cargue</h4>
+          <p id="modalRealMsg">Carga completada con éxito Información actualizada correctamente.</p>
+          <div class="actions">
+            <button type="button" class="btn-ok" id="btnOkReal">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SheetJS para leer Excel en el navegador -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<<script>
+        (function(){
+          // ===== Claves localStorage =====
+          const OBJ_KEY = 'objeciones_data';
+          const RESP_KEY = 'objeciones_responsables';
+
+          // ===== Helpers de estado =====
+          function loadData(){
+            try{
+              const raw = localStorage.getItem(OBJ_KEY);
+              return Array.isArray(JSON.parse(raw)) ? JSON.parse(raw) : [];
+            }catch(e){ return []; }
+          }
+          function saveData(arr){ localStorage.setItem(OBJ_KEY, JSON.stringify(arr||[])); }
+          function saveResp(arr){ localStorage.setItem(RESP_KEY, JSON.stringify(arr||[])); }
+
+          // ===== DOM =====
+          const file   = document.getElementById('fileXLSX');
+          const filePath = document.getElementById('filePath');
+          const btnExam = document.getElementById('btnExam');
+          const btnRun  = document.getElementById('btnRun');
+          const tbody   = document.querySelector('#tblPrev tbody');
+          const toast   = document.getElementById('toast');
+          const resumenTitle = document.getElementById('resumenTitle');
+
+          // Modales
+          const modalConfirm = document.getElementById('modalConfirm');
+          const modalConfirmMsg = document.getElementById('modalConfirmMsg');
+          const btnOkConfirm = document.getElementById('btnOkConfirm');
+          const btnCancelConfirm = document.getElementById('btnCancelConfirm');
+
+          const modalReal = document.getElementById('modalReal');
+          const btnOkReal = document.getElementById('btnOkReal');
+
+          // ===== Modo =====
+          function getModo(){
+            return (document.querySelector('input[name="modo"]:checked')?.value || 'Test');
+          }
+          function setResumenTitle(){
+            resumenTitle.textContent = (getModo()==='Real') ? 'Resumen cargue' : 'Resumen modo Test';
+          }
+          setResumenTitle();
+          document.querySelectorAll('input[name="modo"]').forEach(r=> r.addEventListener('change', setResumenTitle));
+
+          // ===== UI helpers =====
+          btnExam.addEventListener('click', ()=> file.click());
+          file.addEventListener('change', ()=>{ filePath.value = file.files[0]?.name || ''; });
+
+          function showToastTest(){
+            toast.textContent = 'Proceso de carga exitoso en modo test.';
+            toast.style.display='block';
+            setTimeout(()=> toast.style.display='none', 1800);
+          }
+          function showConfirm(count){
+            modalConfirmMsg.textContent = `Se encontraron ${count} registro${count!==1?'s':''} para cargar. ¿Deseas continuar?`;
+            modalConfirm.style.display='flex';
+            modalConfirm.setAttribute('aria-hidden','false');
+          }
+          function hideConfirm(){
+            modalConfirm.style.display='none';
+            modalConfirm.setAttribute('aria-hidden','true');
+          }
+          function showModalReal(){
+            modalReal.style.display='flex';
+            modalReal.setAttribute('aria-hidden','false');
+          }
+          function hideModalReal(){
+            modalReal.style.display='none';
+            modalReal.setAttribute('aria-hidden','true');
+          }
+
+          function renderPreview(rows){
+            tbody.innerHTML='';
+            if(!rows.length){
+              tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#777">Sin datos</td></tr>';
+              return;
+            }
+            rows.forEach(r=>{
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>${r.pagador||''}</td>
+                <td>${r.numero_factura||''}</td>
+                <td>${r.radicado_externo||''}</td>
+                <td>${r.estado||''}</td>
+                <td>${(r.fecha_objecion||'').replaceAll('.', '/')}</td>
+                <td>${r.responsable||''}</td>`;
+              tbody.appendChild(tr);
+            });
+          }
+
+          // ======== PARSEADORES ========
+
+          // --- Utilidades comunes ---
+          function norm(s){
+            return String(s||'').trim().toLowerCase()
+              .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin tildes
+              .replace(/\s+/g,' ');
+          }
+          function toDDMMYYYY(v){
+            if(!v) return '';
+            const s = String(v).trim();
+            if(/^\d{2}\.\d{2}\.\d{4}$/.test(s)) return s;
+            if(/^\d{2}[\/-]\d{2}[\/-]\d{4}$/.test(s)){ const [d,m,y]=s.replace(/-/g,'/').split('/'); return `${d.padStart(2,'0')}.${m.padStart(2,'0')}.${y}`; }
+            if(/^\d{4}-\d{2}-\d{2}$/.test(s)){ const [y,m,d]=s.split('-'); return `${d}.${m}.${y}`; }
+            return s;
+          }
+          function toHHMM(v){
+            if(!v) return '';
+            const s = String(v).trim();
+            const m = s.match(/^(\d{1,2}):(\d{1,2})/);
+            if(m) return `${m[1].padStart(2,'0')}:${m[2].padStart(2,'0')}`;
+            return s;
+          }
+
+          // --- Formato BLOQUES (existente) ---
+          function parseSheetBlocks(ws){
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            let hdr = -1;
+            for(let R = range.s.r; R <= range.e.r; R++){
+              const cell = ws[XLSX.utils.encode_cell({c:1,r:R})];
+              if(cell && /Nombre pagador/i.test(String(cell.v))) { hdr = R; break; }
+            }
+            if(hdr<0) return [];
+
+            let R = hdr+1;
+            function V(r,c){ const cell = ws[XLSX.utils.encode_cell({c:c,r:r})]; return cell? String(cell.v).trim():''; }
+
+            const rec = {
+              pagador: V(R,1),
+              numero_factura: V(R,2),
+              estado: V(R,6),
+              radicado_externo: V(R,7),
+              fecha_objecion: V(R,8),
+              hora_objecion: V(R,9)
+            };
+            rec.fecha_objecion_iso = (function(d){
+              if(!d) return '';
+              const parts = String(d).split('.');
+              if(parts.length===3) return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+              return d;
+            })();
+
+            let detHdr = -1;
+            for(let r=R+1; r<=range.e.r; r++){
+              const cell = ws[XLSX.utils.encode_cell({c:1,r:r})];
+              if(cell && /Detalle/i.test(String(cell.v))) { detHdr = r+1; break; }
+            }
+
+            rec.detalle = [];
+            const responsables = new Set();
+
+            if(detHdr>0){
+              for(let r=detHdr+1; r<=range.e.r; r++){
+                const c1 = ws[XLSX.utils.encode_cell({c:1,r:r})];
+                if(!c1 || String(c1.v).toString().trim()==='') break;
+
+                const row = {
+                  consecutivo: V(r,1),
+                  codigo_servicio: V(r,2),
+                  descripcion_servicio: V(r,3),
+                  valor_servicio: V(r,4),
+                  cantidad: V(r,5),
+                  valor_total: V(r,6),
+                  id_estado_servicio: V(r,7),
+                  estado_posicion: V(r,8),
+                  id_motivo: V(r,9),
+                  motivo: V(r,10),
+                  id_motivo_especifico: V(r,11),
+                  motivo_especifico: V(r,12),
+                  responsable: V(r,13),
+                  valor_objetado: V(r,14),
+                  valor_no_objetado: V(r,15),
+                  nota_pagador: V(r,16)
+                };
+                if(row.responsable) responsables.add(row.responsable);
+                rec.detalle.push(row);
+              }
+            }
+            rec.responsable = rec.detalle.length ? (rec.detalle[0].responsable || '') : '';
+            return [{rec, responsables:[...responsables]}];
+          }
+
+          // --- Formato PLANO (una fila por detalle con encabezados) ---
+          function parseSheetFlat(ws){
+            // AJUSTE: conservar vacíos y aceptar sinónimos en cabecera
+            const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, defval:""});
+            if(!rows || !rows.length) return [];
+            let hIdx = -1;
+            for(let i=0;i<rows.length;i++){
+              const r = rows[i].map(x=>norm(x));
+              if(
+                r.includes('aseguradora') &&
+                (
+                  r.includes('numero de factura') || r.includes('número de factura') ||
+                  r.includes('no. factura') || r.includes('n° factura') || r.includes('numero factura') || r.includes('num. factura') || r.includes('num factura')
+                )
+              ){
+                hIdx = i; break;
+              }
+            }
+            if(hIdx<0) return [];
+
+            const header = rows[hIdx].map(x=>norm(x));
+            const idx = (label)=> header.findIndex(h=>h===label);
+
+            const iAseg=idx('aseguradora');
+            const iFact=header.findIndex(h=> h==='numero de factura' || h==='número de factura' || h==='no. factura' || h==='n° factura' || h==='numero factura' || h==='num. factura' || h==='num factura');
+            let iCaso=header.findIndex(h=> h==='numero caso' || h==='número caso');
+            if(iCaso===-1){ iCaso = header.findIndex(h=> h==='radicado externo' || h==='no. radicado externo' || h==='número radicado externo' || h==='numero radicado externo'); }
+            const iEstado=idx('estado');
+            const iFecha=header.findIndex(h=> h==='fecha objecion (dd.mm.aaaa)' || h==='fecha objeción (dd.mm.aaaa)' || h==='fecha objecion' || h==='fecha objeción' || h==='fecha' || h==='fecha factura');
+            const iHora=header.findIndex(h=> h==='hora' || h==='hora prestacion servicio' || h==='hora prestación servicio' || h==='hora objecion' || h==='hora objeción');
+            const iPos=header.findIndex(h=> h==='pos' || h==='consecutivo' || h==='item' || h==='ítem');
+            const iServ=header.findIndex(h=> h==='servicio' || h==='codigo servicio' || h==='código servicio');
+            const iDesc=header.findIndex(h=> h==='descripcion servicio' || h==='descripción servicio' || h==='descripcion' || h==='descripción');
+            const iPrecio=header.findIndex(h=> h==='precio' || h==='valor unitario' || h==='valor unitario (und)');
+            const iCant=header.findIndex(h=> h==='cant' || h==='cantidad');
+            const iValSer=header.findIndex(h=> h==='valor servicio' || h==='subtotal' || h==='valor total servicio');
+            const iIdEst=header.findIndex(h=> h==='id estado serv' || h==='id estado serv.' || h==='id estado servicio');
+            const iEstPos=header.findIndex(h=> h==='estado posicion' || h==='estado posición');
+            const iIdMot=header.findIndex(h=> h==='id mot obj' || h==='id motivo obj');
+            const iMot=header.findIndex(h=> h==='motivo obj' || h==='motivo objecion' || h==='motivo objeción' || h==='motivo');
+            const iIdMotEsp=header.findIndex(h=> h==='id mot esp' || h==='id motivo especifico' || h==='id motivo específico');
+            const iMotEsp=header.findIndex(h=> h==='motivo especifico' || h==='motivo específico');
+            const iResp=header.findIndex(h=> h==='responsable' || h==='gestor' || h==='analista');
+            const iValObj=header.findIndex(h=> h==='valor objetado' || h==='valor glosa');
+            const iValNo=header.findIndex(h=> h==='valor no objetado' || h==='valor no-objetado' || h==='valor aceptado' || h==='valor conciliado');
+            const iNota=header.findIndex(h=> h==='nota aseguradora' || h==='nota pagador' || h==='observacion' || h==='observación');
+
+            const map = new Map(); // key -> rec
+            const respSet = new Set();
+
+            for(let r=hIdx+1; r<rows.length; r++){
+              const row = rows[r] || [];
+              // si no hay factura o caso, saltar
+              const aseg = row[iAseg] ?? '';
+              const fact = row[iFact] ?? '';
+              const caso = row[iCaso] ?? '';
+              if(String(fact).trim()==='' && String(caso).trim()==='') continue;
+
+              const estado = (row[iEstado] ?? 'objetada') + '';
+              const fecha = toDDMMYYYY(row[iFecha] ?? '');
+              const hora  = toHHMM(row[iHora] ?? '');
+
+              const key = [fact, caso, aseg, estado, fecha, hora].join('||');
+
+              if(!map.has(key)){
+                const rec = {
+                  pagador: aseg || '',
+                  numero_factura: String(fact||''),
+                  estado: estado || '',
+                  radicado_externo: String(caso||''),
+                  fecha_objecion: fecha || '',
+                  hora_objecion: hora || '',
+                  fecha_objecion_iso: (function(d){
+                    if(!d) return '';
+                    const [dd,mm,yy]=d.split('.');
+                    if(mm && yy) return `${yy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+                    return d;
+                  })(),
+                  detalle: []
+                };
+                map.set(key, rec);
+              }
+
+              // calcular valor servicio si viene vacío
+              let vServ = row[iValSer];
+              if((vServ==null || vServ==='') && (iPrecio>-1 && iCant>-1)){
+                const precio = parseFloat(String(row[iPrecio]||'').toString().replace(/[^0-9.\-]/g,''))||0;
+                const cant   = parseFloat(String(row[iCant]||'').toString().replace(/[^0-9.\-]/g,''))||0;
+                vServ = (precio*cant) || '';
+              }
+
+              const det = {
+                consecutivo: row[iPos] ?? '',
+                codigo_servicio: row[iServ] ?? '',
+                descripcion_servicio: row[iDesc] ?? '',
+                valor_servicio: vServ ?? '',
+                cantidad: row[iCant] ?? '',
+                valor_total: vServ ?? '',
+                id_estado_servicio: row[iIdEst] ?? '',
+                estado_posicion: row[iEstPos] ?? '',
+                id_motivo: row[iIdMot] ?? '',
+                motivo: row[iMot] ?? '',
+                id_motivo_especifico: row[iIdMotEsp] ?? '',
+                motivo_especifico: row[iMotEsp] ?? '',
+                responsable: row[iResp] ?? '',
+                valor_objetado: row[iValObj] ?? '',
+                valor_no_objetado: row[iValNo] ?? '',
+                nota_pagador: row[iNota] ?? ''
+              };
+              if(det.responsable) respSet.add(String(det.responsable));
+              map.get(key).detalle.push(det);
+            }
+
+            // responsable de cabecera = primero del detalle (si existe)
+            const out = [];
+            map.forEach(rec=>{
+              rec.responsable = rec.detalle.length ? (rec.detalle[0].responsable || '') : '';
+              out.push({rec, responsables: Array.from(new Set(rec.detalle.map(d=>d.responsable).filter(Boolean)))});
+            });
+            return out;
+          }
+
+          async function parseWorkbook(ab){
+            const wb = XLSX.read(ab, {type:'array'});
+            const keep = [];
+            const respSet = new Set();
+            const seen = new Set(); // evitar duplicados (fact||rad||pagador)
+
+            wb.SheetNames.forEach(name=>{
+              const ws = wb.Sheets[name];
+
+              // 1) Intentar plano
+              const flatRes = parseSheetFlat(ws);
+              if(flatRes.length){
+                flatRes.forEach(p=>{
+                  const key = `${p.rec.numero_factura}||${p.rec.radicado_externo}||${p.rec.pagador}`;
+                  if(!seen.has(key)){
+                    keep.push(p.rec);
+                    p.responsables.forEach(r=>respSet.add(r));
+                    seen.add(key);
+                  }
+                });
+              }
+
+              // 2) Intentar bloques (manteniendo compatibilidad)
+              const blockRes = parseSheetBlocks(ws);
+              if(blockRes.length){
+                blockRes.forEach(p=>{
+                  const key = `${p.rec.numero_factura}||${p.rec.radicado_externo}||${p.rec.pagador}`;
+                  if(!seen.has(key)){
+                    keep.push(p.rec);
+                    p.responsables.forEach(r=>respSet.add(r));
+                    seen.add(key);
+                  }
+                });
+              }
+            });
+
+            return {rows: keep, responsables: [...respSet]}
+          }
+
+          // ===== Flujo principal =====
+          let lastParsedRows = [];
+          let lastParsedResps = [];
+
+          function afterConfirm(){
+            const modo = getModo();
+            if(modo === 'Real'){
+              // Guardar SOLO en modo real (respetando tu lógica existente)
+              const current = loadData();
+              const map = new Map(current.map(x=> [x.numero_factura, x])); // (se mantiene tu clave por factura)
+              lastParsedRows.forEach(r=> map.set(r.numero_factura, r));
+              const final = Array.from(map.values());
+              saveData(final);
+              if(lastParsedResps.length){ saveResp(lastParsedResps); }
+              showModalReal();
+            }else{
+              showToastTest(); // no guarda en test
+            }
+            resumenTitle.textContent = (modo==='Real') ? 'Resumen cargue' : 'Resumen modo Test';
+          }
+
+          document.getElementById('btnOkConfirm').addEventListener('click', ()=>{
+            hideConfirm();
+            afterConfirm();
+          });
+          document.getElementById('btnCancelConfirm').addEventListener('click', hideConfirm);
+          document.getElementById('btnOkReal').addEventListener('click', hideModalReal);
+
+          btnRun.addEventListener('click', async()=>{
+            const fileObj = file.files[0];
+            if(!fileObj){ alert('Selecciona un archivo Excel (.xlsx)'); return; }
+
+            const ab = await fileObj.arrayBuffer();
+            const {rows, responsables} = await parseWorkbook(ab);
+            if(!rows.length){ alert('No se encontraron registros válidos en el archivo.'); return; }
+
+            // Render previo (preview) sin guardar
+            lastParsedRows = rows;
+            lastParsedResps = responsables;
+            renderPreview(rows);
+
+            // Confirmación con cantidad a cargar
+            showConfirm(rows.length);
+          });
+
+        })();
+      </script>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const page = location.pathname.split('/').pop();
+
+      const groups = {
+        devolucion: ["devolucion.html","reg_dev.html","con_dev.html"],
+        objecion:   ["cargue.html","carg_obj.html","conr_obj.html","cam_obj.html","conc_obj.html"],
+        gestion:    ["gestion.html","cont_obj.html","regr_asig.html","resp_asig.html","cons_obj.html"],
+        conciliacion: ["conciliacion.html","con_glo.html","cons_glo.html"]
+      };
+
+      const submenuEls = {
+        devolucion: document.getElementById('submenu-devolucion'),
+        objecion: document.getElementById('submenu-objecion'),
+        gestion: document.getElementById('submenu-gestion'),
+        conciliacion: document.getElementById('submenu-conciliacion')
+      };
+
+      const parentLinks = {
+        devolucion: document.getElementById('devolucion-link'),
+        objecion: document.getElementById('objecion-link'),
+        gestion: document.getElementById('gestion-link'),
+        conciliacion: document.getElementById('conciliacion-link')
+      };
+
+      let activeGroup = null;
+      for (const [group, files] of Object.entries(groups)) {
+        if (files.includes(page)) { activeGroup = group; break; }
+      }
+
+      for (const [group, el] of Object.entries(submenuEls)) {
+        if (!el) continue;
+        if (group === activeGroup) {
+          el.removeAttribute('hidden');
+          if (parentLinks[group]) parentLinks[group].style.textDecoration = 'underline';
+        } else {
+          el.setAttribute('hidden','');
+          if (parentLinks[group]) parentLinks[group].style.textDecoration = 'none';
+        }
+      }
+
+      document
+        .querySelectorAll('.submenu-devolucion a, .submenu-objecion a, .submenu-gestion a, .submenu-conciliacion a')
+        .forEach(a => {
+          const isCurrent = a.getAttribute('href') === page;
+          a.style.textDecoration = isCurrent ? 'underline' : 'none';
+          a.style.fontWeight = isCurrent ? 'bold' : 'normal';
+        });
+    })();
+  </script>
+</body>
+</html>

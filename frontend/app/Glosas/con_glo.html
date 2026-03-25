@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<title>Conciliación objeciones — mySiss</title>
+<style>
+  :root{
+    --morado:#800080; --morado-osc:#3d0a46;
+    --lila:#eee6f8; --lila-suave:#f5f1f9; --borde:#e0d7ea;
+  }
+  /* ===== BASE / SIDEBAR (corregido) ===== */
+  body{margin:0;font-family:Arial,sans-serif;background:#fff;color:#222}
+  .container{display:flex}
+  .sidebar{
+    width:180px;background:var(--lila);padding:20px;height:100vh;
+    position:fixed;top:0;left:0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto;
+  }
+  .sidebar h1{color:var(--morado);font-weight:bold;font-size:50px;margin-bottom:20px}
+  .sidebar a{display:block;margin:15px 0;color:var(--morado);text-decoration:none;font-weight:bold}
+  .submenu-radicacion{margin:4px 0 8px 12px;display:flex;flex-direction:column;gap:4px}
+  .submenu-radicacion a{margin:0;font-weight:normal;font-size:14px;color:var(--morado);text-decoration:none}
+  .submenu-radicacion a:hover{text-decoration:underline}
+  .submenu-conciliacion a{margin:0;font-weight:normal;font-size:14px;color:var(--morado);text-decoration:none}
+  .logout{color:var(--morado);text-decoration:none;font-weight:bold}
+  .main{margin-left:240px;flex:1;padding:20px 40px;background:#fff}
+  [hidden]{display:none !important}
+
+  /* ===== CARDS / BOTONES ===== */
+  .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+  .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px 18px 12px;margin-bottom:22px}
+  .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .btn{background:var(--morado);color:#fff;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6;font-weight:600}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn--soft{background:#f3e9f8;color:var(--morado-osc)}
+
+  /* ===== FILTROS (dos columnas + lupas integradas) ===== */
+  .filters-grid{display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:20px 36px}
+  .field{display:grid;gap:8px;min-width:0}
+  .field label{font-weight:normal;font-size:15px}
+  .input-icon{position:relative;width:100%}
+  .input-icon input{
+    width:100%;padding:10px 36px 10px 12px;border:1px solid var(--morado);
+    border-radius:10px;outline:none;background:#fff;font-size:14px;box-sizing:border-box;
+  }
+  .input-icon .btn-ico{
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    width:26px;height:26px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--morado);cursor:pointer;font-size:14px;
+    background:none;border:none;
+  }
+  .picker{
+    position:absolute;top:calc(100% + 4px);left:0;z-index:1000;
+    background:#fff;border:1px solid #e8dff1;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);
+    min-width:240px;max-height:260px;overflow:auto;
+  }
+  .picker a{display:block;padding:8px 10px;color:#333;text-decoration:none;border-bottom:1px solid #f4ecf9;font-size:14px}
+  .picker a:hover{background:#f7effd}
+
+  .range{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .range input[type="date"]{width:170px;padding:8px 10px;border:1px solid var(--morado);border-radius:10px}
+  .btn-buscar{background:var(--lila-suave);color:var(--morado-osc);border:none;border-radius:10px;padding:10px 16px;font-weight:bold;cursor:pointer;box-shadow:0 3px 0 #b9a8c6}
+
+  @media (max-width:900px){ .filters-grid{grid-template-columns:1fr} .btn-buscar{width:100%} }
+
+  /* ===== TABLAS ===== */
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+  th,td{border:1px solid var(--borde);padding:10px;text-align:left;background:#fff;font-weight:400}
+  th{background:var(--lila-suave);font-size:13px;text-align:center}
+  tr:hover{background:#faf7fd}
+  .col-ico{width:44px;text-align:center}
+  .cell-money{text-align:right}
+  .ico-btn{border:1px solid var(--borde);border-radius:10px;padding:6px 10px;background:#fff;cursor:pointer}
+  .ico-btn:disabled{opacity:.6;cursor:not-allowed}
+  .sem{display:inline-block;width:12px;height:12px;border-radius:50%}
+  .sem.green{background:#23a55a}.sem.yellow{background:#e6b800}.sem.red{background:#d9534f}
+  .pill{display:inline-block;border:1px solid var(--borde);border-radius:999px;padding:4px 8px;font-size:12px}
+
+  /* ===== Encabezado de Detalle / % ===== */
+  .conc-head{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .pct-box{display:flex;align-items:center;gap:10px}
+  .pct-input{width:110px;padding:8px 12px;border:1px solid var(--morado);border-radius:10px;font-weight:600;text-align:right}
+
+  .val-box{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+  .val-num{width:120px;padding:8px 10px;border:1px solid #8b3b98;border-radius:10px;text-align:right}
+  .locked{background:#f6f2fb;color:#444}
+  	  .h2 {
+		  font-weight: bold;
+		}
+		
+		
+</style>
+</head>
+
+<body>
+<div class="container">
+  <aside class="sidebar">
+    <div>
+      <h1>mySiss</h1>
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div id="submenu-radicacion" class="submenu" hidden>
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html" id="devolucion-link">Devolución facturas</a>
+        <div id="submenu-devolucion" class="submenu" hidden>
+          <a href="reg_dev.html">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+        <a href="cargue_objec.html" id="objecion-link">Cargue objeciones</a>
+        <div id="submenu-objecion" class="submenu" hidden>
+          <a href="carg_obj.html">Cargar archivo objeción</a>
+          <a href="conr_obj.html">Consultar responsable objeción</a>
+          <a href="cam_obj.html">Cambiar responsable objeción</a>
+          <a href="conc_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+        <div id="submenu-gestion" class="submenu" hidden>
+          <a href="cont_obj.html">Contestar objeción</a>
+          <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+          <a href="resp_asig.html">Responder objeción aseguradora</a>
+          <a href="cons_obj.html">Consultar objeción</a>
+        </div>
+
+      <a href="conciliacion.html" id="conciliacion-link" style="text-decoration: underline;">Conciliación objeciones</a>
+      <div id="submenu-conciliacion" class="submenu-conciliacion">
+        <a href="con_glo.html" style="text-decoration: underline;">Gestionar conciliaciones</a>
+      </div>
+	          <!-- Submenú Reportes -->
+        <a href="reportes.html">Reportes e Informes</a>
+        <div class="submenu-reportes" id="submenu-reportes">
+        </div>
+    </div>
+    <a href="#" class="logout">Cerrar sesión</a>
+  </aside>
+
+  <main class="main">
+    <h2 class="h2">Gestionar conciliación</h2>
+
+    <!-- ===== FILTROS ===== -->
+    <section class="section" id="secFiltros">
+      <div class="title-row"><div style="font-weight:bold">Filtros</div></div>
+
+      <div class="filters-grid">
+        <div class="field">
+          <label for="fRadExt">No. Radicado Externo</label>
+          <div class="input-icon">
+            <input id="fRadExt" placeholder="F: 00000">
+            <button id="btnLupaRadExt" class="btn-ico" title="Listar radicados"><i class="fas fa-search"></i></button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="fFactura">No. Factura</label>
+          <div class="input-icon">
+            <input id="fFactura" placeholder="Ej: 000000000">
+            <button id="btnLupaFactura" class="btn-ico" title="Listar facturas"><i class="fas fa-search"></i></button>
+          </div>
+        </div>
+
+        <!-- Campo con rótulo explícito -->
+        <div class="field" style="grid-column:1/-1">
+          <label for="fIni">Fecha Objeción</label>
+          <div class="range">
+            <input type="date" id="fIni">
+            <span style="font-weight:bold">a</span>
+            <input type="date" id="fFin">
+            <button id="btnBuscar" class="btn-buscar">Buscar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FACTURAS ===== -->
+    <section id="secFacturas" class="section" hidden>
+      <div class="title-row"><div style="font-weight:bold">Facturas</div></div>
+      <div style="overflow:auto">
+        <table id="tblFacturas">
+          <thead>
+            <tr>
+              <th style="width:40px;text-align:center">Sel</th>
+              <th style="width:60px;text-align:center">Det</th>
+              <th style="width:40px;text-align:center">Sem</th>
+              <th>Pagador</th>
+              <th>No Factura</th>
+              <th>Radicado Externo</th>
+              <th>Estado</th>
+              <th>Fecha Obj.</th>
+              <th>Responsable</th>
+              <th style="width:96px;text-align:center">PDF</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== DETALLE ===== -->
+    <section id="secDetalle" class="section" hidden>
+      <div class="title-row">
+        <div class="conc-head">
+          <div style="font-weight:bold">Detalle de conciliación</div>
+          <div class="pct-box">
+            <span>conciliación (%)</span>
+            <input id="pctConc" class="pct-input" type="number" step="0.01" min="0" max="100" placeholder="0.00">
+          </div>
+        </div>
+        <button id="btnConciliar" class="btn">conciliar glosa</button>
+      </div>
+
+      <table id="tblDetalle">
+        <thead>
+          <tr>
+            <th style="text-align:center">Sel</th>
+            <th>Consecutivo</th>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th class="cell-money">Vr Servicio</th>
+            <th class="cell-money">Vr Total</th>
+            <th class="cell-money">Vr Objetado</th>
+            <th class="cell-money">Vr No Objetado</th>
+            <th class="cell-money">Conciliar por valor</th>
+            <th class="cell-money">Valor conciliado</th>
+            <th style="text-align:center">Sem</th>
+            <th style="text-align:center">Iter</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+</div>
+<script>
+(function(){
+  /* ====== CONFIG ====== */
+  const OBJ_KEY='objeciones_data';
+  // Unificamos con uni_gestion.html
+  // (antes aquí estaba obj_iteraciones_v4)
+  const ITER_KEY='obj_iteraciones_v15';
+
+  /* ====== DOM HELPERS ====== */
+  const $ = s => document.querySelector(s);
+  const $$= s => document.querySelectorAll(s);
+  const fmt=v => (v==null||v==='')? '' : String(v);
+  const toInt = v => Number(String(v||'').replace(/[^\d-]/g,''))||0;
+  const money = n => (typeof n==='number'? n: toInt(n)).toLocaleString('es-CO');
+
+  function loadData(){ try{ return JSON.parse(localStorage.getItem(OBJ_KEY)||'[]') }catch{ return [] } }
+  function loadIters(){ try{ return JSON.parse(localStorage.getItem(ITER_KEY)||'{}') }catch{ return {} } }
+
+  function pick(o,...names){
+    if(!o) return '';
+    for(const name of names){
+      if(o[name]!=null && o[name]!=='') return o[name];
+      const hit = Object.keys(o).find(k=>k.toLowerCase()===String(name).toLowerCase());
+      if(hit && o[hit]!=null && o[hit]!=='') return o[hit];
+    }
+    return '';
+  }
+  function norm(x){ return String(x||'').trim(); }
+
+  /* ====== KEY COMPAT ====== */
+  // uni_gestion guarda iteraciones con clave:
+  // `${numero_factura}||${radicado_externo}||${codigo_servicio}||${consecutivo}`
+  function keyVariants(rec, det, posIdx){
+    const factura = norm(pick(rec,'numero_factura','NroFactura','factura'));
+    const radext  = norm(pick(rec,'radicado_externo','radicado'));
+    const cod     = norm(pick(det,'codigo_servicio','cod_servicio','codigo','cod','Servicio','servicio'));
+    const consecutivo = norm(pick(det,'consecutivo','pos','Pos','posicion','posición')) || String((posIdx||0)+1);
+    const arr = [];
+    // Forma principal (igual a uni_gestion)
+    arr.push(`${factura}||${radext}||${cod}||${consecutivo}`);
+    // Variantes tolerantes
+    arr.push(`${factura}||${radext}||${cod}||`);
+    arr.push(`${factura}||||${cod}||${consecutivo}`);
+    arr.push(`${factura}||${cod}||${consecutivo}`);
+    arr.push(`${factura}`);
+    return [...new Set(arr.filter(Boolean))];
+  }
+
+  function estadoPorIter(n){
+    if(n>=4) return 'PCN';
+    if(n===0) return 'ORA';
+    return (n % 2 === 0) ? 'ROA' : 'OCO';
+  }
+
+  // TRUE si existe iteración 4 con datos de Aseguradora y Prestador
+  function hasIter4Complete(rec){
+    const itAll = loadIters();
+    const dets = Array.isArray(rec.detalle) ? rec.detalle :
+                 (Array.isArray(rec.detalles)? rec.detalles :
+                 (Array.isArray(rec.items)? rec.items : []));
+    let ok = false;
+    for(let i=0;i<dets.length && !ok;i++){
+      const det = dets[i];
+      const keys = keyVariants(rec, det, i);
+      for(const k of keys){
+        const lst = itAll[k];
+        if(Array.isArray(lst)){
+          const r4 = lst.find(r => Number(r?.iter)===4);
+          if(r4 && (r4.vr_aseg || r4.vr_aceptado_aseg) && r4.vr_prest){
+            ok = true; break;
+          }
+        }
+      }
+    }
+    return ok;
+  }
+
+  function mensajeVacio(){ alert('No existen registros para los filtros seleccionados.'); }
+  function semHtmlPCN(){ return '<span class="sem green"></span>'; }
+
+  /* ====== SECTIONS ====== */
+  const secFact = $('#secFacturas');
+  const tFact   = $('#tblFacturas tbody');
+  const secDet  = $('#secDetalle');
+  const tDet    = $('#tblDetalle tbody');
+  let facturaSel = null;
+
+  function dataElegible(){
+    const all = loadData();
+    if(!Array.isArray(all) || !all.length) return [];
+    // Solo registros con iteración 4 completa => estado PCN
+    return all.filter(hasIter4Complete);
+  }
+
+  /* ===== LUPAS ===== */
+  function openPicker(btn, values, onPick){
+    if(!values.length){ mensajeVacio(); return; }
+    const box = btn.closest('.input-icon') || document.body;
+    box.querySelectorAll('.picker').forEach(n=>n.remove());
+    const menu = document.createElement('div'); menu.className='picker';
+    values.forEach(v=>{
+      const a=document.createElement('a'); a.href='#'; a.textContent=v;
+      a.onclick=(ev)=>{ev.preventDefault(); onPick(v); menu.remove();};
+      menu.appendChild(a);
+    });
+    menu.style.maxHeight='280px'; menu.style.overflow='auto';
+    box.appendChild(menu);
+    const close=(ev)=>{ if(!menu.contains(ev.target) && ev.target!==btn){ menu.remove(); document.removeEventListener('click',close,true);} };
+    setTimeout(()=>document.addEventListener('click',close,true),0);
+  }
+
+  $('#btnLupaRadExt')?.addEventListener('click', (e)=>{
+    const d=dataElegible();
+    const arr=[...new Set(d.map(x=> norm(pick(x,'radicado_externo','radicado')) ).filter(Boolean))].sort().reverse().slice(0,200);
+    openPicker(e.currentTarget,arr,v=>$('#fRadExt').value=v);
+  });
+
+  $('#btnLupaFactura')?.addEventListener('click', (e)=>{
+    const d=dataElegible();
+    const arr=[...new Set(d.map(x=> norm(pick(x,'numero_factura','NroFactura','factura')) ).filter(Boolean))].sort().reverse().slice(0,200);
+    openPicker(e.currentTarget,arr,v=>$('#fFactura').value=v);
+  });
+
+  /* ===== BUSCAR (solo PCN con iter 4 completa) ===== */
+  function filtrarElegibles(){
+    const data = dataElegible();
+    const rad=( $('#fRadExt')?.value || '' ).toLowerCase();
+    const fac=( $('#fFactura')?.value || '' ).toLowerCase();
+    const ini = $('#fIni')?.value || '';
+    const fin = $('#fFin')?.value || '';
+
+    return data.filter(r=>{
+      const rx = String(pick(r,'radicado_externo','radicado')).toLowerCase();
+      const nf = String(pick(r,'numero_factura','NroFactura','factura')).toLowerCase();
+      const okR=!rad || rx.includes(rad);
+      const okF=!fac || nf.includes(fac);
+      let okD=true;
+      const fISO = (r.fecha_objecion_iso || r.fechaISO || '').substring(0,10);
+      if(ini && fISO && fISO<ini) okD=false;
+      if(fin && fISO && fISO>fin) okD=false;
+      return okR && okF && okD;
+    });
+  }
+
+  function renderFacturas(){
+    const rows = filtrarElegibles();
+    tFact.innerHTML = '';
+    secFact.hidden = !rows.length;
+    secDet.hidden  = true;
+    rows.forEach(r=>{
+      const nf = fmt(pick(r,'numero_factura','NroFactura','factura'));
+      const rx = fmt(pick(r,'radicado_externo','radicado'));
+      const tr = document.createElement('tr');
+      tr.dataset.key = nf + '||' + rx;
+      tr.innerHTML = `
+        <td style="text-align:center;"><input type="checkbox"></td>
+        <td style="text-align:center;"><button class="ico-btn btn-detalle" title="Detalle"><i class="far fa-clipboard" style="color:#4b0055"></i></button></td>
+        <td style="text-align:center;">${semHtmlPCN()}</td>
+        <td>${fmt(pick(r,'pagador','pagador_nombre','aseguradora'))}</td>
+        <td>${nf}</td>
+        <td>${rx}</td>
+        <td style="text-transform:uppercase">PCN</td>
+        <td>${fmt((r.fecha_objecion || r.fecha || '').toString().replaceAll('.','/'))}</td>
+        <td>${fmt(pick(r,'responsable','usuario'))}</td>
+        <td style="text-align:center;">
+          <button class="ico-btn btn-pdf" title="Abrir factura (PCN)"><i class="fas fa-file-pdf"></i></button>
+        </td>`;
+      tFact.appendChild(tr);
+    });
+  }
+
+  $('#btnBuscar')?.addEventListener('click', ()=>{
+    renderFacturas();
+    const rows = filtrarElegibles();
+    if(!rows.length) mensajeVacio();
+  });
+
+  $('#tblFacturas')?.addEventListener('click',(e)=>{
+    const row = e.target.closest('tr'); if(!row) return;
+    const detBtn=e.target.closest('.btn-detalle');
+    const pdfBtn=e.target.closest('.btn-pdf');
+    const [nf,rx]=(row.dataset.key||'').split('||');
+    const data=filtrarElegibles();
+    facturaSel=data.find(r=> String(pick(r,'numero_factura','NroFactura','factura'))===nf &&
+                              String(pick(r,'radicado_externo','radicado'))===rx );
+    if(detBtn) renderDetalle();
+    if(pdfBtn) window.open('factura_conciliada.pdf','_blank');
+  });
+
+  /* ====== DETALLE: selección + % o valor conciliado ====== */
+  let selectedRow = null;  // <tr> seleccionado en detalle
+
+  function hideConciliarPorValorColumn(){
+    // Oculta header y celdas de la columna "Conciliar por valor"
+    const ths = $$('#tblDetalle thead th');
+    ths.forEach((th,idx)=>{
+      if(th.textContent.trim().toLowerCase().includes('conciliar por valor')){
+        th.style.display='none';
+        const colIndex = idx+1;
+        $$('#tblDetalle tbody tr').forEach(tr=>{
+          const td = tr.querySelector(`td:nth-child(${colIndex})`);
+          if(td) td.style.display='none';
+        });
+      }
+    });
+  }
+
+  function renderDetalle(){
+    secDet.hidden=false; tDet.innerHTML='';
+    selectedRow = null;
+
+    const itAll = loadIters();
+    const dets = Array.isArray(facturaSel.detalle) ? facturaSel.detalle :
+                 (Array.isArray(facturaSel.detalles)? facturaSel.detalles :
+                 (Array.isArray(facturaSel.items)? facturaSel.items : []));
+
+    dets.forEach((d,i)=>{
+      const vObj = toInt(pick(d,'vr_objetado','valor_objetado','VrObjetado','Vr_Objetado','valorObjetado'));
+      const vSrv = toInt(pick(d,'vr_servicio','valor_servicio'));
+      const vTot = toInt(pick(d,'vr_total','valor_total'));
+      const vNoO = toInt(pick(d,'vr_no_objetado','valor_no_objetado'));
+
+      const tr = document.createElement('tr');
+      tr.dataset.idx = i;
+      tr.dataset.obj = vObj; // base para % conciliación
+
+      tr.innerHTML = `
+        <td style="text-align:center"><input type="checkbox" class="sel-row"></td>
+        <td>${fmt(d.consecutivo||'')}</td>
+        <td>${fmt(pick(d,'codigo_servicio','cod_servicio','codigo','cod','Servicio','servicio'))}</td>
+        <td>${fmt(d.descripcion || d.descripcion_servicio || d.descripcion_serv || d.Descripcion || '')}</td>
+        <td style="text-align:center">${parseInt(d.cantidad || d.Cantidad || 1,10) || 1}</td>
+        <td class="cell-money">${money(vSrv)}</td>
+        <td class="cell-money">${money(vTot)}</td>
+        <td class="cell-money obj-val">${money(vObj)}</td>
+        <td class="cell-money">${money(vNoO)}</td>
+        <!-- Columna obsoleta: la ocultamos si existe en tu header -->
+        <td class="cell-money col-conc-valor" style="display:none"></td>
+        <!-- Valor conciliado (editable cuando la fila está seleccionada) -->
+        <td class="cell-money">
+          <input class="val-num conc-final" type="number" step="1" min="0" value="0" disabled>
+        </td>
+        <td style="text-align:center"><span class="sem green"></span></td>
+        <td style="text-align:center"><span class="pill">4</span></td>
+      `;
+      tDet.appendChild(tr);
+    });
+
+    // Oculta columna “Conciliar por valor”
+    hideConciliarPorValorColumn();
+
+    // Selección de fila única
+    tDet.addEventListener('change', onRowSelectChange);
+    // % de conciliación (global) -> aplica a la fila seleccionada
+    const pctInput = $('#pctConc');
+    if(pctInput){
+      pctInput.disabled = true; // inicia deshabilitado hasta seleccionar fila
+      pctInput.oninput = onPctChange;
+    }
+    // Botón conciliar
+    const btn = $('#btnConciliar');
+    if(btn){
+      btn.onclick = onConciliarClick;
+    }
+  }
+
+  function onRowSelectChange(e){
+    const cb = e.target.closest('.sel-row');
+    if(!cb) return;
+    const tr = e.target.closest('tr');
+    const pctInput = $('#pctConc');
+
+    // deselecciona otras filas
+    $$('#tblDetalle tbody .sel-row').forEach(x=>{
+      if(x!==cb){ x.checked=false; const r=x.closest('tr'); unlockRow(r,false); }
+    });
+
+    if(cb.checked){
+      selectedRow = tr;
+      unlockRow(tr,true);
+      if(pctInput) pctInput.disabled = false;
+    }else{
+      unlockRow(tr,false);
+      selectedRow = null;
+      if(pctInput) pctInput.disabled = true;
+    }
+  }
+
+  function unlockRow(tr, enable){
+    const inp = tr.querySelector('.conc-final');
+    if(!inp) return;
+    inp.disabled = !enable;
+    inp.classList.toggle('locked', !enable);
+  }
+
+  function onPctChange(e){
+    const pct = Math.max(0, Math.min(100, parseFloat(e.target.value||'0')));
+    if(!selectedRow) return;
+    const base = parseInt(selectedRow.dataset.obj||'0',10) || 0;
+    const calc = Math.round(base * (pct/100));
+    const inp = selectedRow.querySelector('.conc-final');
+    if(inp && !inp.disabled){
+      inp.value = calc;
+    }
+  }
+
+  function onConciliarClick(){
+    if(!selectedRow){
+      alert('Selecciona una fila del detalle para conciliar.');
+      return;
+    }
+    const pctInput = $('#pctConc');
+    const valorInp = selectedRow.querySelector('.conc-final');
+
+    // Validación: debe haber un valor conciliado (>=0)
+    const valor = parseInt(valorInp.value||'0',10);
+    if(isNaN(valor) || valor<0){
+      alert('Ingresa un valor conciliado válido (0 o mayor).');
+      return;
+    }
+
+    // Bloquear edición
+    valorInp.disabled = true;
+    valorInp.classList.add('locked');
+    const cb = selectedRow.querySelector('.sel-row');
+    if(cb){ cb.disabled = true; }
+    if(pctInput){ pctInput.disabled = true; }
+
+    // Mostrar popup de confirmación
+    showOkPopup('Glosa Conciliada');
+  }
+
+  function showOkPopup(msg){
+    const overlay = document.createElement('div');
+    overlay.style.position='fixed';
+    overlay.style.inset='0';
+    overlay.style.background='rgba(0,0,0,.35)';
+    overlay.style.display='flex';
+    overlay.style.alignItems='center';
+    overlay.style.justifyContent='center';
+    overlay.style.zIndex='9999';
+
+    const card = document.createElement('div');
+    card.style.background='#fff';
+    card.style.padding='22px 24px';
+    card.style.borderRadius='12px';
+    card.style.boxShadow='0 10px 30px rgba(0,0,0,.2)';
+    card.style.minWidth='280px';
+    card.style.textAlign='center';
+    card.innerHTML = `
+      <div style="font-weight:700; font-size:18px; margin-bottom:8px; color:#4b0055">${fmt(msg)}</div>
+      <div style="font-size:14px; color:#333; margin-bottom:16px">La fila seleccionada fue conciliada correctamente.</div>
+      <button id="okPopupBtn" class="btn btn-primary" style="padding:8px 16px; border-radius:8px; border:none; background:#800080; color:#fff; cursor:pointer">OK</button>
+    `;
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    card.querySelector('#okPopupBtn').onclick = ()=> overlay.remove();
+  }
+
+  /* ====== INICIAL ====== */
+  secFact && (secFact.hidden = true);
+  secDet  && (secDet.hidden  = true);
+})();
+</script>
+
+</body>
+</html>

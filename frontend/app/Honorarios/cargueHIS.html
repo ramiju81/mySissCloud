@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cloud Medical Fees mySiss</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: white;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    .sidebar h1 {
+      color: purple;
+      font-weight: bold;
+      font-size: 50px;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      display: block;
+      margin: 20px 0;
+      color: purple;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      background-color: white;
+      padding: 20px 40px;
+    }
+
+    .acciones {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 30px;
+    }
+
+    .radio-column {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      min-width: 180px;
+    }
+
+    .radio-column span {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .radio-column label {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+	  white-space: normal; /* Antes estaba nowrap */
+	  word-break: break-word;
+    }
+
+    .archivo-botones {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .archivo-ejecutar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px; 
+	  margin-left: 5px; /* ⬅️ Añade esta línea */
+    }
+
+    .input-mock {
+      padding: 6px;
+      width: 180px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      color: #666;
+      font-style: italic;
+      cursor: pointer;
+      outline: none;
+    }
+
+.btn {
+  background-color: #800080;
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+    width: 130px;
+}
+
+    .btn.small {
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .acciones-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2e6ff;
+    }
+
+    .acciones-col-extendida {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      align-items: flex-end;
+      margin-top: 0px;
+      margin-left: 335px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+	
+.modal-content h2 {
+  color: #800080;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.btn:hover {
+  background-color: #6a006a;
+}
+
+
+.modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 30px 25px;
+  width: 95%;
+  max-width: 620px;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  font-size: 13px;
+}
+
+.modal-content .close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 18px;
+  color: #555;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.modal-content .close:hover {
+  color: #000;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: purple;
+  font-size: 20px;
+  margin-bottom: 18px;
+}
+	
+#formEntidad {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 12px;
+}
+
+#formEntidad .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px; /* Espacio vertical entre campos */
+}
+
+#formEntidad label {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #333;
+  display: block;
+}
+
+#formEntidad .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+#formEntidad input,
+#formEntidad select {
+  padding: 8px;
+  font-size: 13px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#formEntidad .form-actions {
+  grid-column: span 2;
+  text-align: center;
+  margin-top: 20px;
+}
+
+#formEntidad button[type="submit"] {
+  grid-column: span 2;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: purple;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+	.inactivo {
+	  opacity: 0.5;
+	  background-color: #f0f0f0;
+	}
+	
+	
+	a[href="login.html"] {
+	  position: relative;
+	  bottom: 10px;
+	}
+	
+    .sidebar {
+      width: 200px;
+      background-color: #eee6f8;
+      padding: 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+
+	  display: flex;
+	  flex-direction: column;
+	  justify-content: space-between;
+    }
+	
+	.sidebar a[href="login.html"] {
+	  position: relative;
+	  bottom: 30px;
+	}
+
+	.logout {
+	  color: purple;
+	  text-decoration: none;
+	  font-weight: bold;
+	}
+	
+  </style>
+</head>
+<body>
+  <div class="container">
+	<div class="sidebar">
+	  <div class="sidebar-content">
+    <h1>mySiss</h1>
+      <a href="configuracionHIS.html" >Configuración</a>
+      <a href="cargueHIS.html" style="text-decoration: underline;">Datos Maestros</a>
+      <a href="contratosHIS.html" >Contratos</a>
+	  </div>
+	  <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+  <div class="main">
+    <h2>Configuración datos maestros</h2>
+    <div class="acciones">
+      <div class="radio-column">
+        <span>Tipo de dato</span>
+        <label><input type="radio" name="tipoEntidad" value="medicos"> Profesionales</label>
+        <label><input type="radio" name="tipoEntidad" value="especialidades"> Especialidades</label>
+        <label><input type="radio" name="tipoEntidad" value="tarifas"> Tarifas</label>
+        <label><input type="radio" name="tipoEntidad" value="aseguradoras"> Aseguradoras</label>
+        <label><input type="radio" name="tipoEntidad" value="sociedades"> Sociedad médica</label>
+      </div>
+      <div class="archivo-ejecutar">
+        <input type="file" id="archivo" style="display:none" onchange="mostrarNombreArchivo(event)">
+        <input type="text" id="nombreArchivo" class="input-mock" value="Seleccione archivo" readonly onclick="document.getElementById('archivo').click()"/>
+        <button type="button" class="btn" onclick="ejecutar()" title="Ejecutar">  <i class="fas fa-play"></i> Ejecutar</button>
+        <button type="button" class="btn" onclick="mostrarPopup()" title="Visualizar">  <i class="fas fa-file-upload"></i> Visualizar</button>
+      </div>
+      <div class="acciones-col-extendida">
+        <button type="button" class="btn" onclick="abrirModalNuevo()" title="Nuevo registro">  <i class="fas fa-plus"></i> Nuevo</button>
+        <button type="button" class="btn" onclick="modificarRegistro()" title="Modificar registro">  <i class="fas fa-edit"></i> Modificar</button>
+        <button type="button" class="btn" onclick="inactivarSeleccionados()" title="Inactivar registro"><i class="fas fa-toggle-on"></i> Inactivar/Activar</button>
+      </div>
+    </div>
+    <div id="resultados"></div>
+  </div>
+</div>
+
+<div id="modalEntidad" class="modal">
+  <div class="modal-content">
+<i class="fas fa-times close" onclick="cerrarModal()" title="Cerrar"></i>
+    <h2 id="tituloModal"></h2>
+    <form id="formEntidad" onsubmit="guardarEntidad(event)"></form>
+  </div>
+</div>
+
+<script>
+const datosSimulados = {
+  medicos: [
+                { "Codigo Profesional": "PR001", "Nombres ": "Juan David", "Apellidos": "Maldonado Espitia", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "79879891", "Registro profesional": "79879891", "RUT": "79879891", "Telefono": "+573518305390", "email": "jdmaldonadoe@clinica.com", "Direccion ": "Calle 10 # 6-50", "Activo": "X" },
+                { "Codigo Profesional": "PR002", "Nombres ": "Oscar Javier", "Apellidos": "Modragon Mora", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1156200547", "Registro profesional": "1156200547", "RUT": "1156200547", "Telefono": "+573103776087", "email": "ojmondragonm@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR003", "Nombres ": "Diana Marcela", "Apellidos": "Ayala contreras", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1789654987", "Registro profesional": "1789654987", "RUT": "1789654987", "Telefono": "+573039886364", "email": "dmayalac@gmail.com", "Direccion ": "Avenida 7 # 3-40", "Activo": "X" },
+                { "Codigo Profesional": "PR004", "Nombres ": "Claudia regina", "Apellidos": "Muñoz Maldonado", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1789654989", "Registro profesional": "1789654989", "RUT": "1789654989", "Telefono": "+573198399771", "email": "crmunozm@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR005", "Nombres ": "Joge Jaramillo", "Apellidos": "Alvarado Martinez", "Genero": "Maculino", "Tipo de documento": "CE", "Documento": "79879895", "Registro profesional": "79879895", "RUT": "79879895", "Telefono": "+573014878747", "email": "jjaramilloa@clinica.com", "Direccion ": "Carrera 5 # 3-42", "Activo": "X" },
+                { "Codigo Profesional": "PR006", "Nombres ": "Julian Ramiro", "Apellidos": "Jimenez Roman", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1162003200", "Registro profesional": "1162003200", "RUT": "1162003200", "Telefono": "+573177555327", "email": "jrjimenezr@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR007", "Nombres ": "Juan Carlos", "Apellidos": "Rosas Rodriguez", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "79879897", "Registro profesional": "79879897", "RUT": "79879897", "Telefono": "+573158866866", "email": "jcrosasr@clinica.com", "Direccion ": "Calle 2 # 6-38", "Activo": "X" },
+                { "Codigo Profesional": "PR008", "Nombres ": "Maria Eugenia", "Apellidos": "Rodriguez", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1789654988", "Registro profesional": "1789654988", "RUT": "1789654988", "Telefono": "+573504412829", "email": "merodriguez@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR009", "Nombres ": "Sofia Patricia", "Apellidos": "Orjuela Muñoz", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1789654943", "Registro profesional": "1789654943", "RUT": "1789654943", "Telefono": "+573109960227", "email": "sporjuelam@clinica.com", "Direccion ": "Avenida 4 # 30-20", "Activo": "X" },
+                { "Codigo Profesional": "PR010", "Nombres ": "Mario Jose", "Apellidos": "Torres Rodriguez", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1562005470", "Registro profesional": "1562005470", "RUT": "1562005470", "Telefono": "+573109905557", "email": "mjtorresr@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR011", "Nombres ": "Luis Carlos", "Apellidos": "Fernandez Figueroa", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "79879901", "Registro profesional": "79879901", "RUT": "79879901", "Telefono": "+573045450181", "email": "lcfernandezf@clinica.com", "Direccion ": "Calle 6 Norte # 23-19", "Activo": "X" },
+                { "Codigo Profesional": "PR012", "Nombres ": "Javier Ricardo", "Apellidos": "Lopez", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1432400547", "Registro profesional": "1432400547", "RUT": "1432400547", "Telefono": "+573059728168", "email": "jrlopez@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR013", "Nombres ": "Rosa Maria", "Apellidos": "Lopez Muñoz", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1789654123", "Registro profesional": "1789654123", "RUT": "1789654123", "Telefono": "+573334764387", "email": "rmlopezm@clinica.com", "Direccion ": "Carrera 8 # 5-47", "Activo": "X" },
+                { "Codigo Profesional": "PR014", "Nombres ": "Juana Patricia", "Apellidos": "Muñoz Niño", "Genero": "Femenino", "Tipo de documento": "CE", "Documento": "1543244988", "Registro profesional": "1543244988", "RUT": "1543244988", "Telefono": "+573022998728", "email": "jpmuñozn@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR015", "Nombres ": "Laura Daniela", "Apellidos": "Bohorquez Martinez", "Genero": "Femenino", "Tipo de documento": "CE", "Documento": "1789653753", "Registro profesional": "1789653753", "RUT": "1789653753", "Telefono": "+573047363254", "email": "ldbohorquezm@clinica.com", "Direccion ": "Avenida 9 # 4-49", "Activo": "X" },
+                { "Codigo Profesional": "PR016", "Nombres ": "Jorge Mario", "Apellidos": "Espitia Maldonado", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1156209999", "Registro profesional": "1156209999", "RUT": "1156209999", "Telefono": "+573052717446", "email": "jmespitam@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR017", "Nombres ": "Jhon Alberto", "Apellidos": "Martinez Martinez", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "79879907", "Registro profesional": "79879907", "RUT": "79879907", "Telefono": "+573245675149", "email": "jamartinezm@clinica.com", "Direccion ": "Calle 3 # 7-36", "Activo": "X" },
+                { "Codigo Profesional": "PR018", "Nombres ": "Sandra Martiza", "Apellidos": "Aparicio Bernal", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1234634438", "Registro profesional": "1234634438", "RUT": "1234634438", "Telefono": "+573336992436", "email": "smapariciob@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR019", "Nombres ": "Milena Yadira", "Apellidos": "Berlan Beltral", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1531234648", "Registro profesional": "1531234648", "RUT": "1531234648", "Telefono": "+573019708538", "email": "myberlanb@clinica.com", "Direccion ": "Calle 7 Norte # 20-15", "Activo": "X" },
+                { "Codigo Profesional": "PR020", "Nombres ": "Diego Fernando", "Apellidos": "Orjuela Aldana", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1156208888", "Registro profesional": "1156208888", "RUT": "1156208888", "Telefono": "+573059731601", "email": "dforjuelaa@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR021", "Nombres ": "Jorge ", "Apellidos": "Moreno Montaño", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "79879911", "Registro profesional": "79879911", "RUT": "79879911", "Telefono": "+573507593764", "email": "jmorenom@clinica.com", "Direccion ": "Avenida 6 # 33-24", "Activo": "X" },
+                { "Codigo Profesional": "PR022", "Nombres ": "Ricardo", "Apellidos": "Alarcon Pajarito", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1156209999", "Registro profesional": "1156209999", "RUT": "1156209999", "Telefono": "+573003303091", "email": "ralarconp@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR023", "Nombres ": "Yaneth", "Apellidos": "Mendez Martinez", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1529654988", "Registro profesional": "1529654988", "RUT": "1529654988", "Telefono": "+573046855116", "email": "ymendezm@clinica.com", "Direccion ": "Carrera 4 # 2-30", "Activo": "X" },
+                { "Codigo Profesional": "PR024", "Nombres ": "Mauricio Jose", "Apellidos": "Ramirez Rodriguez", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1158888547", "Registro profesional": "1158888547", "RUT": "1158888547", "Telefono": "+573046855112", "email": "mjramirezr@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR025", "Nombres ": "Leonardo", "Apellidos": "Loaiza Tovar", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "79879915", "Registro profesional": "79879915", "RUT": "79879915", "Telefono": "+573181398889", "email": "lloaizat@clinica.com", "Direccion ": "Calle 8 # 6-53", "Activo": "X" },
+                { "Codigo Profesional": "PR026", "Nombres ": "Maritza", "Apellidos": "Rodriguez", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1789654988", "Registro profesional": "1789654988", "RUT": "1789654988", "Telefono": "+573003303091", "email": "mrodriguez@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR027", "Nombres ": "Pedro Jose", "Apellidos": "Arana camargo", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "79879917", "Registro profesional": "79879917", "RUT": "79879917", "Telefono": "+573003303091", "email": "pjaranac@clinica.com", "Direccion ": "Avenida 2 # 31-22", "Activo": "X" },
+                { "Codigo Profesional": "PR028", "Nombres ": "Jhonny ", "Apellidos": "Montaño rosas", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1156660547", "Registro profesional": "1156660547", "RUT": "1156660547", "Telefono": "+573046855116", "email": "jmontanor@clinica.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR029", "Nombres ": "Pedro Jose", "Apellidos": "Rodriguez Gonzalez", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "79879919", "Registro profesional": "79879919", "RUT": "79879919", "Telefono": "+573102871564", "email": "pjrodriguezg@clinica.com", "Direccion ": "Carrera 7 # 5-44", "Activo": "X" },
+                { "Codigo Profesional": "PR030", "Nombres ": "Laura", "Apellidos": "Gomez", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1111556433", "Registro profesional": "1111556433", "RUT": "1111556433-1", "Telefono": "+573115764646", "email": "laurag8120@gmail.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR031", "Nombres ": "Juan", "Apellidos": "Ortega", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "1002345654", "Registro profesional": "1002345654", "RUT": "1002345654-6", "Telefono": "+573005644335", "email": "juanortega1234@gmail.com", "Direccion ": "Calle 12 # 8-60", "Activo": "X" },
+                { "Codigo Profesional": "PR032", "Nombres ": "Camila", "Apellidos": "Reyez", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "74567454", "Registro profesional": "74567454", "RUT": "74567454-3", "Telefono": "+573014564646", "email": "reyescamila@outlool.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR033", "Nombres ": "Mario", "Apellidos": "Lopez", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "97564243", "Registro profesional": "97564243", "RUT": "97564243-1", "Telefono": "+573112345644", "email": "mario.lopez2342@outlook.com", "Direccion ": "Avenida 5 # 29-18", "Activo": "X" },
+                { "Codigo Profesional": "PR034", "Nombres ": "Yeny", "Apellidos": "Palacio", "Genero": "Femenino", "Tipo de documento": "CC", "Documento": "1020234567", "Registro profesional": "1020234567", "RUT": "1020234567-3", "Telefono": "+573003434565", "email": "yenypalacio021@hotmail.com", "Direccion ": "", "Activo": "X" },
+                { "Codigo Profesional": "PR035", "Nombres ": "Julian", "Apellidos": "Ramirez", "Genero": "Maculino", "Tipo de documento": "CC", "Documento": "94435555", "Registro profesional": "94435555", "RUT": "94435555-5", "Telefono": "+573134456766", "email": "jramirez@gmail.com", "Direccion ": "Carrera 10 # 6-55", "Activo": "X" },
+  ],
+  especialidades: [
+                { ID: 11, Especialidad: "ALERGIA" },
+                { ID: 12, Especialidad: "ALERGIA INFANTIL" },
+                { ID: 13, Especialidad: "INMUNOLOGIA" },
+                { ID: 14, Especialidad: "INMUNOLOGIA INFANTIL" },
+                { ID: 21, Especialidad: "ANESTESIOLOGIA" },
+                { ID: 31, Especialidad: "CARDIOANGIOLOGIA" },
+                { ID: 32, Especialidad: "CARDIOLOGIA" },
+                { ID: 33, Especialidad: "CARDIOLOGIA GERIATRICA" },
+                { ID: 34, Especialidad: "CARDIOLOGIA PEDIATRICA" },
+                { ID: 35, Especialidad: "HEMODINAMIA" },
+                { ID: 41, Especialidad: "CIRUGIA CARDIOVASCULAR" },
+                { ID: 42, Especialidad: "CIRUGIA DE CABEZA/CUELLO" },
+                { ID: 43, Especialidad: "CIRUGIA GASTROENTEROLOG." },
+                { ID: 44, Especialidad: "CIRUGIA GENERAL" },
+                { ID: 45, Especialidad: "CIRUGIA INFANTIL" },
+                { ID: 46, Especialidad: "CIRUGIA ONCOLOGICA" },
+                { ID: 47, Especialidad: "CIRUGIA PLASTICA" },
+                { ID: 48, Especialidad: "CIRUGIA PROCTOLOGICA" },
+                { ID: 49, Especialidad: "CIRUGIA TORAXICA" },
+                { ID: 40, Especialidad: "CIRUGIA VASCULAR" },
+                { ID: 51, Especialidad: "CLINICA MEDICA" },
+                { ID: 61, Especialidad: "MEDICINA DEL DEPORTE" },
+                { ID: 71, Especialidad: "DERMATOLOGIA" },
+                { ID: 72, Especialidad: "DERMATOLOGIA INFANTIL" },
+                { ID: 81, Especialidad: "ENDOCRINOLOGIA" },
+                { ID: 82, Especialidad: "ENDOCRINOLOGIA INFANTIL" },
+                { ID: 83, Especialidad: "ENDOCRINOLOGIA/NUTICION" },
+                { ID: 91, Especialidad: "ANDROLOGIA Y EST.MASC." },
+                { ID: 92, Especialidad: "ESTERILIDAD FEMENINA" },
+                { ID: 93, Especialidad: "REPRODUCCION" },
+                { ID: 101, Especialidad: "FLEBOLOGIA" },
+                { ID: 102, Especialidad: "LINFOLOGIA" },
+                { ID: 111, Especialidad: "GASTROENTEROLOGIA" },
+                { ID: 112, Especialidad: "GASTROENTEROLOGIA INFANTIL" },
+                { ID: 113, Especialidad: "HEPATOLOGIA" },
+                { ID: 121, Especialidad: "GENETICA" },
+                { ID: 131, Especialidad: "GERIATRIA Y GERONTOLOGIA" },
+                { ID: 141, Especialidad: "GINECOLOGIA" },
+                { ID: 142, Especialidad: "GINECOLOGIA INFANTO-JUVENIL" },
+                { ID: 143, Especialidad: "OBSTETRICIA" },
+                { ID: 144, Especialidad: "TOCOGINECOLOGIA" },
+                { ID: 151, Especialidad: "HEMATOLOGIA" },
+                { ID: 152, Especialidad: "HEMATOLOGIA INFANTIL" },
+                { ID: 153, Especialidad: "HEMATOLOGIA ONCOLOGICA" },
+                { ID: 154, Especialidad: "HEMOSTASIA" },
+                { ID: 155, Especialidad: "HEMOTERAPIA" },
+                { ID: 161, Especialidad: "INFECTOLOGIA" },
+                { ID: 162, Especialidad: "INFECTOLOGIA PEDIATRICA" },
+                { ID: 163, Especialidad: "PARASITOLOGIA" },
+                { ID: 171, Especialidad: "FORENSE" },
+                { ID: 172, Especialidad: "MEDICINA DEL TRABAJO / LABORAL" },
+                { ID: 173, Especialidad: "MEDICINA LEGAL" },
+                { ID: 181, Especialidad: "NEFROLOGIA" },
+                { ID: 182, Especialidad: "NEFROLOGIA INFANTIL" },
+                { ID: 191, Especialidad: "NEUMONOLOGIA" },
+                { ID: 192, Especialidad: "NEUMONOLOGIA INFANTIL" },
+                { ID: 193, Especialidad: "NEUMOTISIOLOGIA" },
+                { ID: 194, Especialidad: "NEUMOTISIOLOGIA INFANTIL" },
+                { ID: 201, Especialidad: "NEUROCIRUGIA" },
+                { ID: 202, Especialidad: "NEUROFISIOLOGIA" },
+                { ID: 203, Especialidad: "NEUROFONIATRIA" },
+                { ID: 204, Especialidad: "NEUROLOGIA" },
+                { ID: 205, Especialidad: "NEUROLOGIA INFANTIL" },
+                { ID: 211, Especialidad: "DIABETES" },
+                { ID: 212, Especialidad: "NUTRICION" },
+                { ID: 213, Especialidad: "NUTRICION INFANTIL" },
+                { ID: 214, Especialidad: "OBESIDAD" },
+                { ID: 223, Especialidad: "CLINICA ESTOMATOLOGICA" },
+                { ID: 231, Especialidad: "OFTALMOLOGIA" },
+                { ID: 232, Especialidad: "OFTALMOLOGIA INFANTIL" },
+                { ID: 241, Especialidad: "ONCOLOGIA" },
+                { ID: 242, Especialidad: "ONCOLOGIA INFANTIL" },
+                { ID: 251, Especialidad: "OTORRINOLARINGOLOGIA" },
+                { ID: 252, Especialidad: "OTORRINOLARINGOLOGIA INFANTIL" },
+                { ID: 261, Especialidad: "ANATOMIA PATOLOGICA" },
+                { ID: 262, Especialidad: "CITOLOGIA" },
+                { ID: 271, Especialidad: "NEONATOLOGIA" },
+                { ID: 272, Especialidad: "PEDIATRIA" },
+                { ID: 273, Especialidad: "PERINATOLOGIA" },
+                { ID: 281, Especialidad: "NEUROPSIQUIATRIA" },
+                { ID: 282, Especialidad: "PSIQUIATRIA" },
+                { ID: 283, Especialidad: "PSIQUIATRIA INFANTO JUVENIL" },
+                { ID: 291, Especialidad: "DIAGNOSTICO POR IMAGENES" },
+                { ID: 292, Especialidad: "ECOGRAFIA" },
+                { ID: 293, Especialidad: "ELECTROMIOGRAFIA" },
+                { ID: 294, Especialidad: "MEDICINA NUCLEAR" },
+                { ID: 295, Especialidad: "RADIOLOGIA" },
+                { ID: 296, Especialidad: "RADIOTERAPIA" },
+                { ID: 301, Especialidad: "REUMATOLOGIA" },
+                { ID: 311, Especialidad: "TOXICOLOGIA" },
+                { ID: 322, Especialidad: "ORTOPEDIA" },
+                { ID: 323, Especialidad: "ORTOPEDIA INFANTIL" },
+                { ID: 324, Especialidad: "OSTEOLOGIA" },
+                { ID: 325, Especialidad: "TRAUMATOLOGIA Y ORTOPEDIA" },
+                { ID: 326, Especialidad: "TRAUMATOLOGIA INFANTIL" },
+                { ID: 331, Especialidad: "UROLOGIA" },
+                { ID: 332, Especialidad: "UROLOGIA INFANTIL" },
+  ],
+  tarifas: [
+                { "Codigo": "827902", "Descripcion": "Injerto de tendon flexor de mano o dedos   (UNO O MAS)", "Catalogo": "ISS", "UVR": "100", "Puntos": "", "Valor": "" },
+                { "Codigo": "827102", "Descripcion": "Injerto de tendon de flexor de un dedo con recosntruccion de poleas", "Catalogo": "ISS", "UVR": "200", "Puntos": "", "Valor": "" },
+                { "Codigo": "383101", "Descripcion": "Reseccion de malformacion arteriovenosa supratentorial spetzler", "Catalogo": "ISS", "UVR": "855", "Puntos": "", "Valor": "" },
+                { "Codigo": "934100", "Descripcion": "Traccion espinal con empredo dispositivo craneal", "Catalogo": "ISS", "UVR": "65", "Puntos": "", "Valor": "" },
+                { "Codigo": "890208", "Descripcion": "Consulta por primera vez por Psicologia", "Catalogo": "ISS", "UVR": "", "Puntos": "", "Valor": "$5515" },
+                { "Codigo": "890209", "Descripcion": "Consulta por primera vez por Trabjo Social", "Catalogo": "ISS", "UVR": "", "Puntos": "", "Valor": "$5515" },
+                { "Codigo": "890801", "Descripcion": "Consulta de ingreso por medicina General", "Catalogo": "ISS", "UVR": "", "Puntos": "", "Valor": "$7795" },
+                { "Codigo": "890201", "Descripcion": "Consulta primer vez medicina General", "Catalogo": "ISS", "UVR": "", "Puntos": "", "Valor": "$8755" },
+                { "Codigo": "36100", "Descripcion": "Consulta especializada", "Catalogo": "ISS", "UVR": "", "Puntos": "1,41", "Valor": "" },
+                { "Codigo": "37701", "Descripcion": "Consulta Socual", "Catalogo": "ISS", "UVR": "", "Puntos": "0,62", "Valor": "" },
+                { "Codigo": "19001", "Descripcion": "Acetaminofén", "Catalogo": "SOAT", "UVR": "", "Puntos": "1,56", "Valor": "" },
+                { "Codigo": "19004", "Descripcion": "Acidos biliares", "Catalogo": "SOAT", "UVR": "", "Puntos": "1,69", "Valor": "" },
+                { "Codigo": "19006", "Descripcion": "Acido Folico", "Catalogo": "SOAT", "UVR": "", "Puntos": "2,13", "Valor": "" },
+                { "Codigo": "19008", "Descripcion": "Acido 5 Hidroxi indolacetico", "Catalogo": "SOAT", "UVR": "", "Puntos": "1,39", "Valor": "" },
+  ],
+  aseguradoras: [
+                { "Cod. Aseguradora": "EPS037", "NIT": "900156264-2", "Nombre Aseguradora": "Nueva EPS", "Telefono": "18000954400", "Correo Electronico": "aseg_nuevaEPS@nuevaeps.com" },
+                { "Cod. Aseguradora": "EPS012", "NIT": "890303093-5", "Nombre Aseguradora": "EPS COMFENALCO VALLE EPS", "Telefono": "6024853530", "Correo Electronico": "notificacioneseps@epsdelagente.com.co" },
+                { "Cod. Aseguradora": "EPS005", "NIT": "800251440-6. ", "Nombre Aseguradora": "EPS SANITAS EPS", "Telefono": "6013759000", "Correo Electronico": "comunicacioneseps@colsanitas.com" },
+                { "Cod. Aseguradora": "EPSC22", "NIT": "800088702-2 ", "Nombre Aseguradora": "EPS CONVIDA EPS", "Telefono": "602 437 88 88", "Correo Electronico": "cna@suramericana.com.co" },
+                { "Cod. Aseguradora": "ESSC91", "NIT": "860001004-7", "Nombre Aseguradora": "EPS ECOOPSOS EPS", "Telefono": "6024898686", "Correo Electronico": "sosatencion@soseps.com" },
+  ],
+  sociedades: [
+                { "ID sociedad": "SM001", "Razon Social": "Cardiologos Asociados", "NIT": "8600359922", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM002", "Razon Social": "Radiologos Asociados", "NIT": "8600358822", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM003", "Razon Social": "Grupo Anestesia", "NIT": "8609759922", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM004", "Razon Social": "Sociedad de Cirugia Plastica", "NIT": "8600359942", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM005", "Razon Social": "Maxilo Group", "NIT": "8600359442", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM006", "Razon Social": "Urologos Asociados", "NIT": "8601135552", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM007", "Razon Social": "Gienco group", "NIT": "8600359112", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM008", "Razon Social": "Intensivistas Asociado", "NIT": "8600353242", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+                { "ID sociedad": "SM009", "Razon Social": "Anestesia center group", "NIT": "8600343252", "Telefono": "", "email": "", "Direccion ": "", "Activo": ""},
+                { "ID sociedad": "SM010", "Razon Social": "Terapistas Asociados", "NIT": "8600388792", "Telefono": "", "email": "", "Direccion ": "", "Activo": "X"},
+  ]
+};
+
+let tipoActivo = "medicos";
+let datosTabla = [];
+let modoEdicion = false;
+let indiceEditando = null;
+
+document.querySelectorAll('input[name="tipoEntidad"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    tipoActivo = radio.value;
+  });
+});
+
+function mostrarPopup() {
+  datosTabla = [...datosSimulados[tipoActivo]];
+  renderizarTabla();
+}
+
+function mostrarNombreArchivo(e) {
+  const archivo = e.target.files[0];
+  document.getElementById("nombreArchivo").value = archivo ? archivo.name : "Seleccione archivo";
+}
+
+function ejecutar() {
+  const archivo = document.getElementById("archivo").files[0];
+  if (!archivo) return alert("Seleccione un archivo.");
+  const tipo = archivo.name.split('.').pop().toLowerCase();
+  if (!["csv", "txt", "xls", "xlsx"].includes(tipo)) {
+    alert("Archivo no compatible. Solo se permiten CSV, TXT o XLS(X).");
+    return;
+  }
+  alert("Archivo válido cargado.");
+}
+
+function renderizarTabla() {
+  const contenedor = document.getElementById("resultados");
+  if (!datosTabla.length) {
+    contenedor.innerHTML = "<p>No hay datos para mostrar.</p>";
+    return;
+  }
+  const headers = Object.keys(datosTabla[0]);
+  let html = "<table><thead><tr><th></th>";
+  headers.forEach(h => html += `<th>${h}</th>`);
+  html += "</tr></thead><tbody>";
+  datosTabla.forEach((row, i) => {
+    const inactivo = row.inactivo ? "inactivo" : "";
+    html += `<tr class="${inactivo}"><td><input type="checkbox" data-index="${i}" class="seleccionar"></td>`;
+    headers.forEach(h => html += `<td>${row[h]}</td>`);
+    html += "</tr>";
+  });
+  html += "</tbody></table>";
+  contenedor.innerHTML = html;
+}
+
+function abrirModalNuevo() {
+  modoEdicion = false;
+  indiceEditando = null;
+  abrirModal();
+}
+
+function modificarRegistro() {
+  const seleccionados = document.querySelectorAll('.seleccionar:checked');
+  if (seleccionados.length !== 1) {
+    alert("Seleccione solo un registro.");
+    return;
+  }
+  modoEdicion = true;
+  indiceEditando = seleccionados[0].dataset.index;
+  abrirModal(datosTabla[indiceEditando]);
+}
+
+function abrirModal(datos = null) {
+  const modal = document.getElementById("modalEntidad");
+  const form = document.getElementById("formEntidad");
+  const titulo = document.getElementById("tituloModal");
+
+  form.innerHTML = "";
+  const estructura = datosSimulados[tipoActivo][0];
+  const nombresSingulares = {
+  medicos: "Profesional",
+  especialidades: "especialidad",
+  tarifas: "tarifa",
+  aseguradoras: "aseguradora",
+  sociedades: "sociedad"
+};
+titulo.innerText = `${modoEdicion ? "Modificar" : "Crear"} ${nombresSingulares[tipoActivo]}`;
+
+  // Calcular el próximo ID disponible si es un nuevo registro
+  let nextId = 1;
+  if (!modoEdicion && datosTabla.length > 0) {
+    const idField = Object.keys(estructura)[0]; // Asume que el primer campo es el ID
+    const maxId = Math.max(...datosTabla.map(item => parseInt(item[idField])));
+    nextId = maxId + 1;
+  }
+
+  Object.keys(estructura).forEach((campo, index) => {
+    const value = datos ? datos[campo] : (index === 0 && !modoEdicion ? nextId : "");
+    const readonly = index === 0 ? "readonly" : ""; // Bloquea solo el primer campo (ID)
+
+    let inputHTML = "";
+    if (campo.toLowerCase().includes("tipo_documento")) {
+      inputHTML = `
+        <label for="${campo}">Tipo de Documento</label>
+        <select name="${campo}" required>
+          <option value="">Seleccione...</option>
+          <option value="Cédula" ${value === "Cédula" ? "selected" : ""}>Cédula</option>
+          <option value="NIT" ${value === "NIT" ? "selected" : ""}>NIT</option>
+          <option value="Pasaporte" ${value === "Pasaporte" ? "selected" : ""}>Pasaporte</option>
+        </select>
+      `;
+    } else {
+      inputHTML = `
+        <label for="${campo}">${campo.replace(/_/g, " ")}</label>
+        <input type="text" name="${campo}" value="${value}" ${readonly} required />
+      `;
+    }
+
+    form.innerHTML += `<div class="form-group">${inputHTML}</div>`;
+  });
+
+  // --- BLOQUE PARA MÉDICOS ---
+  if (tipoActivo === "medicos") {
+    form.innerHTML += `
+      <div style="grid-column: span 2;">
+        <h4 style="margin-top:20px;">Información de Contacto</h4>
+        <div id="contactoContainer" style="display:none;"></div>
+        <a href="#" onclick="agregarContacto()" style="color:purple; font-weight:bold; display:inline-block; margin-top:8px;">+ Agregar contacto</a>
+      </div>
+    `;
+    // Eliminamos la llamada automática a agregarContacto()
+  }
+
+  // --- BLOQUE PARA SOCIEDADES ---
+  if (tipoActivo === "sociedades") {
+    form.innerHTML += `
+      <div style="grid-column: span 2;">
+        <h4 style="margin-top:20px;">Médicos Asociados</h4>
+        <div id="medicosContainer" style="display:none;"></div>
+        <a href="#" onclick="agregarMedicoAsociado()" style="color:purple; font-weight:bold; display:inline-block; margin-top:8px;">+ Agregar Profesional</a>
+      </div>
+    `;
+    // Eliminamos la llamada automática a agregarMedicoAsociado()
+  }
+  
+  // --- Botón Guardar ---
+  form.innerHTML += `
+    <div class="form-actions">
+      <button type="submit" class="btn">Guardar</button>
+    </div>
+  `;
+
+  modal.style.display = "block";
+}
+
+function agregarContacto() {
+  const container = document.getElementById("contactoContainer");
+  // Mostrar el contenedor si está oculto
+  if (container.style.display === "none") {
+    container.style.display = "block";
+  }
+  
+  const index = container.children.length;
+  const html = `
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>Teléfono</label>
+      <input type="text" name="telefono_${index}" required />
+      <label>Email</label>
+      <input type="email" name="email_${index}" required />
+      <label>Dirección</label>
+      <input type="text" name="direccion_${index}" required />
+      <hr style="margin: 10px 0;" />
+    </div>
+  `;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+
+function agregarMedicoAsociado() {
+  const container = document.getElementById("medicosContainer");
+  // Mostrar el contenedor si está oculto
+  if (container.style.display === "none") {
+    container.style.display = "block";
+  }
+  
+  const index = container.children.length;
+  const html = `
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>Nombre del Profesional</label>
+      <input type="text" name="medico_nombre_${index}" required />
+      <label>Documento</label>
+      <input type="text" name="medico_documento_${index}" required />
+      <hr style="margin: 10px 0;" />
+    </div>
+  `;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+
+function guardarEntidad(e) {
+  e.preventDefault();
+  
+  // Validar campos de contacto si es médico
+  if (tipoActivo === "medicos") {
+    const contactoContainer = document.getElementById("contactoContainer");
+    if (contactoContainer.style.display === "block") {
+      const inputs = contactoContainer.querySelectorAll("input");
+      let hasEmptyFields = false;
+      
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          hasEmptyFields = true;
+        }
+      });
+      
+      if (hasEmptyFields) {
+        alert("Por favor complete todos los campos de contacto o elimine los campos vacíos.");
+        return;
+      }
+    }
+  }
+  
+  // Validar campos de médicos asociados si es sociedad
+  if (tipoActivo === "sociedades") {
+    const medicosContainer = document.getElementById("medicosContainer");
+    if (medicosContainer.style.display === "block") {
+      const inputs = medicosContainer.querySelectorAll("input");
+      let hasEmptyFields = false;
+      
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          hasEmptyFields = true;
+        }
+      });
+      
+      if (hasEmptyFields) {
+        alert("Por favor complete todos los campos de médicos asociados o elimine los campos vacíos.");
+        return;
+      }
+    }
+  }
+
+  const formData = new FormData(e.target);
+  const nuevoRegistro = {};
+  formData.forEach((v, k) => {
+    // Solo guardamos campos principales, no los de contacto/médicos asociados
+    if (!k.includes("_") || k === "Tipo_documento") {
+      nuevoRegistro[k] = v;
+    }
+  });
+  
+  if (modoEdicion && indiceEditando !== null) {
+    datosTabla[indiceEditando] = nuevoRegistro;
+  } else {
+    datosTabla.unshift(nuevoRegistro);
+  }
+  datosSimulados[tipoActivo] = [...datosTabla];
+  cerrarModal();
+  renderizarTabla();
+}
+function cerrarModal() {
+  document.getElementById("modalEntidad").style.display = "none";
+}
+
+
+function inactivarSeleccionados() {
+  const seleccionados = document.querySelectorAll(".seleccionar:checked");
+
+  if (seleccionados.length === 0) {
+    alert("Por favor, selecciona al menos un registro para inactivar.");
+    return;
+  }
+
+  seleccionados.forEach(cb => {
+    const row = cb.closest("tr");
+    row.classList.toggle("inactivo"); // Alterna inactivo/activo
+    cb.checked = false; // Deselecciona el checkbox después
+  });
+}
+function agregarContacto() {
+  const container = document.getElementById("contactoContainer");
+  const index = container.children.length;
+  const html = `
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>Teléfono</label>
+      <input type="text" name="telefono_${index}" />
+      <label>Email</label>
+      <input type="email" name="email_${index}" />
+      <label>Dirección</label>
+      <input type="text" name="direccion_${index}" />
+      <hr style="margin: 10px 0;" />
+    </div>
+  `;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+function agregarMedicoAsociado() {
+  const container = document.getElementById("medicosContainer");
+  const index = container.children.length;
+  const html = `
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>Nombre del Profesional</label>
+      <input type="text" name="medico_nombre_${index}" />
+      <label>Documento</label>
+      <input type="text" name="medico_documento_${index}" />
+      <hr style="margin: 10px 0;" />
+    </div>
+  `;
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+
+
+</script>
+</body>
+</html>

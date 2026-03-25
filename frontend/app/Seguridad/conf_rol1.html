@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Medical Fees mySiss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --mysiss-purple: #800080;
+            --mysiss-light-purple: #EBE3F2;
+            --mysiss-hover-purple: #DFD1EE;
+            --mysiss-active-bg: #D0B8E6;
+        }
+        .custom-radio {
+            accent-color: var(--mysiss-purple);
+        }
+        .focus-outline:focus-visible {
+            outline: 2px solid var(--mysiss-purple);
+            outline-offset: 2px;
+        }
+        /* Estilos para el sidebar */
+        .submenu {
+            display: none;
+            padding-left: 1rem;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .nav-link.active {
+            background-color: var(--mysiss-active-bg);
+            font-weight: bold;
+            position: relative;
+        }
+        .nav-link.active::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--mysiss-purple);
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        /* Estilo para el contenedor del menú */
+        nav {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 80px);
+            position: relative;
+        }
+        /* Estilo para el enlace de cerrar sesión */
+        .logout-link {
+            margin-top: auto;
+            position: sticky;
+            bottom: 0;
+            background-color: var(--mysiss-light-purple);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .table-row-inactive {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+        .selected-row {
+            background-color: #DFD1EE;
+        }
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            margin: 0 0.125rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+        .edit-btn {
+            color: var(--mysiss-purple);
+        }
+        .delete-btn {
+            color: #EF4444;
+        }
+        .permission-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--mysiss-purple);
+            cursor: pointer;
+        }
+        .file-input {
+            display: none;
+        }
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .disabled-field {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+		/* Botón rojo fijo en esquina inferior derecha */
+		#devClearBtn {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background: transparent;
+			color: transparent;
+			border: none;
+			padding: 10px;
+			border-radius: 5px;
+			cursor: pointer;
+			z-index: 9999;
+		}
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-48 h-full bg-[var(--mysiss-light-purple)] flex flex-col">
+        <div class="p-6">
+            <h1 class="text-[var(--mysiss-purple)] text-5xl font-bold">mySiss</h1>
+        </div>
+        <nav class="mt-4 flex flex-col" aria-label="Menú principal">
+            <!-- Configuración -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('config-submenu', this)">
+                    <strong>Configuración</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="config-submenu" class="submenu">
+                    <a href="conf_bas_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Base</a>
+                    <!-- <a href="conf_func_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>-->
+                    <a href="conf_func_3.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>
+                    <a href="conf_role.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Roles</a>
+                </div>
+            </div>
+            
+            <!-- Usuario -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('usuario-submenu', this)">
+                    <strong>Usuario</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="usuario-submenu" class="submenu">
+                    <a href="conf_usua_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Usuario</a>
+                    <a href="conf_rol.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Asignar Rol</a>
+                </div>
+            </div>
+                        
+            <!-- Módulos - Estructura de tres niveles -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('modulos-submenu', this)">
+                    <strong>Modulos</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="modulos-submenu" class="submenu">
+                    <!-- Honorarios -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('honorarios-submenu', this)">
+                            <span>Honorarios</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="honorarios-submenu" class="submenu">
+                            <a href="../Honorarios/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../Honorarios/Honorarios.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Auditoria -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('auditoria-submenu', this)">
+                            <span>Auditoria</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="auditoria-submenu" class="submenu">
+                            <a href="../auditoria/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../auditoria/auditoria.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Glosas -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('glosas-submenu', this)">
+                            <span>Glosas</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="glosas-submenu" class="submenu">
+                            <a href="../glosas/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../glosas/glosas.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="../login.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors mt-44 focus-outline">
+                <strong>Cerrar Sesión</strong>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="flex-1 bg-white p-8 overflow-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-[var(--mysiss-purple)]">Roles</h2>
+            <div>
+                <button id="uploadTemplateBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline mr-2">
+                    Carga plantilla
+                </button>
+            </div>
+        </div>
+
+        <!-- Pestañas modificadas -->
+        <div class="mb-8 border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px" id="tabs" role="tablist">
+                <li role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-[var(--mysiss-purple)] text-[var(--mysiss-purple)] rounded-t-lg" id="usuarios-tab" type="button" role="tab">Roles-Usuario</button>
+                </li>
+            </ul>
+            <div class="mt-4">
+                <button id="addUserRoleBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Agregar Asociación
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenido de pestañas modificado -->
+        <div id="tab-content">
+            <!-- Pestaña Roles-Usuario siempre visible -->
+            <div class="p-4 rounded-lg bg-gray-50" id="usuarios" role="tabpanel">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Módulo</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funcionalidad</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actividad</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="userRolesTableBody">
+                            <!-- Filas se generan dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para carga de plantilla -->
+    <div id="uploadTemplateModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-bold mb-4">Cargar plantilla</h3>
+            <div class="mb-4">
+                <p class="text-gray-700">Suba un archivo Excel con la estructura de roles y usuarios. El sistema actualizará la información existente o creará nuevos registros según corresponda.</p>
+            </div>
+
+            <div class="mb-4">
+                <label for="fileInput" class="block text-lg font-medium text-gray-700 mb-2"></label>
+                <div class="flex">
+                    <input type="text" id="filePath" class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus-outline cursor-pointer" 
+                        placeholder="Seleccionar archivo..." readonly onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" class="file-input" accept=".xlsx">
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Seleccione un archivo en formato .XLSX</p>
+            </div>
+
+            <div class="flex justify-end space-x-2">
+                <button id="cancelUploadBtn" class="px-4 py-2 bg-gray-200 rounded-md focus-outline">
+                    Cancelar
+                </button>
+                <button id="executeBtn" class="btn-disabled px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Ejecutar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para asignar rol -->
+    <div id="assignRoleModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-3xl w-full">
+            <h3 class="text-lg font-bold mb-4">Asignar Rol a Usuario</h3>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+                    <div class="flex">
+                        <input type="text" id="selectedUser" class="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus-outline" readonly>
+                        <button id="searchUserBtn" class="px-3 py-2 bg-[var(--mysiss-purple)] text-white rounded-r-md focus-outline">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                    <div class="flex">
+                        <input type="text" id="selectedRole" class="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus-outline" readonly>
+                        <button id="searchRoleBtn" class="px-3 py-2 bg-[var(--mysiss-purple)] text-white rounded-r-md focus-outline">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Módulo</label>
+                    <input type="text" id="selectedModule" class="w-full border border-gray-300 rounded-md px-3 py-2 focus-outline" readonly>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Funcionalidad</label>
+                    <input type="text" id="selectedFunction" class="w-full border border-gray-300 rounded-md px-3 py-2 focus-outline" readonly>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Actividad</label>
+                    <input type="text" id="selectedActivity" class="w-full border border-gray-300 rounded-md px-3 py-2 focus-outline" readonly>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-4 mb-4">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Permisos</h4>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="createPermission" class="permission-checkbox mr-2">
+                        <label for="createPermission">Crear</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="modifyPermission" class="permission-checkbox mr-2">
+                        <label for="modifyPermission">Modificar</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="viewPermission" class="permission-checkbox mr-2">
+                        <label for="viewPermission">Visualizar</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="deletePermission" class="permission-checkbox mr-2">
+                        <label for="deletePermission">Eliminar</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-2">
+                <button id="cancelAssignBtn" class="px-4 py-2 bg-gray-200 rounded-md focus-outline">
+                    Cancelar
+                </button>
+                <button id="saveAssignBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para búsqueda de usuarios -->
+    <div id="userSearchModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-4xl w-full">
+            <h3 class="text-lg font-bold mb-4">Buscar Usuario</h3>
+            <div class="mb-4">
+                <input type="text" id="userSearchInput" class="border border-gray-300 rounded-md px-3 py-2 w-full focus-outline" placeholder="Buscar por nombre, apellido o cédula...">
+            </div>
+            <div class="max-h-96 overflow-y-auto mb-4">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Apellido</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cédula</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="userSearchResults">
+                        <!-- Resultados de búsqueda de usuarios -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end">
+                <button id="userSearchModalCloseBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para búsqueda de roles -->
+    <div id="roleSearchModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-4xl w-full">
+            <h3 class="text-lg font-bold mb-4">Buscar Rol</h3>
+            <div class="mb-4">
+                <input type="text" id="roleSearchInput" class="border border-gray-300 rounded-md px-3 py-2 w-full focus-outline" placeholder="Buscar por nombre de rol...">
+            </div>
+            <div class="max-h-96 overflow-y-auto mb-4">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Módulo</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funcionalidad</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actividad</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="roleSearchResults">
+                        <!-- Resultados de búsqueda de roles -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end">
+                <button id="roleSearchModalCloseBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mensajes -->
+    <div id="messageModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 id="modalTitle" class="text-lg font-bold mb-4"></h3>
+            <p id="modalMessage" class="mb-4"></p>
+            <div class="flex justify-end">
+                <button id="modalCloseBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+	<!-->
+	<button id="devClearBtn">Limpiar</button>
+	
+<script>
+    // Datos almacenados en localStorage
+    let userRolesData = JSON.parse(localStorage.getItem('userRolesData')) || [];
+    let modulosData = JSON.parse(localStorage.getItem('modulosData')) || [];
+    let funcionalidadesData = JSON.parse(localStorage.getItem('funcionalidadesData')) || [];
+    let actividadesData = JSON.parse(localStorage.getItem('actividadesData')) || [];
+    
+    // Obtener usuarios del otro HTML (conf_usua_1.html)
+    function getUsers() {
+        const storedUsers = localStorage.getItem('mysiss_users');
+        if (storedUsers) {
+            return JSON.parse(storedUsers);
+        } else {
+            // Datos de ejemplo si no hay usuarios en localStorage
+            return [
+                {id:1, usuario:"ANFEGIR", nombre1:"Andres", apellido1:"Giraldo", numeroDocumento:"1130524118"},
+                {id:2, usuario:"MARIPER", nombre1:"María", apellido1:"Pérez", numeroDocumento:"5214789632"},
+                {id:3, usuario:"jpmora", nombre1:"Juan", apellido1:"Mora", numeroDocumento:"31564356"},
+                {id:4, usuario:"mgomez", nombre1:"María", apellido1:"Gómez", numeroDocumento:"87654321"},
+                {id:5, usuario:"jramirez", nombre1:"Julian", apellido1:"Ramirez", numeroDocumento:"11223344"},
+                {id:6, usuario:"amartin", nombre1:"Ana", apellido1:"Martínez", numeroDocumento:"44332211"}
+            ];
+        }
+    }
+
+    // Variables de estado
+    let selectedUserRoleRow = null;
+    let currentEditingRow = null;
+    let selectedUser = null;
+    let selectedRole = null;
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+        renderUserRolesTable();
+        setupEventListeners();
+        expandAllMenus();
+        setActiveMenu();
+    });
+
+    // Función para expandir todos los menús y submenús
+    function expandAllMenus() {
+        document.querySelectorAll('.submenu').forEach(menu => menu.classList.add('active'));
+        document.querySelectorAll('.menu-item > a svg').forEach(icon => icon.classList.add('rotate-180'));
+    }
+
+    // Configurar eventos
+    function setupEventListeners() {
+        // Botón para agregar asociación
+        document.getElementById('addUserRoleBtn').addEventListener('click', () => {
+            currentEditingRow = null;
+            document.getElementById('assignRoleModal').classList.remove('hidden');
+            resetAssignRoleForm();
+        });
+
+        // Botón para cargar plantilla
+        document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
+            document.getElementById('uploadTemplateModal').classList.remove('hidden');
+        });
+
+        // Botón para cancelar carga de plantilla
+        document.getElementById('cancelUploadBtn').addEventListener('click', () => {
+            document.getElementById('uploadTemplateModal').classList.add('hidden');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePath').value = '';
+            document.getElementById('executeBtn').classList.add('btn-disabled');
+        });
+
+        // Botón para ejecutar carga de plantilla
+        document.getElementById('executeBtn').addEventListener('click', async () => {
+            if (document.getElementById('executeBtn').classList.contains('btn-disabled')) return;
+            
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) {
+                showModal('Error', 'No se ha seleccionado ningún archivo');
+                return;
+            }
+
+            try {
+                const data = await readExcelFile(file);
+                processExcelData(data);
+                
+                document.getElementById('fileInput').value = '';
+                document.getElementById('filePath').value = '';
+                document.getElementById('executeBtn').classList.add('btn-disabled');
+                
+                document.getElementById('uploadTemplateModal').classList.add('hidden');
+                showModal('Éxito', 'La información ha sido guardada correctamente');
+                
+                renderUserRolesTable();
+            } catch (error) {
+                console.error('Error al procesar el archivo:', error);
+                showModal('Error', 'Ocurrió un error al procesar el archivo. Verifique la estructura del Excel.');
+            }
+        });
+
+        // Botón para buscar usuario
+        document.getElementById('searchUserBtn').addEventListener('click', () => {
+            showUserSearchModal();
+        });
+
+        // Botón para buscar rol
+        document.getElementById('searchRoleBtn').addEventListener('click', () => {
+            showRoleSearchModal();
+        });
+
+        // Botón para cancelar asignación de rol
+        document.getElementById('cancelAssignBtn').addEventListener('click', () => {
+            document.getElementById('assignRoleModal').classList.add('hidden');
+        });
+
+        // Botón para guardar asignación de rol
+        document.getElementById('saveAssignBtn').addEventListener('click', () => {
+            saveUserRole();
+        });
+
+        // Cerrar modales al hacer clic fuera
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+
+        // Evento para el input de búsqueda de usuarios
+        document.getElementById('userSearchInput').addEventListener('input', () => {
+            const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#userSearchResults tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Evento para el input de búsqueda de roles
+        document.getElementById('roleSearchInput').addEventListener('input', () => {
+            const searchTerm = document.getElementById('roleSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#roleSearchResults tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Evento para el input de archivo
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                document.getElementById('filePath').value = file.name;
+                
+                if (!file.name.endsWith('.xlsx')) {
+                    showModal('Error', 'Archivo subido diferente a .XLSX.');
+                    document.getElementById('executeBtn').classList.add('btn-disabled');
+                    return;
+                }
+                
+                document.getElementById('executeBtn').classList.remove('btn-disabled');
+            }
+        });
+    }
+
+    // Función para leer archivo Excel
+    function readExcelFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    resolve(jsonData);
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            
+            reader.onerror = (error) => reject(error);
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    // Función para procesar datos del Excel
+    function processExcelData(data) {
+    const today = new Date().toISOString().split('T')[0];
+    
+    data.forEach(row => {
+        const existingIndex = userRolesData.findIndex(ur => 
+            ur.usuario === row.Usuario && ur.rol === row.Rol && 
+            ur.modulo === row.Módulo && ur.funcionalidad === row.Funcionalidad && 
+            ur.actividad === row.Actividad
+        );
+        
+        if (existingIndex >= 0) {
+            // Actualizar rol de usuario existente
+            userRolesData[existingIndex] = {
+                ...userRolesData[existingIndex],
+                crear: row.Crear && (row.Crear.toLowerCase() === 'x' || row.Crear === 'SI'),
+                modificar: row.Modificar && (row.Modificar.toLowerCase() === 'x' || row.Modificar === 'SI'),
+                visualizar: row.Visualizar && (row.Visualizar.toLowerCase() === 'x' || row.Visualizar === 'SI'),
+                eliminar: row.Eliminar && (row.Eliminar.toLowerCase() === 'x' || row.Eliminar === 'SI')
+            };
+        } else {
+            // Crear nuevo rol de usuario
+            userRolesData.push({
+                usuario: row.Usuario,
+                rol: row.Rol,
+                modulo: row.Módulo,
+                funcionalidad: row.Funcionalidad,
+                actividad: row.Actividad,
+                crear: row.Crear && (row.Crear.toLowerCase() === 'x' || row.Crear === 'SI'),
+                modificar: row.Modificar && (row.Modificar.toLowerCase() === 'x' || row.Modificar === 'SI'),
+                visualizar: row.Visualizar && (row.Visualizar.toLowerCase() === 'x' || row.Visualizar === 'SI'),
+                eliminar: row.Eliminar && (row.Eliminar.toLowerCase() === 'x' || row.Eliminar === 'SI'),
+                fechaAsignacion: today
+            });
+        }
+    });
+    
+    localStorage.setItem('userRolesData', JSON.stringify(userRolesData));
+}
+
+    // Función para renderizar la tabla de roles de usuario
+    function renderUserRolesTable() {
+        const tableBody = document.getElementById('userRolesTableBody');
+        tableBody.innerHTML = '';
+        
+        if (userRolesData.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center">No hay asociaciones de roles registradas</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        userRolesData.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.className = 'table-row-inactive';
+            row.dataset.id = index;
+            
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">${item.usuario}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${item.rol}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${item.modulo}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${item.funcionalidad}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${item.actividad}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <button class="edit-btn action-btn" title="Editar">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="delete-btn action-btn" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            `;
+            
+            // Configurar eventos para los botones
+            row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                editUserRole(index);
+            });
+            
+            row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteUserRole(index);
+            });
+            
+            row.addEventListener('click', () => {
+                document.querySelectorAll('#userRolesTableBody tr').forEach(r => {
+                    r.classList.remove('selected-row');
+                });
+                row.classList.add('selected-row');
+                selectedUserRoleRow = index;
+            });
+            
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Función para mostrar el modal de búsqueda de usuarios
+    function showUserSearchModal() {
+        const users = getUsers();
+        const resultsBody = document.getElementById('userSearchResults');
+        resultsBody.innerHTML = '';
+        
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4">${user.usuario}</td>
+                <td class="px-6 py-4">${user.nombre1}</td>
+                <td class="px-6 py-4">${user.apellido1}</td>
+                <td class="px-6 py-4">${user.numeroDocumento}</td>
+                <td class="px-6 py-4">
+                    <button class="select-user-btn px-2 py-1 bg-[var(--mysiss-purple)] text-white rounded-md">
+                        Seleccionar
+                    </button>
+                </td>
+            `;
+            
+            row.querySelector('.select-user-btn').addEventListener('click', () => {
+                selectedUser = user;
+                document.getElementById('selectedUser').value = user.usuario;
+                document.getElementById('userSearchModal').classList.add('hidden');
+            });
+            
+            resultsBody.appendChild(row);
+        });
+        
+        document.getElementById('userSearchInput').value = '';
+        document.getElementById('userSearchModal').classList.remove('hidden');
+    }
+
+    // Función para mostrar el modal de búsqueda de roles
+    function showRoleSearchModal() {
+        // Combinar datos de módulos, funcionalidades y actividades para mostrar roles completos
+        const roles = actividadesData.map(actividad => {
+            const funcionalidad = funcionalidadesData.find(f => f.codigo === actividad.funcionalidad);
+            const modulo = modulosData.find(m => m.codigo === (funcionalidad ? funcionalidad.modulo : ''));
+            
+            return {
+                rol: actividad.nombre,
+                modulo: modulo ? modulo.nombre : '',
+                funcionalidad: funcionalidad ? funcionalidad.nombre : '',
+                actividad: actividad.nombre,
+                codigo: actividad.codigo
+            };
+        });
+        
+        const resultsBody = document.getElementById('roleSearchResults');
+        resultsBody.innerHTML = '';
+        
+        roles.forEach(role => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4">${role.rol}</td>
+                <td class="px-6 py-4">${role.modulo}</td>
+                <td class="px-6 py-4">${role.funcionalidad}</td>
+                <td class="px-6 py-4">${role.actividad}</td>
+                <td class="px-6 py-4">
+                    <button class="select-role-btn px-2 py-1 bg-[var(--mysiss-purple)] text-white rounded-md">
+                        Seleccionar
+                    </button>
+                </td>
+            `;
+            
+            row.querySelector('.select-role-btn').addEventListener('click', () => {
+                selectedRole = role;
+                document.getElementById('selectedRole').value = role.rol;
+                document.getElementById('selectedModule').value = role.modulo;
+                document.getElementById('selectedFunction').value = role.funcionalidad;
+                document.getElementById('selectedActivity').value = role.actividad;
+                document.getElementById('roleSearchModal').classList.add('hidden');
+            });
+            
+            resultsBody.appendChild(row);
+        });
+        
+        document.getElementById('roleSearchInput').value = '';
+        document.getElementById('roleSearchModal').classList.remove('hidden');
+    }
+
+    // Función para editar una asociación de rol
+    function editUserRole(index) {
+        currentEditingRow = index;
+        const userRole = userRolesData[index];
+        
+        selectedUser = { usuario: userRole.usuario };
+        selectedRole = {
+            rol: userRole.rol,
+            modulo: userRole.modulo,
+            funcionalidad: userRole.funcionalidad,
+            actividad: userRole.actividad
+        };
+        
+        document.getElementById('selectedUser').value = userRole.usuario;
+        document.getElementById('selectedRole').value = userRole.rol;
+        document.getElementById('selectedModule').value = userRole.modulo;
+        document.getElementById('selectedFunction').value = userRole.funcionalidad;
+        document.getElementById('selectedActivity').value = userRole.actividad;
+        
+        document.getElementById('createPermission').checked = userRole.crear;
+        document.getElementById('modifyPermission').checked = userRole.modificar;
+        document.getElementById('viewPermission').checked = userRole.visualizar;
+        document.getElementById('deletePermission').checked = userRole.eliminar;
+        
+        document.getElementById('assignRoleModal').classList.remove('hidden');
+    }
+
+    // Función para eliminar una asociación de rol
+    function deleteUserRole(index) {
+        if (confirm('¿Está seguro que desea eliminar esta asociación de rol?')) {
+            userRolesData.splice(index, 1);
+            localStorage.setItem('userRolesData', JSON.stringify(userRolesData));
+            renderUserRolesTable();
+            showModal('Éxito', 'Asociación eliminada correctamente');
+        }
+    }
+
+    // Función para guardar una asociación de rol
+    function saveUserRole() {
+        if (!selectedUser || !selectedRole) {
+            showModal('Error', 'Debe seleccionar un usuario y un rol');
+            return;
+        }
+        
+        const newUserRole = {
+            usuario: selectedUser.usuario,
+            rol: selectedRole.rol,
+            modulo: selectedRole.modulo,
+            funcionalidad: selectedRole.funcionalidad,
+            actividad: selectedRole.actividad,
+            crear: document.getElementById('createPermission').checked,
+            modificar: document.getElementById('modifyPermission').checked,
+            visualizar: document.getElementById('viewPermission').checked,
+            eliminar: document.getElementById('deletePermission').checked,
+            fechaAsignacion: new Date().toISOString().split('T')[0]
+        };
+        
+        if (currentEditingRow !== null) {
+            // Actualizar asociación existente
+            userRolesData[currentEditingRow] = newUserRole;
+            showModal('Éxito', 'Asociación actualizada correctamente');
+        } else {
+            // Crear nueva asociación
+            userRolesData.push(newUserRole);
+            showModal('Éxito', 'Asociación creada correctamente');
+        }
+        
+        localStorage.setItem('userRolesData', JSON.stringify(userRolesData));
+        document.getElementById('assignRoleModal').classList.add('hidden');
+        renderUserRolesTable();
+        currentEditingRow = null;
+    }
+
+    // Función para resetear el formulario de asignación de rol
+    function resetAssignRoleForm() {
+        document.getElementById('selectedUser').value = '';
+        document.getElementById('selectedRole').value = '';
+        document.getElementById('selectedModule').value = '';
+        document.getElementById('selectedFunction').value = '';
+        document.getElementById('selectedActivity').value = '';
+        
+        document.getElementById('createPermission').checked = false;
+        document.getElementById('modifyPermission').checked = false;
+        document.getElementById('viewPermission').checked = false;
+        document.getElementById('deletePermission').checked = false;
+        
+        selectedUser = null;
+        selectedRole = null;
+    }
+
+    // Función para mostrar mensajes en modal
+    function showModal(title, message) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = message;
+        document.getElementById('messageModal').classList.remove('hidden');
+    }
+
+    // Función para cerrar modales
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Función para establecer el menú activo
+    function setActiveMenu() {
+        const currentPath = window.location.pathname.split('/').pop();
+        
+        document.querySelectorAll('.nav-link[href]').forEach(link => {
+            const linkPath = link.getAttribute('href').split('/').pop();
+            if (linkPath === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    }
+
+    // Función para alternar submenús
+    function toggleSubmenu(id, element) {
+        const submenu = document.getElementById(id);
+        const icon = element.querySelector('svg');
+        submenu.classList.toggle('active');
+        icon.classList.toggle('rotate-180');
+    }
+	
+	document.getElementById("devClearBtn").onclick = function() {
+		localStorage.clear(); // Borra todo el localStorage
+		alert("LocalStorage limpiado ✅");
+	};
+</script>
+</body>
+</html>

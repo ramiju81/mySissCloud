@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <title>Consultar responsable objeción - mySiss</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#fff}
+    .container{display:flex}
+    .sidebar{width:180px;background:#eee6f8;padding:20px;height:100vh;position:fixed;top:0;left:0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto}
+    .sidebar h1{color:purple;font-weight:bold;font-size:50px;margin-bottom:30px}
+    .sidebar a{display:block;margin:10px 0;color:purple;text-decoration:none;font-weight:bold}
+    .logout{color:purple;text-decoration:none;font-weight:bold}
+    .main{margin-left:240px;flex:1;background:#fff;padding:20px 40px}
+    [hidden]{display:none !important}
+    .submenu-radicacion,.submenu-devolucion,.submenu-objecion,.submenu-gestion,.submenu-conciliacion{display:flex;flex-direction:column;gap:4px;margin:4px 0 8px 12px}
+    .submenu-radicacion a,.submenu-devolucion a,.submenu-objecion a,.submenu-gestion a,.submenu-conciliacion a{margin:0;font-weight:normal;font-size:14px}
+
+    /* ====== Internos ====== */
+    .main .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+    .main .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px;margin-bottom:22px}
+    .main .row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+    .main .row label{min-width:180px;font-weight:400}
+    .main input[type="date"], .main select, .main input[type="text"]{border:1px solid #8b3b98;border-radius:10px;padding:10px 12px;min-width:200px;outline:none}
+    .btn{background:purple;color:#fff;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6;transition:.15s transform ease;font-weight:400}
+    .btn--outline{background:#f3e9f8;color:#3d0a46}
+    .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .title-row h3{font-size:22px;margin:0;font-weight:400}
+
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th, td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400}
+    th{background:#f5f1f9;font-size:13px;text-align:center}
+    td .ico-btn{background:none;border:0;cursor:pointer}
+
+    /* lupa dentro del cajón (sin forzar width) */
+    .input-icon{position:relative;display:inline-block}
+    .input-icon input{padding-right:36px;min-width:240px}
+    .input-icon button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;cursor:pointer}
+    .input-icon i{color:#7b1e85}
+
+    /* semáforo */
+    .sem{width:20px;height:20px;border-radius:50%;border:3px solid #2f6f88;display:inline-block}
+    .sem.red{border-color:#cc1e1e;background:#ffefef}
+    .sem.green{border-color:#198754;background:#ecffef}
+    .sem.yellow{border-color:#c79500;background:#fff9e6}
+    .sem.gray{border-color:#98a6ad;background:#f4f6f7}
+
+    /* mini menus (lupas) */
+    .picker{
+      position:absolute;right:0;top:calc(100% + 6px);
+      background:#fff;border:1px solid #cbb6d7;border-radius:10px;
+      box-shadow:0 6px 16px rgba(0,0,0,.12);padding:6px;z-index:10005;
+      max-height:260px;overflow:auto
+    }
+    .picker a{display:block;padding:6px 8px;color:#3d0a46;text-decoration:none;white-space:nowrap}
+    .picker a:hover{background:#f6f2fa}
+
+    /* Modales */
+    .modal-backdrop{
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);
+      z-index:10000;align-items:center;justify-content:center;
+    }
+    .modal{
+      background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+      max-width:420px; width:calc(100% - 32px); padding:18px; overflow:visible;
+    }
+    .modal h4{margin:0 0 10px;font-weight:600;color:#2d0b33}
+    .modal .form{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+    .modal .field{ width:340px; }
+    .modal .field > input,
+    .modal .field > .input-icon{ display:block; width:100%; box-sizing:border-box; }
+    .modal .field > .input-icon{ position:relative; }
+    .modal .field > .input-icon input{ width:100%; min-width:0; padding-right:36px; box-sizing:border-box; }
+    .modal .field > .input-icon button{ position:absolute; right:6px; top:50%; transform:translateY(-50%); border:0; background:transparent; cursor:pointer; }
+    .modal .field > .input-icon i{ color:#7b1e85; }
+    .modal .actions{ width:340px; display:flex; justify-content:flex-end; gap:10px; margin-top:12px; }
+    .modal .btn-ok{ background:purple;color:#fff;border:none;border-radius:10px;padding:8px 14px;cursor:pointer; }
+    .modal .btn-cancel{ background:#ccc;color:#000;border:none;border-radius:10px;padding:8px 14px;cursor:pointer; }
+
+    /* === Motivo Específico: 3 líneas + botón (v) + popover === */
+    .cell-esp{position:relative;padding-right:26px;}
+    .cell-esp .clip{
+      display:-webkit-box;
+      -webkit-line-clamp:3;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .cell-esp .btn-exp{
+      position:absolute; right:4px; top:50%; transform:translateY(-50%);
+      border:0; background:transparent; cursor:pointer; padding:0;
+      width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+    }
+    .pop-esp{
+      position:fixed; z-index:10006; background:#fff; border:1px solid #cbb6d7; border-radius:10px;
+      box-shadow:0 12px 28px rgba(0,0,0,.18);
+      max-width:520px; width:min(520px, calc(100% - 24px));
+    }
+    .pop-esp .hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid #eee}
+    .pop-esp .hd h5{margin:0;font-size:14px;font-weight:600;color:#2d0b33}
+    .pop-esp .close{background:transparent;border:0;font-size:16px;cursor:pointer;color:#7b1e85}
+    .pop-esp .bd{padding:10px;max-height:360px;overflow:auto;white-space:pre-wrap;line-height:1.35}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <h1>mySiss</h1>
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div class="submenu-radicacion" id="submenu-radicacion" hidden>
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html" id="devolucion-link">Devolución facturas</a>
+        <div class="submenu-devolucion" id="submenu-devolucion" hidden>
+          <a href="reg_dev.html">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+        <a href="cargue.html" id="objecion-link">Cargue objeciones</a>
+        <div class="submenu-objecion" id="submenu-objecion" hidden>
+          <a href="carg_obj.html">Cargar archivo objeción</a>
+          <a href="conr_obj.html" style="text-decoration: underline;">Consultar/Cambiar responsable objeción</a>
+        </div>
+
+        <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+        <div class="submenu-gestion" id="submenu-gestion" hidden>
+          <a href="cont_obj.html">Contestar objeción</a>
+          <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+          <a href="cons_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="conciliacion.html" id="conciliacion-link">Conciliación objeciones</a>
+        <div class="submenu-conciliacion" id="submenu-conciliacion" hidden>
+          <a href="con_glo.html">Conciliación glosa a conciliar</a>
+          <a href="con_glo.html">Conciliación glosa</a>
+          <a href="cons_glo.html">Consultar glosas conciliadas</a>
+        </div>
+      </div>
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <div class="main">
+      <h2>Consultar / Cambiar responsable de objeción</h2>
+
+<style>
+.main .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+.main .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px 18px 12px;margin-bottom:22px}
+.main .row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.main .row label{min-width:180px;font-weight:400}
+.main input[type="date"], .main select, .main input[type="text"]{border:1px solid #8b3b98;border-radius:10px;padding:10px 12px;min-width:200px;outline:none}
+.main .btn{background:purple;color:#fff;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6;transition:.15s transform ease;font-weight:400}
+.main .btn--outline{background:#f3e9f8;color:#3d0a46}
+.main .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.main table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+.main th, .main td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400}
+.main th{background:#f5f1f9;font-size:13px;text-align:center}
+.main .input-icon{position:relative;display:inline-block}
+.main .input-icon input{padding-right:34px;min-width:240px}
+.main .input-icon button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;cursor:pointer}
+.main .input-icon i{color:#7b1e85}
+</style>
+
+<div class="title-row"><h3 class="h2">Criterios de búsqueda</h3></div>
+<div class="section" id="filtros">
+  <div class="row" style="display:grid;grid-template-columns:auto auto auto;gap:12px;align-items:end;">
+    <div style="display:grid;gap:6px;max-width:240px;">
+      <label for="fRadExt">No. Radicado Externo</label>
+      <div class="input-icon">
+        <input type="text" id="fRadExt" placeholder="Ej: 00000">
+        <button id="btnLupaRadExt" class="btn-ico" title="Buscar"><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+    <div style="display:grid;gap:6px;max-width:240px;">
+      <label for="fFactura">No. Factura</label>
+      <div class="input-icon">
+        <input type="text" id="fFactura" placeholder="Ej: 000000000">
+        <button id="btnLupaFactura" class="btn-ico" title="Buscar"><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+    <div style="display:grid;gap:6px;max-width:220px;">
+      <label for="fEstado">Estado Factura</label>
+      <select id="fEstado">
+        <option value="objetada">Objetada</option>
+        <option value=""></option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row" style="display:grid;grid-template-columns:auto auto;gap:12px;align-items:end;margin-top:12px;">
+    <div style="display:grid;gap:6px;">
+      <label>Fecha Objeción</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="date" id="fIni" style="width:150px;">
+        <span style="font-weight:700">a</span>
+        <input type="date" id="fFin" style="width:150px;">
+      </div>
+    </div>
+    <button id="btnBuscar" class="btn btn--outline" style="height:38px;white-space:nowrap;">Buscar</button>
+  </div>
+</div>
+
+<div class="title-row"><h3 class="h2">Detalle objeciones</h3></div>
+<div class="section">
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th style="width:70px;">Detalle</th>
+        <th style="width:70px;">Indicador</th>
+        <th>Aseguradora</th>
+        <th>No. Factura</th>
+        <th>No. Radicado Externo</th>
+        <th>Estado</th>
+        <th>Fecha Objeción</th>
+        <th>Responsable</th>
+      </tr>
+    </thead>
+    <tbody><tr><td colspan="8" style="text-align:center;color:#777">Usa los filtros y presiona <b>Buscar</b></td></tr></tbody>
+  </table>
+</div>
+
+<!-- Panel de detalle -->
+<div class="section" id="panelDetalle" hidden>
+  <div class="title-row"><h3 class="h2">Detalle objeciones (registro)</h3></div>
+  <div class="toolbar">
+    <button id="btnReasignar" class="btn" disabled>Reasignar</button>
+  </div>
+  <table id="tblDetalle">
+    <thead>
+      <tr>
+        <th style="width:40px;"><input type="checkbox" disabled></th>
+        <th>Posición</th>
+        <th>Prestación</th>
+        <th>Descripción</th>
+        <th>Cantidad</th>
+        <th>Precio</th>
+        <th>Valor Total</th>
+        <th>Motivo Objeción</th>
+        <th>Motivo Específico</th>
+        <th>Valor Objetado</th>
+        <th>Nota Aseguradora</th>
+        <th>Responsable</th>
+      </tr>
+    </thead>
+    <tbody><tr><td colspan="12" class="muted" style="text-align:center;">Seleccione un registro en la lista y haga clic en el ícono de <b>Detalle</b>.</td></tr></tbody>
+  </table>
+</div>
+
+<!-- Modal Nota Aseguradora -->
+<div id="modalNota" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalNotaTitle">
+    <h4 id="modalNotaTitle">Detalle nota aseguradora</h4>
+    <p id="modalNotaText" class="muted">(sin nota)</p>
+    <div class="actions" style="width:auto">
+      <button type="button" class="btn-ok" id="btnCloseNota">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Reasignar Responsable -->
+<div id="modalReasignar" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalReasTitle">
+    <h4 id="modalReasTitle">Cambio de responsable</h4>
+    <div class="form">
+      <div class="field">
+        <label>Responsable actual</label>
+        <input type="text" id="respActual" readonly>
+      </div>
+      <div class="field">
+        <label>Nuevo responsable</label>
+        <div class="input-icon">
+          <input type="text" id="respNuevo" placeholder="Seleccione..." autocomplete="off">
+          <button id="btnLupaResp" title="Listado"><i class="fas fa-search"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn-cancel" id="btnCancelReas">Cancelar</button>
+      <button type="button" class="btn-ok" id="btnSaveReas">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ===== Keys =====
+  const OBJ_KEY  = 'objeciones_data';
+  const RESP_KEY = 'objeciones_responsables';
+
+  // ===== Usuario actual (login) =====
+  const CURRENT_USER = (localStorage.getItem('session_user') || 'AGUAJO').trim().toUpperCase();
+
+  // ===== State helpers =====
+  function loadData(){
+    try{
+      const raw = localStorage.getItem(OBJ_KEY);
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    }catch(e){ return []; }
+  }
+  function saveData(arr){ localStorage.setItem(OBJ_KEY, JSON.stringify(arr||[])); }
+  function loadResp(){
+    try{
+      const raw = localStorage.getItem(RESP_KEY);
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    }catch(e){ return []; }
+  }
+
+  // ===== Visibilidad por responsable =====
+  function canSeeRecord(r){
+    const resp = (r.responsable || '').trim().toUpperCase();
+    // Si no tiene responsable, por defecto lo ve AGUAJO
+    if (!resp) return CURRENT_USER === 'AGUAJO';
+    return resp === CURRENT_USER;
+  }
+
+  // ===== Filters empty check =====
+  function filtrosVacios(scope){
+    const get = id => (scope.querySelector('#'+id)?.value || '').trim();
+    return !get('fRadExt') && !get('fEstado') && !get('fFactura') && (!get('fIni') && !get('fFin'));
+  }
+
+  // ===== Generic filter engine =====
+  function applyFilters(scope){
+    const data = loadData();
+    const get = id => (scope.querySelector('#'+id)?.value || '').trim().toLowerCase();
+    const ini = scope.querySelector('#fIni')?.value || '';
+    const fin = scope.querySelector('#fFin')?.value || '';
+
+    const res = data.filter(r=>{
+      if (!canSeeRecord(r)) return false;  // <<< filtro por responsable
+
+      const rad = (r.radicado_externo||'').toString().toLowerCase();
+      const fac = (r.numero_factura||'').toString().toLowerCase();
+      const est = (r.estado||'').toString().toLowerCase();
+      const fObj = (r.fecha_objecion_iso || r.fecha_objecion || '').substring(0,10);
+
+      const matchRad = !get('fRadExt')  || rad.includes(get('fRadExt'));
+      const matchFac = !get('fFactura') || fac.includes(get('fFactura'));
+      const matchEst = !get('fEstado')  || est === get('fEstado');
+      let matchDate = true;
+      if(ini || fin){
+        const v = fObj || '';
+        if(ini && v < ini) matchDate = false;
+        if(fin && v > fin) matchDate = false;
+      }
+      return matchRad && matchFac && matchEst && matchDate;
+    });
+
+    return res.sort((a,b)=> (b.fecha_objecion_iso||'').localeCompare(a.fecha_objecion_iso||''));
+  }
+
+  // ===== Picker anclado a la lupa =====
+  function openPicker(btn, values, onPick){
+    const container = btn.closest('.input-icon') || btn.parentElement;
+    container.querySelectorAll('.picker').forEach(n=>n.remove());
+    const menu = document.createElement('div');
+    menu.className = 'picker';
+    values.forEach(v=>{
+      const a=document.createElement('a'); a.href='#'; a.textContent=v;
+      a.addEventListener('click', ev=>{ev.preventDefault(); onPick(v); menu.remove();});
+      menu.appendChild(a);
+    });
+    container.appendChild(menu);
+    const close=(ev)=>{ if(!menu.contains(ev.target) && ev.target!==btn){ menu.remove(); document.removeEventListener('click',close);} };
+    setTimeout(()=>document.addEventListener('click',close),0);
+  }
+
+  // Lupa Radicado: solo radicados que el usuario puede ver
+  document.getElementById('btnLupaRadExt').addEventListener('click', (e)=>{
+    e.preventDefault();
+    const data = loadData().filter(canSeeRecord);
+    const list = [...new Set(data.map(x=>x.radicado_externo).filter(Boolean))]
+      .sort((a,b)=>(''+b).localeCompare(''+a)).slice(0,50);
+    openPicker(e.currentTarget, list, (val)=> document.getElementById('fRadExt').value = val);
+  });
+
+  // Lupa Factura: solo facturas que el usuario puede ver
+  document.getElementById('btnLupaFactura').addEventListener('click', (e)=>{
+    e.preventDefault();
+    const data = loadData().filter(canSeeRecord);
+    const list = [...new Set(data.map(x=>x.numero_factura).filter(Boolean))]
+      .sort((a,b)=>(''+b).localeCompare(''+a)).slice(0,50);
+    openPicker(e.currentTarget, list, (val)=> document.getElementById('fFactura').value = val);
+  });
+
+  // ===== Render lista principal =====
+  const scope = document;
+  const tbody = scope.querySelector('#tbl tbody');
+  const panelDetalle = document.getElementById('panelDetalle');
+  const tbodyDet = document.querySelector('#tblDetalle tbody');
+
+  function semaforoHTML(estado){
+    const s = (estado||'').toString().toLowerCase();
+    let cls = 'gray';
+    if(s==='objetada') cls = 'red';
+    else if(s==='generada') cls = 'green';
+    else if(s==='radicada') cls = 'yellow';
+    return `<span class="sem ${cls}"></span>`;
+  }
+
+  function render(rows){
+    tbody.innerHTML='';
+    if(!rows.length){ tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777">Sin resultados</td></tr>'; return; }
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.dataset.key = `${r.numero_factura}||${r.radicado_externo}`;
+      tr.innerHTML = `
+                      <td style="text-align:center;"><button class="ico-btn btn-detalle" title="Ver detalle"><i class="far fa-clipboard" style="color:#4b0055"></i></button></td>
+                      <td style="text-align:center;">${semaforoHTML(r.estado)}</td>
+                      <td>${r.pagador||''}</td>
+                      <td>${r.numero_factura||''}</td>
+                      <td>${r.radicado_externo||''}</td>
+                      <td style="text-transform:capitalize;">${(r.estado||'').toLowerCase()}</td>
+                      <td>${(r.fecha_objecion||'').replaceAll('.','/')}</td>
+                      <td>${r.responsable||''}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  scope.getElementById('btnBuscar').addEventListener('click', ()=>{
+    if(filtrosVacios(scope)){
+      alert('Debe ingresar al menos un criterio de búsqueda.');
+      return;
+    }
+    const rows = applyFilters(scope);
+    render(rows);
+    panelDetalle.hidden = true;
+    tbodyDet.innerHTML = '<tr><td colspan="12" class="muted" style="text-align:center;">Seleccione un registro en la lista y haga clic en el ícono de <b>Detalle</b>.</td></tr>';
+    document.getElementById('btnReasignar').disabled = true;
+  });
+
+  // ===== Detalle, nota y reasignación =====
+  let currentRecord = null;
+  let currentDetalleIndex = null;
+
+  function pickKey(obj, keys){
+    if(!obj) return '';
+    for(const k of keys){
+      if(Object.prototype.hasOwnProperty.call(obj, k)){
+        const v = obj[k];
+        if(v!=='' && v!=null) return v;
+      }
+    }
+    return '';
+  }
+  function pickDetOrRec(det, rec, keys){
+    return pickKey(det, keys) || pickKey(rec, keys) || '';
+  }
+
+  let _popEsp = null;
+  function cerrarPopEsp(){
+    if(_popEsp){
+      _popEsp.remove(); _popEsp=null;
+      document.removeEventListener('click', _autoClose);
+      window.removeEventListener('resize', cerrarPopEsp);
+      window.removeEventListener('scroll', cerrarPopEsp, true);
+    }
+  }
+  function _autoClose(ev){
+    if(_popEsp && !(_popEsp.contains(ev.target) || ev.target.closest('.btn-exp'))){ cerrarPopEsp(); }
+  }
+  function abrirPopCerca(btn, titulo, texto){
+    cerrarPopEsp();
+    const pop = document.createElement('div');
+    pop.className='pop-esp';
+    pop.innerHTML = `
+      <div class="hd">
+        <h5>${titulo||''}</h5>
+        <button class="close" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="bd"></div>`;
+    pop.querySelector('.bd').textContent = texto || '(sin texto)';
+    document.body.appendChild(pop);
+
+    const r = btn.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const pw = pop.offsetWidth, ph = pop.offsetHeight;
+
+    let left = r.right - pw; if(left<8) left=8; if(left+pw>vw-8) left = vw - pw - 8;
+    let top  = r.bottom + 6; if(top+ph>vh-8) top = Math.max(8, r.top - ph - 6);
+
+    pop.style.left = (window.scrollX + left) + 'px';
+    pop.style.top  = (window.scrollY + top)  + 'px';
+
+    pop.querySelector('.close').addEventListener('click', cerrarPopEsp);
+    setTimeout(()=>{
+      document.addEventListener('click', _autoClose);
+      window.addEventListener('resize', cerrarPopEsp);
+      window.addEventListener('scroll', cerrarPopEsp, true);
+    },0);
+    _popEsp = pop;
+  }
+
+  function renderDetalle(rec){
+    tbodyDet.innerHTML='';
+    if(!rec || !Array.isArray(rec.detalle) || !rec.detalle.length){
+      tbodyDet.innerHTML='<tr><td colspan="12" class="muted" style="text-align:center;">El registro no tiene detalle.</td></tr>'; 
+      return;
+    }
+    rec.detalle.forEach((d,i)=>{
+      const motObj = pickDetOrRec(d, rec, [
+        'Motivo objeción','Motivo Objeción','motivo_objecion','motivo'
+      ]);
+      const motEsp = pickDetOrRec(d, rec, [
+        'Motivo Específico','Motivo específico','motivo_especifico','motivo_esp','motivoEspecifico'
+      ]);
+
+      const tr = document.createElement('tr');
+      tr.dataset.idx = i;
+      tr.innerHTML = `
+        <td style="text-align:center;"><input type="radio" name="selDet" class="sel-det"></td>
+        <td>${d.consecutivo||i+1}</td>
+        <td>${d.codigo_servicio||''}</td>
+        <td>${d.descripcion_servicio||''}</td>
+        <td style="text-align:right;">${d.cantidad||''}</td>
+        <td style="text-align:right;">${d.valor_servicio||''}</td>
+        <td style="text-align:right;">${d.valor_total||''}</td>
+
+        <td>${motObj||''}</td>
+
+        <td class="cell-esp">
+          <div class="clip">${motEsp||''}</div>
+          ${ motEsp ? `<button class="btn-exp" title="Ver completo"><i class="fas fa-caret-down"></i></button>` : `` }
+        </td>
+
+        <td style="text-align:right;">${d.valor_objetado||''}</td>
+        <td style="text-align:center;">
+          <button class="ico-btn btn-nota" title="Ver nota"><i class="fas fa-search"></i></button>
+        </td>
+        <td>${d.responsable||rec.responsable||''}</td>`;
+      tbodyDet.appendChild(tr);
+    });
+  }
+
+  // abrir detalle desde la lista
+  tbody.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.btn-detalle');
+    if(!btn) return;
+    const tr = btn.closest('tr');
+    const [fact, rad] = tr.dataset.key.split('||');
+    const data = loadData();
+    const rec = data.find(x=> (x.numero_factura==fact && x.radicado_externo==rad));
+    currentRecord = rec || null;
+    currentDetalleIndex = null;
+    document.getElementById('btnReasignar').disabled = true;
+    panelDetalle.hidden = false;
+    renderDetalle(currentRecord);
+    panelDetalle.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  // seleccionar fila detalle
+  document.getElementById('tblDetalle').addEventListener('change', (e)=>{
+    if(e.target.classList.contains('sel-det')){
+      const tr = e.target.closest('tr');
+      currentDetalleIndex = parseInt(tr.dataset.idx,10);
+      document.getElementById('btnReasignar').disabled = false;
+    }
+  });
+
+  // modal nota aseguradora
+  const modalNota = document.getElementById('modalNota');
+  const modalNotaText = document.getElementById('modalNotaText');
+  document.getElementById('btnCloseNota').addEventListener('click', ()=>{
+    modalNota.style.display='none'; modalNota.setAttribute('aria-hidden','true');
+  });
+  document.getElementById('tblDetalle').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.btn-nota');
+    if(!btn) return;
+    const row = btn.closest('tr');
+    const idx = parseInt(row.dataset.idx,10);
+    const d = (currentRecord?.detalle||[])[idx] || {};
+    modalNotaText.textContent = d.nota_pagador || '(sin nota)';
+    modalNota.style.display='flex';
+    modalNota.setAttribute('aria-hidden','false');
+  });
+
+  // botón "v" (ver completo) Motivo Específico
+  document.getElementById('tblDetalle').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.btn-exp');
+    if(!btn) return;
+    const row = btn.closest('tr');
+    const idx = parseInt(row.dataset.idx,10);
+    const d = (currentRecord?.detalle||[])[idx] || {};
+    const full = pickDetOrRec(d, currentRecord, [
+      'Motivo Específico','Motivo específico','motivo_especifico','motivo_esp','motivoEspecifico'
+    ]) || '(sin texto)';
+    abrirPopCerca(btn, 'Motivo Específico', String(full));
+  });
+
+  // ===== Reasignar =====
+  const modalReas = document.getElementById('modalReasignar');
+  const respActual = document.getElementById('respActual');
+  const respNuevo = document.getElementById('respNuevo');
+  const btnLupaResp = document.getElementById('btnLupaResp');
+
+  btnLupaResp.addEventListener('click', (e)=>{
+    e.preventDefault();
+    const base = new Set(loadResp());
+    ['ARAMIREZ','MHENAO','CTOVAR','AGUAJO'].forEach(x=>base.add(x));
+    const list = [...base].sort();
+    openPicker(e.currentTarget, list, (val)=> respNuevo.value = val);
+  });
+
+  document.getElementById('btnReasignar').addEventListener('click', ()=>{
+    if(currentRecord==null || currentDetalleIndex==null){ return; }
+    const d = currentRecord.detalle[currentDetalleIndex];
+    respActual.value = d.responsable || currentRecord.responsable || '';
+    respNuevo.value = '';
+    modalReas.style.display='flex'; modalReas.setAttribute('aria-hidden','false');
+  });
+
+  document.getElementById('btnCancelReas').addEventListener('click', ()=>{
+    modalReas.style.display='none'; modalReas.setAttribute('aria-hidden','true');
+  });
+
+  document.getElementById('btnSaveReas').addEventListener('click', ()=>{
+    const nuevo = (respNuevo.value||'').trim().toUpperCase();
+    if(!nuevo){ alert('Seleccione el nuevo responsable.'); return; }
+
+    const data = loadData();
+    const idxRec = data.findIndex(x=> x.numero_factura==currentRecord.numero_factura && x.radicado_externo==currentRecord.radicado_externo);
+    if(idxRec>=0 && data[idxRec].detalle && data[idxRec].detalle[currentDetalleIndex]){
+      // actualizar detalle
+      data[idxRec].detalle[currentDetalleIndex].responsable = nuevo;
+      // actualizar responsable del registro principal (para filtros y tabla)
+      data[idxRec].responsable = nuevo;
+      saveData(data);
+      currentRecord = data[idxRec];
+
+      // Re-renderizar detalle
+      renderDetalle(currentRecord);
+      // Re-renderizar lista principal aplicando filtros + responsable
+      const rows = applyFilters(scope);
+      render(rows);
+
+      // Si el registro ya no le pertenece al usuario actual, ocultar panel de detalle
+      if (!canSeeRecord(currentRecord)){
+        panelDetalle.hidden = true;
+        tbodyDet.innerHTML = '<tr><td colspan="12" class="muted" style="text-align:center;">Seleccione un registro en la lista y haga clic en el ícono de <b>Detalle</b>.</td></tr>';
+      }
+    }
+    modalReas.style.display='none'; modalReas.setAttribute('aria-hidden','true');
+  });
+
+})();
+</script>
+
+</div>
+  </div>
+  
+<script>
+(function(){
+  const page = location.pathname.split('/').pop();
+
+  const groups = {
+    devolucion: ["devolucion.html","reg_dev.html","con_dev.html"],
+    objecion:   ["cargue.html","carg_obj.html","conr_obj.html","cam_obj.html","conc_obj.html"],
+    gestion:    ["gestion.html","cont_obj.html","regr_asig.html","resp_asig.html","cons_obj.html"],
+    conciliacion: ["conciliacion.html","con_glo.html","cons_glo.html"]
+  };
+
+  const submenuEls = {
+    devolucion: document.getElementById('submenu-devolucion'),
+    objecion: document.getElementById('submenu-objecion'),
+    gestion: document.getElementById('submenu-gestion'),
+    conciliacion: document.getElementById('submenu-conciliacion')
+  };
+
+  const parentLinks = {
+    devolucion: document.getElementById('devolucion-link'),
+    objecion: document.getElementById('objecion-link'),
+    gestion: document.getElementById('gestion-link'),
+    conciliacion: document.getElementById('conciliacion-link')
+  };
+
+  let activeGroup = null;
+  for (const [group, files] of Object.entries(groups)) {
+    if (files.includes(page)) { activeGroup = group; break; }
+  }
+
+  for (const [group, el] of Object.entries(submenuEls)) {
+    if (!el) continue;
+    if (group === activeGroup) {
+      el.removeAttribute('hidden');
+      if (parentLinks[group]) parentLinks[group].style.textDecoration = 'underline';
+    } else {
+      el.setAttribute('hidden','');
+      if (parentLinks[group]) parentLinks[group].style.textDecoration = 'none';
+    }
+  }
+
+  document.querySelectorAll('.submenu-devolucion a, .submenu-objecion a, .submenu-gestion a, .submenu-conciliacion a')
+    .forEach(a => {
+      const isCurrent = a.getAttribute('href') === page;
+      a.style.textDecoration = isCurrent ? 'underline' : 'none';
+      a.style.fontWeight = isCurrent ? 'bold' : 'normal';
+    });
+
+})();
+</script>
+
+</body>
+</html>

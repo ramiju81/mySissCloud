@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Medical Fees mySiss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --mysiss-purple: #800080;
+            --mysiss-light-purple: #EBE3F2;
+            --mysiss-hover-purple: #DFD1EE;
+            --mysiss-active-bg: #D0B8E6;
+        }
+        .form-row input, 
+        .form-row select {
+            width: 100%;
+            min-width: 200px;
+        }
+        .custom-radio {
+            accent-color: var(--mysiss-purple);
+        }
+        .focus-outline:focus-visible {
+            outline: 2px solid var(--mysiss-purple);
+            outline-offset: 2px;
+        }
+        .submenu {
+            display: none;
+            padding-left: 1rem;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .nav-link.active {
+            background-color: var(--mysiss-active-bg);
+            font-weight: bold;
+            position: relative;
+        }
+        .nav-link.active::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--mysiss-purple);
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        nav {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 80px);
+            position: relative;
+        }
+        .logout-link {
+            margin-top: auto;
+            position: sticky;
+            bottom: 0;
+            background-color: var(--mysiss-light-purple);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-button.active {
+            border-bottom: 2px solid var(--mysiss-purple);
+            background-color: var(--mysiss-hover-purple);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .search-results {
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            z-index: 100;
+            display: none;
+        }
+        .search-results table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .search-results tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+        .password-strength .requirement {
+            margin-right: 10px;
+        }
+        .password-strength .valid {
+            color: green;
+        }
+        .password-strength .invalid {
+            color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .compact-select {
+            padding-top: 0.35rem;
+            padding-bottom: 0.35rem;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .form-row label {
+            min-width: 120px;
+            margin-right: 0.5rem;
+        }
+        .form-row input, .form-row select {
+            flex-grow: 1;
+        }
+        .password-row {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .password-input {
+            flex: 1;
+        }
+        .password-strength {
+            flex: 1;
+            margin-top: 0;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+        .info-row label {
+            min-width: 120px;
+            margin-right: 0.5rem;
+        }
+        .info-row p {
+            flex-grow: 1;
+            margin: 0;
+            padding: 0.35rem 0;
+        }
+        .disabled-field {
+            background-color: #f3f4f6 !important;
+            color: #6b7280 !important;
+            cursor: not-allowed !important;
+        }
+        .border-red-500 {
+            border-color: #ef4444;
+        }
+        #devClearBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: transparent;
+            color: transparent;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden">
+    <div class="w-48 h-full bg-[var(--mysiss-light-purple)] flex flex-col">
+        <div class="p-6">
+            <h1 class="text-[var(--mysiss-purple)] text-5xl font-bold">mySiss</h1>
+        </div>
+        <nav class="mt-4 flex flex-col" aria-label="Menú principal">
+            <!-- Configuración -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('config-submenu', this)">
+                    <strong>Configuración</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="config-submenu" class="submenu">
+                    <a href="conf_bas_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Base</a>
+                    <a href="conf_func_3.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>
+                    <a href="conf_role.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Roles</a>
+                </div>
+            </div>
+            
+            <!-- Usuario -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('usuario-submenu', this)">
+                    <strong>Usuario</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="usuario-submenu" class="submenu">
+                    <a href="conf_usua_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Usuario</a>
+                    <a href="conf_rol.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Asignar Rol</a>
+                </div>
+            </div>
+
+            <!-- Módulos -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('modulos-submenu', this)">
+                    <strong>Modulos</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="modulos-submenu" class="submenu">
+                    <!-- Honorarios -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('honorarios-submenu', this)">
+                            <span>Honorarios</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="honorarios-submenu" class="submenu">
+                            <a href="../Honorarios/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../Honorarios/Honorarios.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Auditoria -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('auditoria-submenu', this)">
+                            <span>Auditoria</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="auditoria-submenu" class="submenu">
+                            <a href="../auditoria/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../auditoria/auditoria.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Glosas -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('glosas-submenu', this)">
+                            <span>Glosas</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="glosas-submenu" class="submenu">
+                            <a href="../glosas/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../glosas/glosas.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="../login.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors mt-44 focus-outline">
+                <strong>Cerrar Sesión</strong>
+            </a>
+        </nav>
+    </div>
+
+    <div class="flex-1 bg-white p-8 overflow-auto">
+        <h2 class="text-2xl font-bold text-[var(--mysiss-purple)] mb-6">Gestion de usuario</h2>
+        
+        <div class="relative mb-6">
+            <div class="flex items-center">
+                <div>
+                    <div class="flex">
+                        <input type="text" id="user-search" placeholder="Buscar usuario por nombre..." 
+                               class="block w-[300px] border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               oninput="searchUsers()">
+                        <button type="button" class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-[var(--mysiss-light-purple)] text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)]" onclick="searchUsers()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div id="search-results" class="search-results">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="p-2 bg-gray-100">Nombre</th>
+                                    <th class="p-2 bg-gray-100">Cédula</th>
+                                    <th class="p-2 bg-gray-100">Celular</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="ml-[354px] self-center">
+                    <label class="block text-sm font-medium mb-1"></label>
+                    <input type="text" id="usuario" readonly 
+                           class="w-[250px] border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 disabled-field">
+                    <div id="usuario-error" class="error-message"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex gap-2 mb-6 items-center">
+            <button type="button" id="edit-btn" onclick="enableEditing()" disabled class="w-32 inline-flex justify-center items-center px-4 py-2 text-sm font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed">
+                <i class="fas fa-edit mr-2"></i>Modificar
+            </button>
+            <button type="button" id="save-btn" onclick="saveUser()" disabled class="w-32 inline-flex justify-center items-center px-4 py-2 text-sm font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed">
+                <i class="fas fa-save mr-2"></i>Guardar
+            </button>
+            
+            <div class="flex items-center space-x-4 ml-auto">
+                <div class="flex items-center">
+                    <input type="radio" id="validity-active" name="validity-status" value="active" checked 
+                           class="h-4 w-4 text-[var(--mysiss-purple)] focus:ring-[var(--mysiss-purple)] border-gray-300 custom-radio"
+                           onchange="toggleMotivoField(); checkFormValidityAndToggleSaveButton()">
+                    <label for="validity-active" class="ml-2 block text-sm text-gray-700">Activo</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="radio" id="validity-inactive" name="validity-status" value="inactive" 
+                           class="h-4 w-4 text-[var(--mysiss-purple)] focus:ring-[var(--mysiss-purple)] border-gray-300 custom-radio"
+                           onchange="toggleMotivoField(); checkFormValidityAndToggleSaveButton()">
+                    <label for="validity-inactive" class="ml-2 block text-sm text-gray-700">Inactivo</label>
+                </div>
+            </div>
+            
+            <div id="validity-motivo-container" class="hidden form-row">
+                <label class="text-sm font-medium text-gray-700">Motivo*</label>
+                <select id="validity-motivo"
+                        class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)] compact-select"
+                        onchange="checkFormValidityAndToggleSaveButton()">
+                    <option value="">Seleccione...</option>
+                    <option value="RET">Retiro</option>
+                    <option value="VAC">Vacaciones</option>
+                    <option value="LIC">Licencia</option>
+                    <option value="INC">Incapacidad</option>
+                    <option value="TLB">Tiempo labor</option>
+                    <option value="OTR">Otros</option>
+                </select>
+                <div id="validity-motivo-error" class="error-message"></div>
+            </div>
+        </div>
+        
+        <div id="creacion-usuario" class="tab-content active">
+            <form class="grid grid-cols-2 gap-4" id="user-form">
+                <div class="space-y-2">
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Nombre 1*</label>
+                        <input type="text" id="nombre1" required
+                               pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ ]+" 
+                               title="Solo se permiten letras"
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               oninput="updateUsername()">
+                        <div id="nombre1-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Apellido 1*</label>
+                        <input type="text" id="apellido1" required
+                               pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ ]+" 
+                               title="Solo se permiten letras"
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               oninput="updateUsername()">
+                        <div id="apellido1-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Tipo Documento*</label>
+                        <select id="tipo-documento" required class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)] compact-select">
+                            <option value="">Seleccione...</option>
+                            <option value="CC">Cédula de ciudadanía</option>
+                            <option value="CE">Cédula de extranjería</option>
+                            <option value="TI">Tarjeta de identidad</option>
+                            <option value="PP">Pasaporte</option>
+                            <option value="RC">Registro civil</option>
+                            <option value="DE">Documento identificación extranjería</option>
+                            <option value="CD">Carnet diplomado</option>
+                            <option value="TE">Tarjeta extranjería</option>
+                            <option value="NE">NIT extranjería</option>
+                            <option value="NIT">Número identificación tributaria</option>
+                        </select>
+                        <div id="tipo-documento-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Fecha Nacimiento*</label>
+                        <input type="date" id="fecha-nacimiento" required
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               onchange="validateBirthDate()">
+                        <div id="fecha-nacimiento-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">E-Mail*</label>
+                        <input type="email" id="email" required
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               onblur="validateEmail()">
+                        <div id="email-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Teléfono</label>
+                        <input type="tel" id="telefono"
+                               pattern="[0-9]+" 
+                               title="Solo se permiten números"
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+                        <div id="telefono-error" class="error-message"></div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Nombre 2</label>
+                        <input type="text" id="nombre2"
+                               pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ ]+" 
+                               title="Solo se permiten letras"
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               oninput="updateUsername()">
+                        <div id="nombre2-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Apellido 2</label>
+                        <input type="text" id="apellido2"
+                               pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ ]+" 
+                               title="Solo se permiten letras"
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               oninput="updateUsername()">
+                        <div id="apellido2-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Número Documento*</label>
+                        <input type="text" id="numero-documento" required
+                               pattern="[0-9]+" 
+                               title="Solo se permiten números"
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               onblur="validateUniqueDocument()">
+                        <div id="numero-documento-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Ocupación*</label>
+                        <input type="text" id="ocupacion" list="ocupaciones" required
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+                        <datalist id="ocupaciones">
+                            <option value="Médico">
+                            <option value="Ingeniero">
+                            <option value="Abogado">
+                            <option value="Contador">
+                            <option value="Docente">
+                            <option value="Administrador">
+                            <option value="Analista">
+                            <option value="Gerente">
+                        </datalist>
+                        <div id="ocupacion-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Dirección residencia*</label>
+                        <input type="text" id="direccion" required
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+                        <div id="direccion-error" class="error-message"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="text-sm font-medium text-gray-700">Móvil*</label>
+                        <input type="tel" id="movil" required
+                               pattern="[0-9]{10}" 
+                               title="Debe tener exactamente 10 dígitos"
+                               class="border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]"
+                               onblur="validateUniqueMobile()">
+                        <div id="movil-error" class="error-message"></div>
+                    </div>
+                </div>
+                
+                <div class="col-span-2 grid grid-cols-5 gap-4 mt-0,1 text-gray-500">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Creado por</label>
+                        <input type="text" id="creado-por" readonly 
+                               class="w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 bg-gray-100 disabled-field">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Válido desde*</label>
+                        <input type="date" id="valido-de" required
+                               class="w-full border border-gray-300 rounded-md shadow-sm py-1 px-2"
+                               onchange="validateValidoDesde()">
+                        <div id="valido-de-error" class="error-message"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Válido hasta*</label>
+                        <input type="date" id="valido-a" required
+                               class="w-full border border-gray-300 rounded-md shadow-sm py-1 px-2">
+                        <div id="valido-a-error" class="error-message"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Creado el</label>
+                        <input type="date" id="creado-el" readonly 
+                               class="w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 bg-gray-100 disabled-field">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Modificado el</label>
+                        <input type="date" id="modificado-el" readonly 
+                               class="w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 bg-gray-100 disabled-field">
+                    </div>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-confirmacion" class="modal">
+        <div class="modal-content bg-white p-6 rounded-lg max-w-md mx-auto mt-20">
+            <div class="text-center">
+                <i id="modal-icon" class="fas fa-check-circle text-4xl text-green-500 mb-4"></i>
+                <h3 id="modal-title" class="text-lg font-bold text-gray-800 mb-2"></h3>
+                <p id="modal-message" class="text-gray-600 mb-4"></p>
+                <button onclick="closeModal()" class="mt-4 px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-700">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <button id="devClearBtn">Limpiar</button>
+    
+    <script>
+        // Obtener usuarios de localStorage o inicializar con datos de ejemplo
+        function getUsers() {
+            const storedUsers = localStorage.getItem('mysiss_users');
+            if (storedUsers) {
+                return JSON.parse(storedUsers);
+            } else {
+                // Datos de ejemplo iniciales
+                const initialUsers = [
+                    {id:1,nombre1:"Andres",nombre2:"Felipe",apellido1:"Giraldo",apellido2:"Rodríguez",tipoDocumento:"CC",numeroDocumento:"1130524118",fechaNacimiento:"1987-02-15",email:"Anfegiro@aol.com",telefono:"6025578908",ocupacion:"Médico",direccion:"Calle 66 N° 10-99",movil:"3124567890",usuario:"ANGIRAL",creadoPor:"mySiss",creadoEl:"2025-01-01",modificadoEl:"2025-01-01",status:"active",clave:"",validoDe:"2025-01-01",validoA:"2026-01-01",motivo:""},
+                    {id:2,nombre1:"María",nombre2:"Isabel",apellido1:"Pérez",apellido2:"Gómez",tipoDocumento:"CC",numeroDocumento:"5214789632",fechaNacimiento:"1990-05-20",email:"maria.perez@gmail.com",telefono:"6012345678",ocupacion:"Ingeniera",direccion:"Carrera 45 #12-34",movil:"3159876543",usuario:"MAPEPER",creadoPor:"mySiss",creadoEl:"2025-02-15",modificadoEl:"2025-02-15",status:"active",clave:"",validoDe:"2025-02-15",validoA:"2026-02-15",motivo:""},
+                    {id:3,nombre1:"Juan",nombre2:"Pablo",apellido1:"Mora",apellido2:"",tipoDocumento:"CC",numeroDocumento:"31564356",fechaNacimiento:"1985-03-10",email:"jpmora@hotmail.com",telefono:"601234567",ocupacion:"administrativo",direccion:"Calle 123 #45-67",movil:"3001234567",usuario:"JUMOMOR",creadoPor:"mySiss",creadoEl:"2025-01-15",modificadoEl:"2025-01-15",status:"active",clave:"",validoDe:"2025-01-15",validoA:"2026-01-15",motivo:""},
+                    {id:4,nombre1:"María",nombre2:"",apellido1:"Gómez",apellido2:"",tipoDocumento:"CC",numeroDocumento:"87654321",fechaNacimiento:"1988-07-22",email:"mgomez@hotmail.com",telefono:"602345678",ocupacion:"Auditor",direccion:"Carrera 89 #10-11",movil:"3007654321",usuario:"MAGOGOM",creadoPor:"mySiss",creadoEl:"2025-02-20",modificadoEl:"2025-02-20",status:"active",clave:"",validoDe:"2025-02-20",validoA:"2026-02-20",motivo:""},
+                    {id:5,nombre1:"Julian",nombre2:"",apellido1:"Ramirez",apellido2:"",tipoDocumento:"CC",numeroDocumento:"11223344",fechaNacimiento:"1992-11-05",email:"jramirez@aol.com",telefono:"603456789",ocupacion:"Medico",direccion:"Avenida 56 #78-90",movil:"3001122334",usuario:"JURARAM",creadoPor:"mySiss",creadoEl:"2025-03-05",modificadoEl:"2025-03-05",status:"active",clave:"",validoDe:"2025-03-05",validoA:"2026-03-05",motivo:""},
+                    {id:6,nombre1:"Ana",nombre2:"",apellido1:"Martínez",apellido2:"",tipoDocumento:"CC",numeroDocumento:"44332211",fechaNacimiento:"1995-09-18",email:"amartin@hotmail.com",telefono:"604567890",ocupacion:"Auxiliar",direccion:"Transversal 34 #56-78",movil:"3004433221",usuario:"ANMARTI",creadoPor:"mySiss",creadoEl:"2025-03-10",modificadoEl:"2025-03-10",status:"active",clave:"",validoDe:"2025-03-10",validoA:"2026-03-10",motivo:""}
+                ];
+                localStorage.setItem('mysiss_users', JSON.stringify(initialUsers));
+                return initialUsers;
+            }
+        }
+        
+        // Guardar usuarios en localStorage
+        function saveUsers(users) {
+            localStorage.setItem('mysiss_users', JSON.stringify(users));
+        }
+        
+        let users = getUsers();
+        let currentUser = null;
+        let isCreatingNewUser = true;
+        let originalUserData = null;
+        
+        // Búsqueda de usuarios
+        function searchUsers() {
+            const searchTerm = document.getElementById('user-search').value.toLowerCase();
+            const resultsBody = document.getElementById('results-body');
+            const searchResults = document.getElementById('search-results');
+            
+            resultsBody.innerHTML = '';
+            
+            // Mostrar todos los usuarios si el campo está vacío o contiene solo *
+            if (searchTerm === '' || searchTerm === '*') {
+                if (users.length > 0) {
+                    users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="p-2">${user.nombre1} ${user.nombre2 || ''} ${user.apellido1} ${user.apellido2 || ''}</td>
+                            <td class="p-2">${user.numeroDocumento}</td>
+                            <td class="p-2">${user.movil}</td>
+                        `;
+                        row.onclick = () => selectUser(user);
+                        resultsBody.appendChild(row);
+                    });
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.style.display = 'none';
+                }
+                return;
+            }
+            
+            if (searchTerm.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            const filteredUsers = users.filter(user => 
+                `${user.nombre1} ${user.nombre2 || ''} ${user.apellido1} ${user.apellido2 || ''}`.toLowerCase().includes(searchTerm) ||
+                user.numeroDocumento.includes(searchTerm)
+            );
+            
+            if (filteredUsers.length > 0) {
+                filteredUsers.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="p-2">${user.nombre1} ${user.nombre2 || ''} ${user.apellido1} ${user.apellido2 || ''}</td>
+                        <td class="p-2">${user.numeroDocumento}</td>
+                        <td class="p-2">${user.movil}</td>
+                    `;
+                    row.onclick = () => selectUser(user);
+                    resultsBody.appendChild(row);
+                });
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.style.display = 'none';
+            }
+        }
+        
+        function selectUser(user) {
+            currentUser = user;
+            isCreatingNewUser = false;
+            originalUserData = JSON.parse(JSON.stringify(user)); // Copia profunda
+            
+            clearFormErrors();
+            
+            document.getElementById('user-search').value = `${user.nombre1} ${user.nombre2 || ''} ${user.apellido1} ${user.apellido2 || ''}`;
+            document.getElementById('search-results').style.display = 'none';
+            
+            // Llenar formulario con datos del usuario
+            document.getElementById('nombre1').value = user.nombre1;
+            document.getElementById('nombre2').value = user.nombre2 || '';
+            document.getElementById('apellido1').value = user.apellido1;
+            document.getElementById('apellido2').value = user.apellido2 || '';
+            document.getElementById('tipo-documento').value = user.tipoDocumento;
+            document.getElementById('numero-documento').value = user.numeroDocumento;
+            document.getElementById('fecha-nacimiento').value = user.fechaNacimiento;
+            document.getElementById('email').value = user.email;
+            document.getElementById('telefono').value = user.telefono;
+            document.getElementById('ocupacion').value = user.ocupacion;
+            document.getElementById('direccion').value = user.direccion;
+            document.getElementById('movil').value = user.movil;
+            document.getElementById('usuario').value = user.usuario;
+            document.getElementById('creado-por').value = user.creadoPor;
+            document.getElementById('creado-el').value = user.creadoEl;
+            document.getElementById('modificado-el').value = user.modificadoEl;
+            document.getElementById('valido-de').value = user.validoDe;
+            document.getElementById('valido-a').value = user.validoA;
+            
+            document.getElementById(`validity-${user.status}`).checked = true;
+            document.getElementById('validity-motivo').value = user.motivo || '';
+            toggleMotivoField();
+            
+            disableFormFields();
+            
+            document.getElementById('edit-btn').disabled = false;
+            document.getElementById('edit-btn').classList.remove('bg-gray-400', 'cursor-not-allowed');
+            document.getElementById('edit-btn').classList.add('bg-[var(--mysiss-purple)]', 'hover:bg-purple-700');
+            
+            document.getElementById('save-btn').disabled = true;
+            document.getElementById('save-btn').classList.add('bg-gray-400', 'cursor-not-allowed');
+            document.getElementById('save-btn').classList.remove('bg-[var(--mysiss-purple)]', 'hover:bg-purple-700');
+        }
+        
+        function disableFormFields() {
+            const fields = [
+                'nombre1', 'nombre2', 'apellido1', 'apellido2',
+                'tipo-documento', 'numero-documento', 'fecha-nacimiento',
+                'email', 'telefono', 'ocupacion', 'direccion', 'movil',
+                'valido-de', 'valido-a' 
+            ];
+            
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                field.classList.add('disabled-field');
+                field.readOnly = true;
+                field.disabled = true; 
+            });
+            
+            document.getElementById('usuario').readOnly = true;
+            document.getElementById('usuario').disabled = true;
+            document.getElementById('usuario').classList.add('disabled-field');
+            
+            document.getElementById('validity-active').disabled = true;
+            document.getElementById('validity-inactive').disabled = true;
+            document.getElementById('validity-motivo').disabled = true;
+        }
+        
+        function enableFormFields() {
+            const fields = [
+                'nombre1', 'nombre2', 'apellido1', 'apellido2',
+                'tipo-documento', 'numero-documento', 'fecha-nacimiento',
+                'email', 'telefono', 'ocupacion', 'direccion', 'movil',
+                'valido-de', 'valido-a'
+            ];
+            
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                field.classList.remove('disabled-field');
+                field.readOnly = false;
+                field.disabled = false;
+            });
+            
+            document.getElementById('usuario').readOnly = true;
+            document.getElementById('usuario').disabled = true;
+            document.getElementById('usuario').classList.add('disabled-field');
+            
+            document.getElementById('validity-active').disabled = false;
+            document.getElementById('validity-inactive').disabled = false;
+            document.getElementById('validity-active').classList.remove('disabled-field');
+            document.getElementById('validity-inactive').classList.remove('disabled-field');
+            
+            toggleMotivoField();
+        }
+        
+        function clearFormErrors() {
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+            const fieldsWithErrors = document.querySelectorAll('.border-red-500');
+            fieldsWithErrors.forEach(el => el.classList.remove('border-red-500'));
+        }
+
+        function initializeNewUserForm() {
+            currentUser = null;
+            isCreatingNewUser = true;
+            originalUserData = null;
+            
+            document.getElementById('user-form').reset();
+            clearFormErrors();
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('creado-por').value = 'ADMIN'; 
+            document.getElementById('creado-el').value = today;
+            document.getElementById('modificado-el').value = today;
+            document.getElementById('valido-de').value = today;
+            document.getElementById('valido-a').value = today;
+            document.getElementById('validity-active').checked = true;
+            document.getElementById('validity-motivo').value = '';
+            
+            document.getElementById('usuario').value = '';
+            
+            enableFormFields();
+            
+            document.getElementById('edit-btn').disabled = true;
+            document.getElementById('edit-btn').classList.add('bg-gray-400', 'cursor-not-allowed');
+            document.getElementById('edit-btn').classList.remove('bg-[var(--mysiss-purple)]', 'hover:bg-purple-700');
+            
+            checkFormValidityAndToggleSaveButton(); 
+            
+            document.getElementById('nombre1').focus();
+        }
+        
+        function enableEditing() {
+            if (!currentUser) return;
+            
+            isCreatingNewUser = false;
+            enableFormFields();
+            checkFormValidityAndToggleSaveButton();
+        }
+        
+        function generateUsername(nombre1, nombre2, apellido1, apellido2) {
+            if (!nombre1 || !apellido1) return '';
+            
+            let username = (
+                nombre1.substring(0, 2) + 
+                apellido1.substring(0, 2) + 
+                apellido1.substring(Math.max(0, apellido1.length - 2))
+            ).toUpperCase();
+            
+            if (users.some(user => user.usuario === username && (!currentUser || user.id !== currentUser.id))) {
+                username = (
+                    nombre1.substring(0, 4) + 
+                    apellido1.substring(0, 2)
+                ).toUpperCase().substring(0, 6);
+                
+                if (users.some(user => user.usuario === username && (!currentUser || user.id !== currentUser.id))) {
+                    username = (
+                        nombre1.substring(0, 2) + 
+                        apellido1.substring(0, 4)
+                    ).toUpperCase().substring(0, 6);
+                    
+                    if (users.some(user => user.usuario === username && (!currentUser || user.id !== currentUser.id))) {
+                        let counter = 1;
+                        let baseUsername = username.substring(0, 5);
+                        while (users.some(user => user.usuario === username && (!currentUser || user.id !== currentUser.id)) && counter < 10) {
+                            username = baseUsername + counter;
+                            counter++;
+                        }
+                    }
+                }
+            }
+            
+            return username.substring(0, 6);
+        }
+        
+        function validateBirthDate() {
+            const fechaNacimiento = document.getElementById('fecha-nacimiento').value;
+            const errorElement = document.getElementById('fecha-nacimiento-error');
+            
+            if (!fechaNacimiento) {
+                errorElement.textContent = 'Este campo es obligatorio';
+                errorElement.style.display = 'block';
+                document.getElementById('fecha-nacimiento').classList.add('border-red-500');
+                return false;
+            }
+            
+            const birthDate = new Date(fechaNacimiento + 'T00:00:00');
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            if (age < 0 || age > 100) {
+                errorElement.textContent = 'La edad debe estar entre 0 y 100 años';
+                errorElement.style.display = 'block';
+                document.getElementById('fecha-nacimiento').classList.add('border-red-500');
+                return false;
+            } else {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+                document.getElementById('fecha-nacimiento').classList.remove('border-red-500');
+                return true;
+            }
+        }
+        
+        function validateEmail(silent = false) {
+            const email = document.getElementById('email').value;
+            const errorElement = document.getElementById('email-error');
+            
+            if (!email) {
+                if (!silent) {
+                    errorElement.textContent = 'Este campo es obligatorio';
+                    errorElement.style.display = 'block';
+                    document.getElementById('email').classList.add('border-red-500');
+                }
+                return false;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                if (!silent) {
+                    errorElement.textContent = 'El email debe tener un formato válido (ejemplo@dominio.com)';
+                    errorElement.style.display = 'block';
+                    document.getElementById('email').classList.add('border-red-500');
+                }
+                return false;
+            }
+            
+            const emailExists = users.some(user => 
+                user.email.toLowerCase() === email.toLowerCase() && 
+                (currentUser === null || user.id !== currentUser.id)
+            );
+            
+            if (emailExists) {
+                if (!silent) {
+                    errorElement.textContent = 'Este email ya está registrado';
+                    errorElement.style.display = 'block';
+                    document.getElementById('email').classList.add('border-red-500');
+                }
+                return false;
+            }
+            
+            if (!silent) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+                document.getElementById('email').classList.remove('border-red-500');
+            }
+            return true;
+        }
+        
+        function validateUniqueDocument(silent = false) {
+            const documento = document.getElementById('numero-documento').value;
+            const errorElement = document.getElementById('numero-documento-error');
+            
+            if (!documento) {
+                if (!silent) {
+                    errorElement.textContent = 'Este campo es obligatorio';
+                    errorElement.style.display = 'block';
+                    document.getElementById('numero-documento').classList.add('border-red-500');
+                }
+                return false;
+            }
+            
+            if (!/^\d+$/.test(documento)) {
+                if (!silent) {
+                    errorElement.textContent = 'Solo se permiten números';
+                    errorElement.style.display = 'block';
+                    document.getElementById('numero-documento').classList.add('border-red-500');
+                }
+                return false;
+            }
+
+            const docExists = users.some(user => 
+                user.numeroDocumento === documento && 
+                (currentUser === null || user.id !== currentUser.id)
+            );
+            
+            if (docExists) {
+                if (!silent) {
+                    errorElement.textContent = 'Este número de documento ya está registrado';
+                    errorElement.style.display = 'block';
+                    document.getElementById('numero-documento').classList.add('border-red-500');
+                }
+                return false;
+            }
+            
+            if (!silent) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+                document.getElementById('numero-documento').classList.remove('border-red-500');
+            }
+            return true;
+        }
+        
+        function validateUniqueMobile(silent = false) {
+            const movil = document.getElementById('movil').value;
+            const errorElement = document.getElementById('movil-error');
+            
+            if (!movil) {
+                if (!silent) {
+                    errorElement.textContent = 'Este campo es obligatorio';
+                    errorElement.style.display = 'block';
+                    document.getElementById('movil').classList.add('border-red-500');
+                }
+                return false;
+            }
+            
+            if (movil.length !== 10 || !/^\d{10}$/.test(movil)) {
+                if (!silent) {
+                    errorElement.textContent = 'El número móvil debe tener exactamente 10 dígitos y ser numérico';
+                    errorElement.style.display = 'block';
+                    document.getElementById('movil').classList.add('border-red-500');
+                }
+                return false;
+            }
+            
+            const mobileExists = users.some(user => 
+                user.movil === movil && 
+                (currentUser === null || user.id !== currentUser.id)
+            );
+            
+            if (mobileExists) {
+                if (!silent) {
+                    errorElement.textContent = 'Este número móvil ya está registrado';
+                    errorElement.style.display = 'block';
+                    document.getElementById('movil').classList.add('border-red-500');
+                }
+                return false;
+            }
+            
+            if (!silent) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+                document.getElementById('movil').classList.remove('border-red-500');
+            }
+            return true;
+        }
+        
+        function validateUniqueFullName() {
+            const nombre1 = document.getElementById('nombre1').value.trim().toLowerCase();
+            const nombre2 = document.getElementById('nombre2').value.trim().toLowerCase();
+            const apellido1 = document.getElementById('apellido1').value.trim().toLowerCase();
+            const apellido2 = document.getElementById('apellido2').value.trim().toLowerCase();
+            
+            if (!nombre1 || !apellido1) {
+                document.getElementById('nombre1-error').textContent = '';
+                document.getElementById('nombre1-error').style.display = 'none';
+                document.getElementById('nombre1').classList.remove('border-red-500');
+                return true; 
+            }
+
+            const nameExists = users.some(user => 
+                user.nombre1.toLowerCase() === nombre1 &&
+                (user.nombre2 || '').toLowerCase() === nombre2 &&
+                user.apellido1.toLowerCase() === apellido1 &&
+                (user.apellido2 || '').toLowerCase() === apellido2 &&
+                (currentUser === null || user.id !== currentUser.id)
+            );
+            
+            if (nameExists) {
+                document.getElementById('nombre1-error').textContent = 'Ya existe un usuario con esta combinación de nombres y apellidos';
+                document.getElementById('nombre1-error').style.display = 'block';
+                document.getElementById('nombre1').classList.add('border-red-500');
+                return false;
+            } else {
+                document.getElementById('nombre1-error').textContent = '';
+                document.getElementById('nombre1-error').style.display = 'none';
+                document.getElementById('nombre1').classList.remove('border-red-500');
+                return true;
+            }
+        }
+        
+        function validateValidoDesde() {
+            const validoDe = document.getElementById('valido-de').value;
+            const errorElement = document.getElementById('valido-de-error');
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (!validoDe) {
+                errorElement.textContent = 'Este campo es obligatorio';
+                errorElement.style.display = 'block';
+                document.getElementById('valido-de').classList.add('border-red-500');
+                return false;
+            }
+            
+            if (validoDe < today) {
+                errorElement.textContent = 'La fecha debe ser igual o posterior a hoy';
+                errorElement.style.display = 'block';
+                document.getElementById('valido-de').classList.add('border-red-500');
+                return false;
+            }
+            
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+            document.getElementById('valido-de').classList.remove('border-red-500');
+            return true;
+        }
+        
+        function toggleMotivoField() {
+            const isInactive = document.getElementById('validity-inactive').checked;
+            const motivoContainer = document.getElementById('validity-motivo-container');
+            const motivoSelect = document.getElementById('validity-motivo');
+
+            if (motivoContainer) {
+                motivoContainer.style.display = isInactive ? 'block' : 'none';
+                motivoSelect.disabled = !isInactive;
+                
+                if (!isInactive) {
+                    motivoSelect.value = '';
+                }
+            }
+        }
+        
+        function updateUsername() {
+            if (isCreatingNewUser && currentUser === null) { 
+                const nombre1 = document.getElementById('nombre1').value;
+                const apellido1 = document.getElementById('apellido1').value;
+                
+                if (nombre1.trim() && apellido1.trim()) {
+                    const username = generateUsername(nombre1, '', apellido1, '');
+                    document.getElementById('usuario').value = username;
+                } else {
+                    document.getElementById('usuario').value = '';
+                }
+            }
+            checkFormValidityAndToggleSaveButton();
+        }
+
+        function areAllFieldsValid() {
+            const requiredFields = [
+                'nombre1', 'apellido1', 'tipo-documento', 'numero-documento', 
+                'fecha-nacimiento', 'email', 'ocupacion', 
+                'direccion', 'movil', 'valido-de', 'valido-a'
+            ];
+            
+            let allValid = true;
+            
+            for (const fieldId of requiredFields) {
+                const field = document.getElementById(fieldId);
+                const errorElement = document.getElementById(`${fieldId}-error`);
+                
+                if (field.type === 'text' || field.type === 'email' || field.type === 'tel') {
+                    if (!field.value.trim()) {
+                        field.classList.add('border-red-500');
+                        errorElement.textContent = 'Este campo es obligatorio';
+                        errorElement.style.display = 'block';
+                        allValid = false;
+                    } else {
+                        let fieldValid = true;
+                        switch(fieldId) {
+                            case 'email':
+                                fieldValid = validateEmail(true);
+                                break;
+                            case 'numero-documento':
+                                fieldValid = validateUniqueDocument(true);
+                                break;
+                            case 'movil':
+                                fieldValid = validateUniqueMobile(true);
+                                break;
+                            case 'fecha-nacimiento':
+                                fieldValid = validateBirthDate();
+                                break;
+                            case 'valido-de':
+                                fieldValid = validateValidoDesde();
+                                break;
+                        }
+                        
+                        if (!fieldValid) {
+                            allValid = false;
+                        } else {
+                            field.classList.remove('border-red-500');
+                            errorElement.style.display = 'none';
+                        }
+                    }
+                } else {
+                    if (!field.value) {
+                        field.classList.add('border-red-500');
+                        errorElement.textContent = 'Este campo es obligatorio';
+                        errorElement.style.display = 'block';
+                        allValid = false;
+                    } else {
+                        field.classList.remove('border-red-500');
+                        errorElement.style.display = 'none';
+                    }
+                }
+            }
+
+            const isMotivoRequired = document.getElementById('validity-inactive').checked;
+            const motivoField = document.getElementById('validity-motivo');
+            const motivoError = document.getElementById('validity-motivo-error');
+            if (isMotivoRequired && (!motivoField.value || motivoField.value === '')) {
+                motivoField.classList.add('border-red-500');
+                motivoError.textContent = 'El motivo es obligatorio para usuarios inactivos';
+                motivoError.style.display = 'block';
+                allValid = false;
+            } else {
+                motivoField.classList.remove('border-red-500');
+                motivoError.style.display = 'none';
+            }
+
+            return allValid;
+        }
+
+        function checkFormValidityAndToggleSaveButton() {
+            const saveBtn = document.getElementById('save-btn');
+            const validityActive = document.getElementById('validity-active');
+            const validityInactive = document.getElementById('validity-inactive');
+            const motivoSelect = document.getElementById('validity-motivo');
+
+            if ((isCreatingNewUser || currentUser) && areAllFieldsValid()) {
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                saveBtn.classList.add('bg-[var(--mysiss-purple)]', 'hover:bg-purple-700');
+                
+                validityActive.disabled = false;
+                validityInactive.disabled = false;
+                validityActive.classList.remove('disabled-field');
+                validityInactive.classList.remove('disabled-field');
+                
+                motivoSelect.disabled = !document.getElementById('validity-inactive').checked;
+            } else {
+                saveBtn.disabled = true;
+                saveBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                saveBtn.classList.remove('bg-[var(--mysiss-purple)]', 'hover:bg-purple-700');
+                
+                validityActive.disabled = true;
+                validityInactive.disabled = true;
+                validityActive.classList.add('disabled-field');
+                validityInactive.classList.add('disabled-field');
+                motivoSelect.disabled = true;
+            }
+            
+            toggleMotivoField();
+        }
+        
+        function saveUser() {
+            let isValid = true;
+            
+            isValid = validateBirthDate() && isValid;
+            isValid = validateEmail() && isValid;
+            isValid = validateUniqueDocument() && isValid;
+            isValid = validateUniqueMobile() && isValid;
+            isValid = validateUniqueFullName() && isValid; 
+            isValid = validateValidoDesde() && isValid;
+            
+            const requiredFields = [
+                'nombre1', 'apellido1', 'tipo-documento', 'numero-documento', 
+                'fecha-nacimiento', 'email', 'ocupacion', 
+                'direccion', 'movil', 'valido-de', 'valido-a'
+            ];
+
+            let hasEmptyRequiredFields = false;
+            for (const fieldId of requiredFields) {
+                const field = document.getElementById(fieldId);
+                const errorElement = document.getElementById(`${fieldId}-error`);
+                if (field.type === 'text' || field.type === 'email' || field.type === 'tel') {
+                    if (!field.value.trim()) {
+                        field.classList.add('border-red-500');
+                        errorElement.textContent = 'Este campo es obligatorio';
+                        errorElement.style.display = 'block';
+                        hasEmptyRequiredFields = true;
+                    } else {
+                        field.classList.remove('border-red-500');
+                        errorElement.style.display = 'none';
+                    }
+                } else {
+                    if (!field.value) {
+                        field.classList.add('border-red-500');
+                        errorElement.textContent = 'Este campo es obligatorio';
+                        errorElement.style.display = 'block';
+                        hasEmptyRequiredFields = true;
+                    } else {
+                        field.classList.remove('border-red-500');
+                        errorElement.style.display = 'none';
+                    }
+                }
+            }
+
+            const isInactive = document.getElementById('validity-inactive').checked;
+            const motivoField = document.getElementById('validity-motivo');
+            const motivoError = document.getElementById('validity-motivo-error');
+            if (isInactive && (!motivoField.value || motivoField.value === '')) {
+                motivoField.classList.add('border-red-500');
+                motivoError.textContent = 'El motivo es obligatorio para usuarios inactivos';
+                motivoError.style.display = 'block';
+                hasEmptyRequiredFields = true;
+            } else {
+                motivoField.classList.remove('border-red-500');
+                motivoError.style.display = 'none';
+            }
+
+            if (hasEmptyRequiredFields || !isValid) {
+                showModal('Error', 'Por favor complete y corrija todos los campos obligatorios', 'fas fa-exclamation-circle', 'text-red-500');
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            const nombre1 = document.getElementById('nombre1').value;
+            const nombre2 = document.getElementById('nombre2').value;
+            const apellido1 = document.getElementById('apellido1').value;
+            const apellido2 = document.getElementById('apellido2').value;
+            const username = document.getElementById('usuario').value;
+            
+            if (isCreatingNewUser) {
+                const newUserId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+                
+                currentUser = {
+                    id: newUserId,
+                    nombre1: nombre1,
+                    nombre2: nombre2,
+                    apellido1: apellido1,
+                    apellido2: apellido2,
+                    tipoDocumento: document.getElementById('tipo-documento').value,
+                    numeroDocumento: document.getElementById('numero-documento').value,
+                    fechaNacimiento: document.getElementById('fecha-nacimiento').value,
+                    email: document.getElementById('email').value,
+                    telefono: document.getElementById('telefono').value,
+                    ocupacion: document.getElementById('ocupacion').value,
+                    direccion: document.getElementById('direccion').value,
+                    movil: document.getElementById('movil').value,
+                    usuario: username,
+                    creadoPor: document.getElementById('creado-por').value,
+                    creadoEl: document.getElementById('creado-el').value,
+                    modificadoEl: today,
+                    status: document.querySelector('input[name="validity-status"]:checked').value,
+                    clave: '', 
+                    validoDe: document.getElementById('valido-de').value || today,
+                    validoA: document.getElementById('valido-a').value || today,
+                    motivo: document.getElementById('validity-motivo').value || ''
+                };
+                
+                users.push(currentUser);
+            } else {
+                // Mantener todos los datos originales y solo actualizar los modificados
+                currentUser.nombre1 = nombre1 || originalUserData.nombre1;
+                currentUser.nombre2 = nombre2 || originalUserData.nombre2;
+                currentUser.apellido1 = apellido1 || originalUserData.apellido1;
+                currentUser.apellido2 = apellido2 || originalUserData.apellido2;
+                currentUser.tipoDocumento = document.getElementById('tipo-documento').value || originalUserData.tipoDocumento;
+                currentUser.numeroDocumento = document.getElementById('numero-documento').value || originalUserData.numeroDocumento;
+                currentUser.fechaNacimiento = document.getElementById('fecha-nacimiento').value || originalUserData.fechaNacimiento;
+                currentUser.email = document.getElementById('email').value || originalUserData.email;
+                currentUser.telefono = document.getElementById('telefono').value || originalUserData.telefono;
+                currentUser.ocupacion = document.getElementById('ocupacion').value || originalUserData.ocupacion;
+                currentUser.direccion = document.getElementById('direccion').value || originalUserData.direccion;
+                currentUser.movil = document.getElementById('movil').value || originalUserData.movil;
+                currentUser.modificadoEl = today;
+                currentUser.status = document.querySelector('input[name="validity-status"]:checked').value || originalUserData.status;
+                currentUser.motivo = document.getElementById('validity-motivo').value || originalUserData.motivo;
+                currentUser.validoDe = document.getElementById('valido-de').value || originalUserData.validoDe;
+                currentUser.validoA = document.getElementById('valido-a').value || originalUserData.validoA;
+            }
+            
+            saveUsers(users);
+            
+            disableFormFields();
+            document.getElementById('edit-btn').disabled = false;
+            document.getElementById('edit-btn').classList.remove('bg-gray-400', 'cursor-not-allowed');
+            document.getElementById('edit-btn').classList.add('bg-[var(--mysiss-purple)]', 'hover:bg-purple-700');
+
+            document.getElementById('save-btn').disabled = true;
+            document.getElementById('save-btn').classList.add('bg-gray-400', 'cursor-not-allowed');
+            document.getElementById('save-btn').classList.remove('bg-[var(--mysiss-purple)]', 'hover:bg-purple-700');
+
+            document.getElementById('validity-active').disabled = true;
+            document.getElementById('validity-inactive').disabled = true;
+            document.getElementById('validity-motivo').disabled = true;
+            
+            isCreatingNewUser = false;
+            showModal('Éxito', 'Usuario guardado correctamente', 'fas fa-check-circle', 'text-green-500');
+        }
+        
+        function showModal(title, message, icon, iconColor) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-icon').className = `${icon} text-4xl ${iconColor} mb-4`;
+            document.getElementById('modal-confirmacion').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('modal-confirmacion').style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('modal-confirmacion')) {
+                closeModal();
+            }
+        }
+        
+        function toggleSubmenu() {
+            return;
+        }
+
+        function setActiveMenu() {
+            const currentPath = window.location.pathname.split('/').pop();
+            
+            document.querySelectorAll('.nav-link[href]').forEach(link => {
+                const linkPath = link.getAttribute('href').split('/').pop();
+                if (linkPath === currentPath) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNewUserForm();
+
+            document.querySelectorAll('.submenu').forEach(menu => {
+                menu.classList.add('active');
+                menu.style.display = 'block';
+                const parentLink = menu.previousElementSibling;
+                if (parentLink && parentLink.querySelector('svg')) {
+                    parentLink.querySelector('svg').classList.add('rotate-180');
+                }
+            });
+
+            document.querySelectorAll('.has-submenu').forEach(link => {
+                link.onclick = null;
+                link.href = 'javascript:void(0)';
+            });
+
+            const formFields = document.querySelectorAll('#user-form input:not([readonly]), #user-form select:not([disabled])');
+            formFields.forEach(field => {
+                field.addEventListener('input', checkFormValidityAndToggleSaveButton);
+                field.addEventListener('change', checkFormValidityAndToggleSaveButton); 
+                field.addEventListener('blur', function() { 
+                    const fieldId = this.id;
+                    switch (fieldId) {
+                        case 'fecha-nacimiento': validateBirthDate(); break;
+                        case 'email': validateEmail(); break;
+                        case 'numero-documento': validateUniqueDocument(); break;
+                        case 'movil': validateUniqueMobile(); break;
+                        case 'valido-de': validateValidoDesde(); break;
+                        case 'nombre1': 
+                        case 'nombre2': 
+                        case 'apellido1': 
+                        case 'apellido2': 
+                            validateUniqueFullName(); 
+                            updateUsername();
+                            break;
+                        case 'telefono':
+                            const telField = document.getElementById('telefono');
+                            const telError = document.getElementById('telefono-error');
+                            if (telField.value && !/^\d+$/.test(telField.value)) {
+                                telError.textContent = 'Solo se permiten números';
+                                telError.style.display = 'block';
+                                telField.classList.add('border-red-500');
+                            } else {
+                                telError.textContent = '';
+                                telError.style.display = 'none';
+                                telField.classList.remove('border-red-500');
+                            }
+                            break;
+                    }
+                    checkFormValidityAndToggleSaveButton(); 
+                });
+            });
+
+            document.getElementById('validity-active').addEventListener('change', function() {
+                toggleMotivoField();
+                checkFormValidityAndToggleSaveButton();
+            });
+            
+            document.getElementById('validity-inactive').addEventListener('change', function() {
+                toggleMotivoField();
+                checkFormValidityAndToggleSaveButton();
+            });
+
+            document.querySelector('#user-search + button').addEventListener('click', function() {
+                searchUsers();
+            });
+
+            setActiveMenu();
+        });
+        
+        document.getElementById("devClearBtn").onclick = function() {
+            localStorage.clear();
+            alert("LocalStorage limpiado ✅");
+        };
+    </script>
+</body>
+</html>

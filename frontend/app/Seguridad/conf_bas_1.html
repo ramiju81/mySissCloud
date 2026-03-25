@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Medical Fees mySiss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --mysiss-purple: #800080;
+            --mysiss-light-purple: #EBE3F2;
+            --mysiss-hover-purple: #DFD1EE;
+            --mysiss-active-bg: #D0B8E6;
+        }
+        .custom-radio {
+            accent-color: var(--mysiss-purple);
+        }
+        .focus-outline:focus-visible {
+            outline: 2px solid var(--mysiss-purple);
+            outline-offset: 2px;
+        }
+        .submenu {
+            display: none;
+            padding-left: 1rem;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .nav-link.active {
+            background-color: var(--mysiss-active-bg);
+            font-weight: bold;
+            position: relative;
+        }
+        .nav-link.active::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background-color: var(--mysiss-purple);
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        nav {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 80px);
+            position: relative;
+        }
+        .logout-link {
+            margin-top: auto;
+            position: sticky;
+            bottom: 0;
+            background-color: var(--mysiss-light-purple);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-button.active {
+            border-bottom: 2px solid var(--mysiss-purple);
+            background-color: var(--mysiss-hover-purple);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .selected-row {
+            background-color: var(--mysiss-light-purple) !important;
+        }
+		
+		/* Botón rojo fijo en esquina inferior derecha */
+		#devClearBtn {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background: transparent;
+			color: transparent;
+			border: none;
+			padding: 10px;
+			border-radius: 5px;
+			cursor: pointer;
+			z-index: 9999;
+		}
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden">
+    <div class="w-48 h-full bg-[var(--mysiss-light-purple)] flex flex-col">
+        <div class="p-6">
+            <h1 class="text-[var(--mysiss-purple)] text-5xl font-bold">mySiss</h1>
+        </div>
+        <nav class="mt-4 flex flex-col" aria-label="Menú principal">
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('config-submenu', this)">
+                    <strong>Configuración</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="config-submenu" class="submenu">
+                    <a href="conf_bas_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Base</a>
+                    <!-- <a href="conf_func_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>-->
+                    <a href="conf_func_3.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>
+                    <a href="conf_role.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear					Roles</a>
+                </div>
+            </div>
+            
+            <!-- Usuario -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('usuario-submenu', this)">
+                    <strong>Usuario</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="usuario-submenu" class="submenu">
+                    <a href="conf_usua_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Usuario</a>
+                    <a href="conf_rol.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Asignar Rol</a>
+                </div>
+            </div>
+            
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('modulos-submenu', this)">
+                    <strong>Modulos</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="modulos-submenu" class="submenu">
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('honorarios-submenu', this)">
+                            <span>Honorarios</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="honorarios-submenu" class="submenu">
+                            <a href="../Honorarios/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../Honorarios/Honorarios.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('auditoria-submenu', this)">
+                            <span>Auditoria</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="auditoria-submenu" class="submenu">
+                            <a href="../auditoria/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../auditoria/auditoria.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('glosas-submenu', this)">
+                            <span>Glosas</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="glosas-submenu" class="submenu">
+                            <a href="../glosas/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../glosas/glosas.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="../login.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors mt-44 focus-outline">
+                <strong>Cerrar Sesión</strong>
+            </a>
+        </nav>
+    </div>
+
+    <div class="flex-1 bg-white p-8 overflow-auto">
+        <h2 class="text-2xl font-bold text-[var(--mysiss-purple)] mb-6">Base</h2>
+        
+<div class="flex border-b mb-6">
+    <!-- Botón para agregar nueva pestaña -->
+    <div class="flex items-center gap-1 ml-auto">
+        <button onclick="openModal('agregar-pestana')" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+            <i class="fas fa-plus mr-2"></i>
+        </button>
+    <!-- Botón para modificar nueva pestaña -->
+	<button onclick="openModalModificarPestana()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+            <i class="fas fa-pencil-alt mr-2"></i>
+        </button>
+    <!-- Botón para inactivar nueva pestaña -->
+        <button onclick="openModalInactivarPestana()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+            <i class="fas fa-eye-slash mr-2"></i>
+        </button>
+    </div>
+</div>
+        
+        <!-- Modal para agregar nueva pestaña -->
+        <div id="modal-agregar-pestana" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-[var(--mysiss-purple)]">Agregar Nueva Pestaña</h3>
+                    <button onclick="closeModal('agregar-pestana')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="form-pestana" onsubmit="agregarNuevaPestana(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la pestaña*</label>
+                        <input type="text" id="nombre-pestana" required 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="closeModal('agregar-pestana')" 
+                                class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">Crear</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+<!-- Modal para modificar pestaña -->
+<div id="modal-modificar-pestana" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-[var(--mysiss-purple)]">Modificar Pestaña</h3>
+            <button onclick="closeModal('modificar-pestana')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="form-modificar-pestana" onsubmit="modificarPestana(event)">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Seleccionar pestaña*</label>
+                <select id="select-pestana-modificar" required 
+                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+                    <option value="">Seleccione una pestaña</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nuevo nombre*</label>
+                <input type="text" id="nuevo-nombre-pestana" required 
+                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeModal('modificar-pestana')" 
+                        class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                <button type="submit" 
+                        class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para inactivar/activar pestaña -->
+<div id="modal-inactivar-pestana" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-[var(--mysiss-purple)]" id="titulo-modal-inactivar">Inactivar Pestaña</h3>
+            <button onclick="closeModal('inactivar-pestana')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="form-inactivar-pestana" onsubmit="gestionarPestana(event)">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" id="label-seleccion-pestana">Seleccionar pestaña a inactivar*</label>
+                <select id="select-pestana-inactivar" required 
+                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+                    <option value="">Seleccione una pestaña</option>
+                </select>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeModal('inactivar-pestana')" 
+                        class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                <button type="submit" id="boton-accion-pestana"
+                        class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">Inactivar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+        <!-- Modal para agregar items a pestañas dinámicas -->
+        <div id="modal-agregar-item-pestana" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-[var(--mysiss-purple)]" id="titulo-modal-item-pestana">Agregar Item</h3>
+                    <button onclick="closeModal('agregar-item-pestana')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="form-item-pestana" onsubmit="guardarItemPestana(event)">
+                    <input type="hidden" id="pestana-id">
+                    <input type="hidden" id="item-id">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Código*</label>
+                        <input type="text" id="item-codigo" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción*</label>
+                        <input type="text" id="item-descripcion" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-[var(--mysiss-purple)] focus:border-[var(--mysiss-purple)]">
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="closeModal('agregar-item-pestana')" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="modal-confirmacion" class="modal">
+        <div class="modal-content max-w-sm">
+            <div class="text-center p-6">
+                <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+                <h3 class="text-lg font-bold text-gray-800 mb-2" id="mensaje-confirmacion">Los datos fueron grabados correctamente</h3>
+                <button onclick="closeModal('confirmacion')" class="mt-4 px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+		<!-->
+	<button id="devClearBtn">Limpiar</button>
+	
+<script>
+    // Variables de estado
+    let pestanas = JSON.parse(localStorage.getItem('pestanas')) || [];
+    pestanas.forEach(p => {
+        if (p.activo === undefined) p.activo = true; // Por defecto todas están activas
+    });
+    let pestanaEditando = null;
+    let itemEditando = null;
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', function() {
+        initTabs();
+        initRowSelection();
+        renderPestanas();
+        setActiveMenu();
+        showAllMenuItems();
+    });
+
+    // Mostrar todos los items del menú permanentemente
+    function showAllMenuItems() {
+        // Mostrar todos los links principales
+        document.querySelectorAll('.menu-item > a.nav-link').forEach(link => {
+            link.style.display = 'flex';
+        });
+
+        // Mostrar todos los submenús permanentemente
+        document.querySelectorAll('.submenu').forEach(submenu => {
+            submenu.classList.add('active');
+            submenu.style.display = 'block';
+        });
+
+        // Mostrar todas las flechas en su estado normal (sin rotación)
+        document.querySelectorAll('.menu-item > a.nav-link svg').forEach(icon => {
+            icon.classList.remove('rotate-180');
+        });
+    }
+
+    // Funciones de inicialización
+    function initTabs() {
+        // Los eventos de tabs ahora se manejan en renderPestanas()
+        // Esta función se mantiene por compatibilidad
+    }
+
+    function initRowSelection() {
+        document.addEventListener('click', function(e) {
+            // Manejar selección de filas en todas las tablas dinámicas
+            if (e.target.closest('[id^="tabla-pestana-"] tr')) {
+                const tablaId = e.target.closest('[id^="tabla-pestana-"]').id;
+                document.querySelectorAll(`#${tablaId} tr`).forEach(tr => tr.classList.remove('selected-row'));
+                e.target.closest('tr').classList.add('selected-row');
+            }
+        });
+    }
+
+    // Funciones para pestañas dinámicas
+    function renderPestanas() {
+        const tabsContainer = document.querySelector('.flex.border-b.mb-6');
+        
+        // 1. Guardar los botones de acción (agregar, modificar, inactivar)
+        const botonesAccion = document.createElement('div');
+        botonesAccion.className = 'flex items-center gap-1 ml-auto';
+        botonesAccion.innerHTML = `
+            <button onclick="openModal('agregar-pestana')" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                <i class="fas fa-plus mr-2"></i>
+            </button>
+            <button onclick="openModalModificarPestana()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                <i class="fas fa-pencil-alt mr-2"></i>
+            </button>
+            <button onclick="openModalInactivarPestana()" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                <i class="fas fa-eye-slash mr-2"></i>
+            </button>
+        `;
+        
+        // 2. Limpiar el contenedor y agregar botones de acción
+        tabsContainer.innerHTML = '';
+        tabsContainer.appendChild(botonesAccion);
+        
+        // 3. Limpiar contenidos de pestañas dinámicas antiguas
+        document.querySelectorAll('.tab-content[id^="pestana-"]').forEach(content => content.remove());
+        
+        // 4. Filtrar pestañas activas
+        const pestanasActivas = pestanas.filter(p => p.activo);
+        
+        if (pestanasActivas.length === 0) {
+            // Mostrar mensaje si no hay pestañas
+            const noPestanasMsg = document.createElement('div');
+            noPestanasMsg.className = 'text-center py-8 text-gray-500';
+            noPestanasMsg.textContent = 'No hay pestañas configuradas. Use el botón "+" para agregar.';
+            document.querySelector('.flex-1.bg-white').appendChild(noPestanasMsg);
+            return;
+        }
+        
+        // 5. Crear pestañas dinámicas
+        pestanasActivas.forEach(pestana => {
+            // Crear botón de pestaña
+            const tabButton = document.createElement('button');
+            tabButton.className = 'tab-button px-4 py-2 text-[var(--mysiss-purple)] focus-outline';
+            tabButton.setAttribute('data-tab', `pestana-${pestana.id}`);
+            tabButton.textContent = pestana.nombre;
+            
+            // Insertar antes de los botones de acción
+            tabsContainer.insertBefore(tabButton, botonesAccion);
+            
+            // Crear contenido de pestaña
+            const tabContent = document.createElement('div');
+            tabContent.id = `pestana-${pestana.id}`;
+            tabContent.className = 'tab-content';
+            
+            tabContent.innerHTML = `
+                <div class="mb-4 flex justify-between">
+                    <div class="flex space-x-2">
+                        <button onclick="openModalAgregarItemPestana('${pestana.id}')" 
+                                class="bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                            <i class="fas fa-plus mr-2"></i>Agregar
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="buscar-pestana-${pestana.id}" placeholder="Buscar..." 
+                               class="border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mysiss-purple)]">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-[var(--mysiss-light-purple)]">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-[var(--mysiss-purple)] uppercase tracking-wider">Código</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-[var(--mysiss-purple)] uppercase tracking-wider">Descripción</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-[var(--mysiss-purple)] uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="tabla-pestana-${pestana.id}">
+                            ${renderItemsPestana(pestana.id)}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Insertar el contenido
+            document.querySelector('.flex-1.bg-white').appendChild(tabContent);
+            
+            // Configurar evento de búsqueda
+            document.getElementById(`buscar-pestana-${pestana.id}`).addEventListener('input', (e) => {
+                filtrarItemsPestana(pestana.id, e.target.value.toLowerCase());
+            });
+            
+            // Configurar evento de clic en la pestaña
+            tabButton.addEventListener('click', function() {
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                this.classList.add('active');
+                document.getElementById(`pestana-${pestana.id}`).classList.add('active');
+            });
+        });
+        
+        // Activar la primera pestaña
+        const primeraPestana = tabsContainer.querySelector('.tab-button');
+        if (primeraPestana) {
+            primeraPestana.click();
+        }
+    }
+
+    function renderItemsPestana(pestanaId) {
+        const pestana = pestanas.find(p => p.id == pestanaId);
+        if (!pestana || !pestana.items) return '';
+        
+        return pestana.items.map(item => `
+            <tr data-id="${item.id}" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">${item.codigo}</td>
+                <td class="px-6 py-4">${item.descripcion}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <button onclick="editarItemPestana('${pestanaId}', ${item.id})" class="text-[var(--mysiss-purple)] hover:text-purple-900 mr-3">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarItemPestana('${pestanaId}', ${item.id})" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Función para abrir modal de modificación
+    function openModalModificarPestana() {
+        const select = document.getElementById('select-pestana-modificar');
+        select.innerHTML = '<option value="">Seleccione una pestaña</option>';
+        
+        // Mostrar solo pestañas activas
+        pestanas.filter(p => p.activo).forEach(pestana => {
+            const option = document.createElement('option');
+            option.value = pestana.id;
+            option.textContent = pestana.nombre;
+            select.appendChild(option);
+        });
+        
+        document.getElementById('nuevo-nombre-pestana').value = '';
+        openModal('modificar-pestana');
+    }
+
+    // Función para modificar una pestaña
+    function modificarPestana(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('select-pestana-modificar').value;
+        const nuevoNombre = document.getElementById('nuevo-nombre-pestana').value.trim();
+        
+        if (!id || !nuevoNombre) return;
+        
+        const pestana = pestanas.find(p => p.id == id);
+        if (!pestana) return;
+        
+        // Verificar si el nuevo nombre ya existe
+        if (pestanas.some(p => p.id != id && p.nombre.toLowerCase() === nuevoNombre.toLowerCase())) {
+            alert('Ya existe una pestaña con ese nombre');
+            return;
+        }
+        
+        pestana.nombre = nuevoNombre;
+        localStorage.setItem('pestanas', JSON.stringify(pestanas));
+        
+        renderPestanas();
+        closeModal('modificar-pestana');
+        mostrarConfirmacion('Pestaña modificada correctamente');
+    }
+
+    // Función para abrir modal de inactivar/activar
+    function openModalInactivarPestana() {
+        const select = document.getElementById('select-pestana-inactivar');
+        select.innerHTML = '<option value="">Seleccione una pestaña</option>';
+        
+        const titulo = document.getElementById('titulo-modal-inactivar');
+        const label = document.getElementById('label-seleccion-pestana');
+        const boton = document.getElementById('boton-accion-pestana');
+        
+        // Ver si hay pestañas inactivas
+        const hayInactivas = pestanas.some(p => !p.activo);
+        
+        if (hayInactivas) {
+            // Mostrar para activar pestañas inactivas
+            titulo.textContent = 'Activar Pestaña';
+            label.textContent = 'Seleccionar pestaña inactiva a activar*';
+            boton.textContent = 'Activar';
+            
+            pestanas.filter(p => !p.activo).forEach(pestana => {
+                const option = document.createElement('option');
+                option.value = pestana.id;
+                option.textContent = pestana.nombre;
+                select.appendChild(option);
+            });
+        } else {
+            // Mostrar para inactivar pestañas activas
+            titulo.textContent = 'Inactivar Pestaña';
+            label.textContent = 'Seleccionar pestaña a inactivar*';
+            boton.textContent = 'Inactivar';
+            
+            pestanas.filter(p => p.activo).forEach(pestana => {
+                const option = document.createElement('option');
+                option.value = pestana.id;
+                option.textContent = pestana.nombre;
+                select.appendChild(option);
+            });
+        }
+        
+        openModal('inactivar-pestana');
+    }
+
+    // Función para gestionar inactivar/activar pestaña
+    function gestionarPestana(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('select-pestana-inactivar').value;
+        if (!id) return;
+        
+        const pestana = pestanas.find(p => p.id == id);
+        if (!pestana) return;
+        
+        // Cambiar estado
+        pestana.activo = !pestana.activo;
+        localStorage.setItem('pestanas', JSON.stringify(pestanas));
+        
+        renderPestanas();
+        closeModal('inactivar-pestana');
+        mostrarConfirmacion(pestana.activo ? 'Pestaña activada correctamente' : 'Pestaña inactivada correctamente');
+    }
+
+    function agregarNuevaPestana(e) {
+        e.preventDefault();
+        
+        const nombre = document.getElementById('nombre-pestana').value.trim();
+        
+        if (pestanas.some(p => p.nombre.toLowerCase() === nombre.toLowerCase())) {
+            alert('Ya existe una pestaña con ese nombre');
+            return;
+        }
+        
+        const nuevaId = pestanas.length > 0 ? Math.max(...pestanas.map(p => p.id)) + 1 : 1;
+        const nuevaPestana = {
+            id: nuevaId,
+            nombre: nombre,
+            items: [],
+            activo: true
+        };
+        
+        pestanas.push(nuevaPestana);
+        localStorage.setItem('pestanas', JSON.stringify(pestanas));
+        
+        renderPestanas();
+        closeModal('agregar-pestana');
+        mostrarConfirmacion('Pestaña creada correctamente');
+        document.getElementById('form-pestana').reset();
+    }
+
+    function openModalAgregarItemPestana(pestanaId) {
+        pestanaEditando = pestanaId;
+        itemEditando = null;
+        
+        document.getElementById('titulo-modal-item-pestana').textContent = 'Agregar Item';
+        document.getElementById('pestana-id').value = pestanaId;
+        document.getElementById('item-id').value = '';
+        document.getElementById('item-codigo').value = '';
+        document.getElementById('item-descripcion').value = '';
+        
+        openModal('agregar-item-pestana');
+    }
+
+    function editarItemPestana(pestanaId, itemId) {
+        const pestana = pestanas.find(p => p.id == pestanaId);
+        if (!pestana) return;
+        
+        const item = pestana.items.find(i => i.id == itemId);
+        if (!item) return;
+        
+        pestanaEditando = pestanaId;
+        itemEditando = itemId;
+        
+        document.getElementById('titulo-modal-item-pestana').textContent = 'Editar Item';
+        document.getElementById('pestana-id').value = pestanaId;
+        document.getElementById('item-id').value = itemId;
+        document.getElementById('item-codigo').value = item.codigo;
+        document.getElementById('item-descripcion').value = item.descripcion;
+        
+        openModal('agregar-item-pestana');
+    }
+
+    function guardarItemPestana(e) {
+        e.preventDefault();
+        
+        const pestanaId = document.getElementById('pestana-id').value;
+        const itemId = document.getElementById('item-id').value;
+        const codigo = document.getElementById('item-codigo').value.toUpperCase();
+        const descripcion = document.getElementById('item-descripcion').value;
+        
+        const pestana = pestanas.find(p => p.id == pestanaId);
+        if (!pestana) return;
+        
+        if (!itemId && pestana.items.some(item => item.codigo === codigo)) {
+            alert('El código ya existe en esta pestaña. Por favor ingrese un código único.');
+            return;
+        }
+        
+        if (itemId) {
+            // Editar existente
+            const index = pestana.items.findIndex(i => i.id == itemId);
+            pestana.items[index] = { id: parseInt(itemId), codigo, descripcion };
+        } else {
+            // Agregar nuevo
+            const nuevoId = pestana.items.length > 0 ? Math.max(...pestana.items.map(i => i.id)) + 1 : 1;
+            pestana.items.push({ id: nuevoId, codigo, descripcion });
+        }
+        
+        localStorage.setItem('pestanas', JSON.stringify(pestanas));
+        
+        closeModal('agregar-item-pestana');
+        renderPestanas();
+        
+        // Reactivar la pestaña actual
+        const tabButton = document.querySelector(`.tab-button[data-tab="pestana-${pestanaId}"]`);
+        if (tabButton) tabButton.click();
+        
+        mostrarConfirmacion(itemId ? 'Item actualizado correctamente' : 'Item agregado correctamente');
+        document.getElementById('form-item-pestana').reset();
+        pestanaEditando = null;
+        itemEditando = null;
+    }
+
+    function eliminarItemPestana(pestanaId, itemId) {
+        if (!confirm('¿Está seguro que desea eliminar este item?')) return;
+        
+        const pestana = pestanas.find(p => p.id == pestanaId);
+        if (!pestana) return;
+        
+        const index = pestana.items.findIndex(i => i.id == itemId);
+        if (index !== -1) {
+            pestana.items.splice(index, 1);
+            localStorage.setItem('pestanas', JSON.stringify(pestanas));
+            renderPestanas();
+            mostrarConfirmacion('Item eliminado correctamente');
+        }
+    }
+
+    function filtrarItemsPestana(pestanaId, busqueda) {
+        document.querySelectorAll(`#tabla-pestana-${pestanaId} tr`).forEach(fila => {
+            const textoFila = fila.textContent.toLowerCase();
+            fila.style.display = textoFila.includes(busqueda) ? '' : 'none';
+        });
+    }
+
+    // Funciones generales
+    function openModal(modalId) {
+        document.getElementById(`modal-${modalId}`).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(`modal-${modalId}`).style.display = 'none';
+    }
+
+    function mostrarConfirmacion(mensaje) {
+        document.getElementById('mensaje-confirmacion').textContent = mensaje;
+        openModal('confirmacion');
+    }
+
+    function setActiveMenu() {
+        const currentPath = window.location.pathname.split('/').pop();
+        
+        document.querySelectorAll('.nav-link[href]').forEach(link => {
+            const linkPath = link.getAttribute('href').split('/').pop();
+            if (linkPath === currentPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    }
+
+    function toggleSubmenu(submenuId, element) {
+        const submenu = document.getElementById(submenuId);
+        const icon = element.querySelector('svg');
+        
+        submenu.classList.toggle('active');
+        icon.classList.toggle('rotate-180');
+    }
+    
+    document.getElementById("devClearBtn").onclick = function() {
+        localStorage.clear();
+        alert("LocalStorage limpiado ✅");
+        location.reload();
+    };
+</script>
+</body>
+</html>

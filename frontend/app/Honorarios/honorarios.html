@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <title>Cloud Medical Fees mySiss</title>
+  <link rel="stylesheet" href="../css/honorarios.css">
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <h1>mySiss</h1>
+        <a href="honorarios.html" style="text-decoration: underline;">Preliquidacion / Liquidación</a>
+        <a href="validacion_liq.html">Validaciones</a>
+        <a href="reportes_liq.html">Reportes</a>
+      </div>
+      <a href="../../mySiss_Cloud_Login.html" class="logout">Cerrar sesión</a>
+    </div>
+ 
+    <div class="main">
+      <div class="radio-group">
+        <label><input type="radio" name="tipo" id="pre" checked> Preliquidación</label>
+        <label><input type="radio" name="tipo" id="liq"> Liquidación</label>
+      </div>
+
+      <div id="preliquidacion-section" class="form-section">
+        <div class="form-row">
+          <label>Fecha:</label>
+          <input type="date" id="fechaInicioPre" />
+          <input type="date" id="fechaFinPre" />
+          <input type="number" id="periodoPre" min="1" max="12" placeholder="Mes" />
+        
+          <span id="btnActualizarWS" class="btn-icon" title="Actualizar Web Service">
+            <i class="fas fa-sync-alt"></i>
+          </span>
+        </div>
+      
+        <div class="form-row">
+          <label>Aseguradora:</label>
+          <select id="aseguradoraSelect">
+            <option selected value="">Todas</option>
+            <option>Comfenalco EPS</option>
+            <option>SURA EPS</option>
+            <option>Comfandi</option>
+            <option>Cruz Blanca</option> 
+            <option>Coomeva EPS</option>
+            <option>Nueva EPS</option>
+          </select>
+        </div>
+
+        <div class="form-row" style="display: flex; align-items: center; gap: 20px;">
+          <div style="display: flex; align-items: center;">
+            <label for="tipoContrato" style="margin-right: 30px; min-width: 120px;">Tipo liquidación:</label>
+            <select id="tipoContrato" onchange="mostrarEspecialidad(this.value)">
+              <option selected value="">Todos</option>
+              <option value="grupo">Sociedad medica</option>
+              <option value="servicio">Nombre propio</option>
+            </select>
+          </div>
+
+          <div id="especialidadGrupo" style="display: none; align-items: center;">
+            <label for="especialidad" style="min-width: 20px;"></label>
+            <select id="especialidad">
+              <option selected value="">Todas</option>
+              <option>Cardiologos Asociados</option>
+              <option>Radiologos Asociados</option>
+              <option>Grupo Anestesia</option>
+              <option>Sociedad de Cirugia Plastica</option>
+              <option>Maxilo Group</option>
+              <option>Urologos Asociados</option>
+              <option>Gienco group</option>
+              <option>Intensivistas Asociado</option>
+              <option>Anestesia center group</option>
+              <option>Terapistas Asociados</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">		
+          <label>Profesional:</label>
+          <select id="profesionalSelect">
+            <option selected value="">Todos</option>
+            <option>Palacio Yeny</option>
+            <option>Ramirez Julian</option>
+            <option>López Mario</option>
+            <option>Reyes Camila</option>
+            <option>Ortega Juan</option>
+            <option>Gómez Laura</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <button class="btn" onclick="filtrarDatos()" title="Visualizar">
+            <i class="fas fa-search"></i>
+          </button>          
+          <button class="btn" onclick="gen_Accion('pre')">Preliquidar</button>
+        </div>
+      </div>
+
+      <div id="liquidacion-section" class="form-section hidden">
+        <div class="form-row">
+          <label>Fecha:</label>
+          <input type="date" id="fechaInicioLiq" />
+          <input type="date" id="fechaFinLiq" />
+          <input type="number" id="periodoLiq" min="1" max="12" placeholder="Mes" />
+        </div>
+
+        <div class="form-row">
+          <label>Número Orden:</label>
+          <input type="text" id="ordenInput" />
+        </div>
+
+        <div class="form-row">
+          <button class="btn" onclick="filtrarDatos()" title="Visualizar">
+            <i class="fas fa-search"></i>
+          </button>     
+          <button class="btn" onclick="gen_Accion('liq')" title="Liquidar Honorarios">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="resultados">
+        <!-- Aquí se generará la tabla dinámicamente -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal para actualizar WS -->
+  <div id="wsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p>¿Desea actualizar la información del Web Service?</p>
+      <div class="modal-buttons">
+        <button class="cancel">Cancelar</button>
+        <button class="accept">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  
+<script src="../js/honorarios.js"></script>
+</body>
+</html>

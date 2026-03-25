@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Consultar devoluciones - mySiss Cloud</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+
+    <style>
+      /* ====== Plantilla (alineada a tu con_dev original) ====== */
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #fff;
+        color: #111;
+      }
+
+      .container {
+        display: flex;
+      }
+
+      .sidebar {
+        width: 180px;
+        background: #eee6f8;
+        padding: 20px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow-y: auto;
+      }
+
+      .sidebar h1 {
+        color: purple;
+        font-weight: bold;
+        font-size: 50px;
+        margin-bottom: 30px;
+        line-height: 1;
+      }
+
+      .sidebar a {
+        display: block;
+        margin: 10px 0;
+        color: purple;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .logout {
+        color: purple;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .main {
+        margin-left: 240px;
+        flex: 1;
+        background: #fff;
+        padding: 20px 40px;
+      }
+
+      /* ====== Submenús ====== */
+      .submenu-radicacion,
+      .submenu-devolucion,
+      .submenu-objecion,
+      .submenu-gestion,
+      .submenu-conciliacion {
+        margin: 4px 0 8px 12px;
+        display: none;              /* visible por JS según página */
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .submenu-radicacion a,
+      .submenu-devolucion a,
+      .submenu-objecion a,
+      .submenu-gestion a,
+      .submenu-conciliacion a {
+        margin: 0;
+        font-weight: normal;
+        font-size: 14px;
+        color: purple;
+        text-decoration: none;
+      }
+
+      .submenu-devolucion a.active {
+        text-decoration: underline;
+        font-weight: bold;
+      }
+
+      /* ====== Estilos internos ====== */
+      .title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .h2 {
+        font-size: 24px;
+        font-weight: 400;
+        margin: 4px 0 10px;
+      }
+
+      .section {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        padding: 18px 18px;
+        margin-bottom: 12px;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+
+      .row label {
+        min-width: 180px;
+        font-weight: 400;
+      }
+
+      input[type="text"],
+      select {
+        border: 1.6px solid purple;
+        border-radius: 12px;
+        padding: 10px 12px;
+        min-width: 200px;
+        outline: none;
+      }
+
+      .field,
+      .with-ico {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .txt {
+        padding: 10px 40px 10px 12px; /* espacio para la lupa */
+        min-width: 260px;
+      }
+
+      .lupa,
+      .ico-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+        color: purple;
+      }
+
+      .lupa svg { display: block; }
+
+      .btn {
+        background: purple;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        cursor: pointer;
+        box-shadow: 0 3px 0 #b9a8c6;
+        transition: .15s transform ease;
+        font-weight: 400;
+      }
+      .btn:active { transform: translateY(1px); }
+
+      .muted {
+        color: #666;
+        font-style: italic;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #f6f2fa;
+        color: #3d0a46;
+        border: 1px solid #e0d7ea;
+        font-size: 12px;
+      }
+
+      /* ====== Tablas ====== */
+      .table-wrap { overflow-x: auto; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        background: #fff;
+      }
+
+      th, td {
+        border: 1px solid #e0d7ea;
+        padding: 8px;
+        background: #fff;
+        font-weight: 400;
+      }
+
+      th {
+        text-align: center;
+        background: #f5f1f9;
+        color: #3d0a46; 
+		font-weight: normal; 
+      }
+
+      td { text-align: left; }
+      .col-ico { width: 56px; text-align: center; }
+
+      /* ====== Semáforo ====== */
+      .dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 3px solid #1f5577;
+        background: #fff;
+        display: inline-block;
+      }
+      .dot.ok {
+        background: #4bb543;  /* verde */
+        border-color: #4bb543;
+      }
+
+      /* ====== Sugerencias (lupa) ====== */
+      .sugg {
+        position: absolute;
+        background: #fff;
+        border: 1px solid #e0d7ea;
+        border-radius: 10px;
+        box-shadow: 0 6px 24px rgba(0,0,0,.08);
+        display: none;
+        max-height: 220px;
+        overflow: auto;
+        z-index: 5;
+      }
+      .sugg ul { list-style: none; margin: 0; padding: 6px; }
+      .sugg li { padding: 8px; border-radius: 8px; cursor: pointer; }
+      .sugg li:hover { background: #faf5ff; }
+	  .h2 {
+		  font-weight: bold;
+		}
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- ====== Sidebar ====== -->
+      <aside class="sidebar">
+        <div class="sidebar-content">
+          <h1>mySiss</h1>
+
+          <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+          <div class="submenu-radicacion" id="submenu-radicacion">
+            <a href="radicar_fact.html">Radicar facturas</a>
+            <a href="actualizar_rad.html">Actualizar radicación</a>
+            <a href="consultar_fact.html">Consultar facturas radicadas</a>
+          </div>
+
+          <a href="devolucion.html" id="devolucion-link">Devolución facturas</a>
+          <div class="submenu-devolucion" id="submenu-devolucion">
+            <a href="reg_dev.html">Registrar devoluciones</a>
+            <a href="con_dev.html" class="active" style="text-decoration: underline;">Consultar devoluciones</a>
+          </div>
+
+          <a href="cargue.html" id="objecion-link">Cargue objeciones</a>
+          <div class="submenu-objecion" id="submenu-objecion">
+            <a href="carg_obj.html">Cargar archivo objeción</a>
+            <a href="conr_obj.html">Consultar responsable objeción</a>
+            <a href="cam_obj.html">Cambiar responsable objeción</a>
+            <a href="conc_obj.html">Consultar objeción</a>
+          </div>
+
+          <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+          <div class="submenu-gestion" id="submenu-gestion">
+            <a href="cont_obj.html">Contestar objeción</a>
+            <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+            <a href="cons_obj.html">Consultar objeción</a>
+          </div>
+
+          <a href="conciliacion.html" id="conciliacion-link">Conciliación objeciones</a>
+          <div class="submenu-conciliacion" id="submenu-conciliacion">
+            <a href="con_glo.html">Conciliación glosa a conciliar</a>
+            <a href="con_glo.html">Conciliación glosa</a>
+            <a href="cons_glo.html">Consultar glosas conciliadas</a>
+          </div>
+        </div>
+
+        <a href="../login.html" class="logout">Cerrar sesión</a>
+      </aside>
+
+      <!-- ====== Contenido ====== -->
+      <main class="main">
+        <div class="title-row">
+          <h3 class="h2">Consultar devoluciones</h3>
+        </div>
+        <div class="title-row">
+          <h3 class="h2" style="font-weight: normal;">Criterios de búsqueda</h3>
+        </div>
+
+        <!-- ====== Criterios de búsqueda ====== -->
+        <section class="section" id="filtros">
+          <div class="row">
+            <label for="fRadExt">No. Radicado Externo</label>
+            <div class="with-ico">
+              <input id="fRadExt" class="txt" type="text" autocomplete="off" />
+              <i id="btnLupaRadExt" class="fas fa-search ico-btn" title="Buscar radicado externo"></i>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="fFactura">No. Factura</label>
+            <div class="with-ico">
+              <input id="fFactura" class="txt" type="text" autocomplete="off" />
+              <i id="btnLupaFactura" class="fas fa-search ico-btn" title="Buscar número de factura"></i>
+            </div>
+
+            <button id="btnBuscar" class="btn">Buscar</button>
+          </div>
+
+          <!-- Paneles de sugerencias -->
+          <div id="suggRad" class="sugg"><ul id="suggRadList"></ul></div>
+          <div id="suggFac" class="sugg"><ul id="suggFacList"></ul></div>
+        </section>
+
+        <!-- ====== Resultado: tabla principal ====== -->
+        <section class="section">
+          <div class="table-wrap">
+            <table id="tablaFactura" aria-label="Facturas devueltas">
+              <thead>
+                <tr>
+                  <th class="col-ico">Detalle</th>
+                  <th class="col-ico" title="Semáforo">Indicador</th>
+                  <th>Aseguradora</th>
+                  <th>Número de factura</th>
+                  <th>Valor factura</th>
+                  <th>No. Radicado Interno</th>
+                  <th>No. Radicado Externo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="placeholder">
+                  <td colspan="7" class="muted">
+                    Sin resultados. Ingresa un filtro y pulsa Buscar.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ====== Bloque detalle (OCULTO INICIALMENTE) ====== -->
+        <section id="bloque-detalle" class="section" style="display:none;">
+          <div class="title-row" style="margin-bottom:6px;">
+            <span class="chip">
+              <i class=""></i> Detalle factura
+            </span>
+          </div>
+          <div class="table-wrap">
+            <table id="tablaDetalle" aria-label="Detalle de factura">
+              <thead>
+                <tr>
+                  <th>Consecutivo servicio</th>
+                  <th>Código servicio facturado</th>
+                  <th>Descripción servicio</th>
+                  <th>Cantidad servicio</th>
+                  <th>Valor servicio</th>
+                  <th>Valor total</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ====== Datos de la devolución (OCULTO INICIALMENTE) ====== -->
+        <!-- CAMBIO: id + display:none -->
+        <section id="bloque-devolucion" class="section" style="display:none;">
+          <div class="title-row" style="margin-bottom:6px;">
+            <span class="chip">
+              <i class=""></i> Datos de la devolución
+            </span>
+          </div>
+          <div class="table-wrap">
+            <table id="tablaDev" aria-label="Datos de la devolución">
+              <thead>
+                <tr>
+                  <th>ID Motivo Devolución</th>
+                  <th>Motivo Devolución</th>
+                  <th>ID Sub Motivo</th>
+                  <th>Sub Motivo</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Usuario</th>
+                  <th>Nota</th>
+                  <th>ID Estado</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="placeholder">
+                  <td colspan="10" class="muted">Selecciona una fila o pulsa “Detalle”.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      /* ==========================================================
+         Submenús activos (igual a tu con_dev original)
+      ========================================================== */
+      (function () {
+        const page = location.pathname.split("/").pop();
+
+        const groups = {
+          radicacion: [
+            "radicacion.html",
+            "radicar_fact.html",
+            "actualizar_rad.html",
+            "consultar_fact.html"
+          ],
+          devolucion: ["devolucion.html", "reg_dev.html", "con_dev.html"],
+          objecion: [
+            "cargue.html",
+            "carg_obj.html",
+            "conr_obj.html",
+            "cam_obj.html",
+            "conc_obj.html"
+          ],
+          gestion: [
+            "gestion.html",
+            "cont_obj.html",
+            "regr_asig.html",
+            "resp_asig.html",
+            "cons_obj.html"
+          ],
+          conciliacion: ["conciliacion.html", "con_glo.html", "cons_glo.html"]
+        };
+
+        const submenus = {
+          radicacion: document.getElementById("submenu-radicacion"),
+          devolucion: document.getElementById("submenu-devolucion"),
+          objecion: document.getElementById("submenu-objecion"),
+          gestion: document.getElementById("submenu-gestion"),
+          conciliacion: document.getElementById("submenu-conciliacion")
+        };
+
+        const parentLinks = {
+          radicacion: document.getElementById("radicacion-link"),
+          devolucion: document.getElementById("devolucion-link"),
+          objecion: document.getElementById("objecion-link"),
+          gestion: document.getElementById("gestion-link"),
+          conciliacion: document.getElementById("conciliacion-link")
+        };
+
+        // Detecta grupo activo
+        let activeGroup = null;
+        for (const [g, files] of Object.entries(groups)) {
+          if (files.includes(page)) { activeGroup = g; break; }
+        }
+
+        // Muestra sólo el submenú del grupo activo y subraya el link padre
+        for (const [g, el] of Object.entries(submenus)) {
+          if (!el) continue;
+          if (g === activeGroup) {
+            el.style.display = "flex";
+            if (parentLinks[g]) parentLinks[g].style.textDecoration = "underline";
+          } else {
+            el.style.display = "none";
+            if (parentLinks[g]) parentLinks[g].style.textDecoration = "none";
+          }
+        }
+
+        // Subraya la opción hija actual
+        document.querySelectorAll(".submenu-devolucion a").forEach((a) => {
+          const isCurrent = a.getAttribute("href") === page;
+          a.classList.toggle("active", isCurrent);
+        });
+      })();
+
+      /* ==========================================================
+         === LECTORES COMPATIBLES CON reg_dev ===
+      ========================================================== */
+      const PREFERRED = ['radicar_fact_data','mysiss_state','mysiss','state_fact','radicacion_state'];
+      function safeParse(raw){ try{ return JSON.parse(raw);}catch{ return null;} }
+      function pickArrayLike(obj){
+        if (!obj || typeof obj !== 'object') return null;
+        if (Array.isArray(obj)) return obj;
+        if (Array.isArray(obj.facturas)) return obj.facturas;
+        if (Array.isArray(obj.items)) return obj.items;
+        if (Array.isArray(obj.data)) return obj.data;
+        if (Array.isArray(obj.registros)) return obj.registros;
+        return null;
+      }
+      function loadState(){
+        for (const k of PREFERRED){
+          const v = safeParse(localStorage.getItem(k));
+          const arr = pickArrayLike(v);
+          if (arr) return { _storageKey:k, facturas:arr, _raw:v };
+        }
+        for (let i=0;i<localStorage.length;i++){
+          const k = localStorage.key(i);
+          const v = safeParse(localStorage.getItem(k));
+          const arr = pickArrayLike(v);
+          if (arr) return { _storageKey:k, facturas:arr, _raw:v };
+        }
+        return { _storageKey:null, facturas:[], _raw:null };
+      }
+
+      const DEV_KEY = 'devoluciones_data';
+      function getDevoluciones(){
+        const raw = safeParse(localStorage.getItem(DEV_KEY));
+        if (raw && typeof raw === 'object' && Array.isArray(raw.items)) return raw.items;
+        if (Array.isArray(raw)) return raw;
+        return [];
+      }
+
+      /* ==========================================================
+         Sugerencias con lupa (panel flotante)
+      ========================================================== */
+      (function () {
+        const suggRad = document.getElementById("suggRad");
+        const suggRadList = document.getElementById("suggRadList");
+        const suggFac = document.getElementById("suggFac");
+        const suggFacList = document.getElementById("suggFacList");
+
+        const fRadExt = document.getElementById("fRadExt");
+        const fFactura = document.getElementById("fFactura");
+
+        function showSugg(panel, listEl, items, anchor) {
+          listEl.innerHTML = "";
+          const q = anchor.value.trim().toUpperCase();
+          items
+            .filter((x) => (q ? String(x).toUpperCase().includes(q) : true))
+            .forEach((x) => {
+              const li = document.createElement("li");
+              li.textContent = x;
+              li.addEventListener("click", () => {
+                anchor.value = x;
+                panel.style.display = "none";
+              });
+              listEl.appendChild(li);
+            });
+
+          const r = anchor.getBoundingClientRect();
+          panel.style.left = r.left + window.scrollX + "px";
+          panel.style.top = r.bottom + window.scrollY + "px";
+          panel.style.width = r.width + "px";
+          panel.style.display = "block";
+        }
+
+        function hideAll() {
+          suggRad.style.display = "none";
+          suggFac.style.display = "none";
+        }
+
+        document.getElementById('btnLupaRadExt').addEventListener('click', ()=>{
+          const st = loadState();
+          const vals = Array.from(new Set(
+            (st.facturas||[]).map(f => (f.radicadoExt ?? f.radExt ?? f.radicadoExterno ?? ''))
+                             .filter(v => v && String(v).trim()!=='')
+          ));
+          showSugg(suggRad, suggRadList, vals, fRadExt);
+        });
+
+        document.getElementById('btnLupaFactura').addEventListener('click', ()=>{
+          const st = loadState();
+          const vals = Array.from(new Set(
+            (st.facturas||[]).map(f => (f.factura ?? f.nroFactura ?? f.numeroFactura ?? ''))
+                             .filter(v => v && String(v).trim()!=='')
+          ));
+          showSugg(suggFac, suggFacList, vals, fFactura);
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest(".sugg") && !e.target.closest(".ico-btn")) {
+            hideAll();
+          }
+        });
+
+        fFactura.addEventListener("input", () =>
+          document.getElementById('btnLupaFactura').click()
+        );
+        fRadExt.addEventListener("input", () =>
+          document.getElementById('btnLupaRadExt').click()
+        );
+      })();
+
+      /* ==========================================================
+         Lógica de página (búsqueda, render, localStorage)
+      ========================================================== */
+      (function () {
+        const tFactBody = document.querySelector("#tablaFactura tbody");
+        const tDevBody = document.querySelector("#tablaDev tbody");
+        const tDetBody = document.querySelector("#tablaDetalle tbody");
+        const bloqueDetalle = document.getElementById("bloque-detalle");
+        const bloqueDevolucion = document.getElementById("bloque-devolucion"); // NUEVO
+
+        const fRadExt = document.getElementById("fRadExt");
+        const fFactura = document.getElementById("fFactura");
+        const btnBuscar = document.getElementById("btnBuscar");
+
+        function dataset() {
+          const state = loadState();
+          if (Array.isArray(state.facturas) && state.facturas.length) return state.facturas;
+          return [];
+        }
+
+        function resetFactura() {
+          tFactBody.innerHTML =
+            '<tr class="placeholder"><td colspan="14" class="muted">Sin resultados. Ingresa un filtro y pulsa Buscar.</td></tr>';
+          bloqueDetalle.style.display = "none";
+          bloqueDevolucion.style.display = "none"; // NUEVO
+          tDetBody.innerHTML = "";
+          tDevBody.innerHTML =
+            '<tr class="placeholder"><td colspan="10" class="muted">Selecciona una fila o pulsa “Detalle”.</td></tr>';
+        }
+
+        function hayFiltros() {
+          return fRadExt.value.trim() !== "" || fFactura.value.trim() !== "";
+        }
+
+        function norm(v){ return (v==null?'':String(v)).trim().toUpperCase(); }
+
+        function coincideFiltro(r) {
+          const rf = norm(fRadExt.value);
+          const ff = norm(fFactura.value);
+          const okRad = !rf || norm(r.radicadoExterno || r.radicadoExt || r.radExt).includes(rf);
+          const okFac = !ff || norm(r.numeroFactura || r.factura || r.nroFactura).includes(ff);
+          return okRad && okFac;
+        }
+
+        function renderDetalle(d) {
+          const detalle = Array.isArray(d.detalle) ? d.detalle
+                        : Array.isArray(d.det) ? d.det
+                        : Array.isArray(d.items) ? d.items
+                        : [{
+                            consecutivo: d.consecutivoServicio || "1",
+                            codigo: d.codigoServicio || "",
+                            desc: d.descripcionServicio || "",
+                            cant: d.cantidadServicio || "",
+                            valor: d.valorServicio || "",
+                            total: d.valorTotal || ""
+                          }];
+
+          tDetBody.innerHTML = "";
+          detalle.forEach((f) => {
+            const tr = document.createElement("tr");
+            function td(t) {
+              const e = document.createElement("td");
+              e.textContent = t ?? "";
+              return e;
+            }
+            tr.append(
+              td(f.pos ?? f.consec ?? f.consecutivo ?? f.item ?? f.consecutivoServicio ?? ""),
+              td(f.prest ?? f.codigo ?? f.cod ?? f.codigoServicio ?? ""),
+              td(f.desc ?? f.descripcion ?? f.descripcionServicio ?? ""),
+              td(f.cant ?? f.cantidad ?? f.cantidadServicio ?? ""),
+              td(f.precio ?? f.valor ?? f.valorServicio ?? ""),
+              td(f.total ?? f.valorTotal ?? "")
+            );
+            tDetBody.appendChild(tr);
+          });
+
+          // MOSTRAR AMBAS SECCIONES AL VER DETALLE
+          bloqueDetalle.style.display = "block";
+          bloqueDevolucion.style.display = "block";
+          bloqueDetalle.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function matchDevoluciones(reg){
+          const devs = getDevoluciones();
+          const id  = reg.id ?? reg._id ?? null;
+          const nro = reg.numeroFactura ?? reg.factura ?? reg.nroFactura ?? null;
+          const rad = reg.radicadoExterno ?? reg.radicadoExt ?? reg.radExt ?? null;
+
+          return devs.filter(x=>{
+            if (id!=null && x.idFactura!=null && String(x.idFactura)===String(id)) return true;
+            if (nro && x.numeroFactura && String(x.numeroFactura)===String(nro)) return true;
+            if (rad && x.radicadoExterno && String(x.radicadoExterno)===String(rad)) return true;
+            return false;
+          });
+        }
+
+        function renderDevolucion(reg) {
+          const rows = matchDevoluciones(reg);
+          tDevBody.innerHTML = "";
+          if (!rows.length) {
+            tDevBody.innerHTML =
+              '<tr class="placeholder"><td colspan="10" class="muted">Sin devolución registrada para esta factura.</td></tr>';
+            return;
+          }
+          rows.forEach(dev=>{
+            const tr = document.createElement("tr");
+            function c(t){ const td=document.createElement("td"); td.textContent=t ?? ""; return td; }
+            tr.append(
+              c(dev.idMotivo),
+              c(dev.motivo),
+              c(dev.idSubMotivo),
+              c(dev.subMotivo),
+              c(dev.fechaDevolucion),
+              c(dev.horaDevolucion),
+              c(dev.usuarioDevolucion),
+              c(dev.notaDevolucion),
+              c(dev.idEstadoFactura),
+              c(dev.estadoFactura)
+            );
+            tDevBody.appendChild(tr);
+          });
+        }
+
+        function renderFacturaRow(d) {
+          const tr = document.createElement("tr");
+
+          const tdDet = document.createElement("td");
+          tdDet.className = "col-ico";
+          const link = document.createElement("span");
+          link.className = "far fa-clipboard";
+          link.style.color = "purple";
+          link.style.textDecoration = "underline";
+          link.style.cursor = "pointer";
+          link.addEventListener("click", () => {
+            renderDetalle(d);
+            renderDevolucion(d);
+          });
+          tdDet.appendChild(link);
+
+          const tdSel = document.createElement("td");
+          tdSel.className = "col-ico";
+          const sel = document.createElement("input");
+          sel.type = "checkbox";
+          tdSel.appendChild(sel);
+
+          const tdSem = document.createElement("td");
+          tdSem.className = "col-ico";
+          const dot = document.createElement("span");
+          const esDev = norm(d.estado || d.estadoFactura) === "DEVUELTA";
+          dot.className = "dot" + (esDev ? " ok" : "");
+          tdSem.appendChild(dot);
+
+          function c(t) {
+            const td = document.createElement("td");
+            td.textContent = t ?? "";
+            return td;
+          }
+
+          tr.append(
+            tdDet,
+            tdSem,
+            c(d.pagador || d.resp),
+            c(d.numeroFactura || d.factura || d.nroFactura),
+            c(d.valorFactura || d.valor),
+            c(d.radicadoInterno || d.radicadoInt || d.radInt),
+            c(d.radicadoExterno || d.radicadoExt || d.radExt)
+          );
+
+          sel.addEventListener("change", () => {
+            tDevBody.innerHTML = "";
+            const filasSeleccionadas = [...document.querySelectorAll('#tablaFactura tbody input[type="checkbox"]:checked')]
+              .map(chk => chk.closest("tr")._dataRegistro)
+              .filter(Boolean);
+            if (filasSeleccionadas.length === 0) {
+              tDevBody.innerHTML =
+                '<tr class="placeholder"><td colspan="10" class="muted">Selecciona una fila o pulsa “Detalle”.</td></tr>';
+            } else {
+              // al usar check, también mostramos el bloque de devolución
+              bloqueDevolucion.style.display = "block";
+              filasSeleccionadas.forEach(reg => renderDevolucion(reg));
+            }
+          });
+
+          tr._dataRegistro = d;
+          return tr;
+        }
+
+        btnBuscar.addEventListener("click", () => {
+          if (!hayFiltros()) {
+            alert("Debe ingresar algún valor para buscar.");
+            return;
+          }
+
+          const data = dataset().filter(coincideFiltro);
+
+          tFactBody.innerHTML = "";
+          if (data.length) {
+            data.forEach((d) => tFactBody.appendChild(renderFacturaRow(d)));
+            // Al hacer nueva búsqueda, ocultamos ambas hasta que el usuario pida detalle
+            bloqueDetalle.style.display = "none";
+            bloqueDevolucion.style.display = "none";
+            tDetBody.innerHTML = "";
+            tDevBody.innerHTML =
+              '<tr class="placeholder"><td colspan="10" class="muted">Selecciona una fila o pulsa “Detalle”.</td></tr>';
+          } else {
+            resetFactura();
+          }
+        });
+
+        resetFactura();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cloud Medical Fees mySiss</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: white;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    .sidebar {
+      width: 180px;
+      background-color: #eee6f8;
+      padding: 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    .sidebar h1 {
+      color: purple;
+      font-weight: bold;
+      font-size: 50px;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      display: block;
+      margin: 20px 0;
+      color: purple;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      background-color: white;
+      padding: 20px 40px;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      min-width: 140px;
+    }
+
+    input, select {
+      padding: 6px;
+      width: 200px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      margin-top: 10px;
+      margin-right: 10px;
+      background-color: purple;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .table-section {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    .popup {
+      position: fixed;
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      width: 400px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 60px;
+      resize: none;
+    }
+
+    .popup-icon {
+      cursor: pointer;
+      font-size: 18px;
+      color: #555;
+    }
+
+    .subrayado {
+      text-decoration: underline;
+    }
+
+    .popup-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      background-color: #ccc;
+      color: white;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      text-align: center;
+      line-height: 25px;
+      font-weight: bold;
+    }
+
+    .popup-close:hover {
+      background-color: #999;
+    }
+    
+    .mensaje-exito {
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .mensaje-exito h3 {
+      color: green;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h1>mySiss</h1>
+      <a href="validacion_med.html" style="text-decoration: underline;">Validaciones</a>
+      <a href="reportes_med.html">Reportes</a>
+      <a href="../login.html">Cerrar sesion</a>
+    </div>
+
+    <div class="main">
+      <div class="form-row">
+        <label>Fecha:</label>
+        <input type="date" id="fechaInicio" value="2025-04-01" />
+        <input type="date" id="fechaFin" value="2025-04-30" />
+        <input type="number" id="periodo" min="1" max="12" placeholder="Mes" value="4" />
+      </div>
+
+      <div class="form-row">
+        <button class="btn" onclick="mostrarTabla()">Buscar</button>
+      </div>
+
+      <div id="tablaPreliq" class="table-section hidden">
+        <h3 id="tituloPreliq">Detalle de preliquidación</h3>
+        <table>
+          <thead>
+            <tr>
+              <th class="col-status">Status</th>
+              <th class="col-motivo">Respuesta</th>
+              <th>Orden</th>
+              <th>Caso</th>
+              <th>CUPS</th>
+              <th>Descripción</th>
+              <th>Fecha</th>
+              <th>Aseguradora</th>
+              <th>Especialidad</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <!-- Los datos se cargarán dinámicamente aquí -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="9"><strong>Totales</strong></td>
+              <td id="totalGeneral">$0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Justificación -->
+  <div id="popupForm" class="popup hidden">
+    <span class="popup-close" onclick="cerrarPopup('popupForm')">×</span>
+    <h3>Formulario de Objeción</h3>
+    <div id="formularioCampos"></div>
+    <button class="btn" onclick="guardarFormulario()">Guardar</button>
+  </div>
+
+  <!-- Popup Respuesta -->
+  <div id="popupRespuesta" class="popup hidden">
+    <span class="popup-close" onclick="cerrarPopup('popupRespuesta')">×</span>
+    <h3>Detalle de Respuesta</h3>
+    <div id="respuestaCampos"></div>
+  </div>
+
+  <!-- Popup de Éxito -->
+  <div id="popupExito" class="popup hidden">
+    <span class="popup-close" onclick="cerrarPopup('popupExito')">×</span>
+    <div class="mensaje-exito">
+      <h3>✅ Datos grabados con éxito</h3>
+      <button onclick="cerrarPopup('popupExito')" class="btn">Ok</button>
+    </div>
+  </div>
+
+  <script>
+    let filaTemporal = null;
+    let datosTabla = [
+      {estado: "PRELIMINAR", orden: "027", caso: "50045", CUPS: "870005", desc_servicio: "RADIOGRAFIA DE MASTOIDES COMPARATIVAS", fecha: "26/04/2025", aseguradora: "Nueva EPS", especialidad: "Radiología", total: "$ 270.000"},
+      {estado: "PRELIMINAR", orden: "007", caso: "50008", CUPS: "890202", desc_servicio: "CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES MEDICAS", fecha: "6/04/2025", aseguradora: "Nueva EPS", especialidad: "Medicina Interna", total: "$ 180.000"},
+      {estado: "PRELIMINAR", orden: "007", caso: "50028", CUPS: "890202", desc_servicio: "CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES MEDICAS", fecha: "23/04/2025", aseguradora: "Nueva EPS", especialidad: "Medicina Interna", total: "$ 180.000"},
+      {estado: "PRELIMINAR", orden: "027", caso: "50029", CUPS: "870005", desc_servicio: "RADIOGRAFIA DE MASTOIDES COMPARATIVAS", fecha: "23/04/2025", aseguradora: "Coomeva EPS", especialidad: "Radiología", total: "$ 270.000"},
+      {estado: "PRELIMINAR", orden: "027", caso: "50040", CUPS: "870005", desc_servicio: "RADIOGRAFIA DE MASTOIDES COMPARATIVAS", fecha: "23/04/2025", aseguradora: "Nueva EPS", especialidad: "Radiología", total: "$ 250.000"}
+    ];
+
+    function mostrarTabla() {
+      const fechaInicio = document.getElementById("fechaInicio").value;
+      const fechaFin = document.getElementById("fechaFin").value;
+
+      // Filtrar datos si es necesario
+      let datosFiltrados = datosTabla;
+      if (fechaInicio) {
+        datosFiltrados = datosFiltrados.filter(item => new Date(item.fecha.split('/').reverse().join('-')) >= new Date(fechaInicio));
+      }
+      if (fechaFin) {
+        datosFiltrados = datosFiltrados.filter(item => new Date(item.fecha.split('/').reverse().join('-')) <= new Date(fechaFin));
+      }
+
+      // Generar la tabla
+      const tbody = document.getElementById("tabla-body");
+      tbody.innerHTML = "";
+
+      let totalGeneral = 0;
+
+      datosFiltrados.forEach(item => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td class="col-status">${item.estado === "PRELIMINAR" ? "Preliquidado" : (item.estado === "APROBADO" ? "Aprobado" : "Rechazado")}</td>
+          <td class="col-motivo">
+            ${item.estado === "PRELIMINAR" ? 
+              '<span class="popup-icon" onclick="abrirFormulario(this)">✏️</span>' : 
+              '<span class="popup-icon" onclick="verFormularioRespuesta(this)">📩</span>'}
+          </td>
+          <td>${item.orden}</td>
+          <td>${item.caso}</td>
+          <td>${item.CUPS}</td>
+          <td>${item.desc_servicio}</td>
+          <td>${item.fecha}</td>
+          <td>${item.aseguradora}</td>
+          <td>${item.especialidad}</td>
+          <td>${item.total}</td>
+        `;
+
+        tbody.appendChild(tr);
+
+        // Calcular totales
+        const valorNumerico = parseFloat(item.total.replace(/[^\d.]/g, '').replace('.', '')) || 0;
+        totalGeneral += valorNumerico;
+      });
+
+      // Actualizar totales
+      document.getElementById("totalGeneral").textContent = `$${totalGeneral.toLocaleString()}`;
+
+      document.getElementById("tablaPreliq").classList.remove("hidden");
+    }
+
+    function abrirFormulario(icono) {
+      filaTemporal = icono.closest("tr");
+      const celdas = filaTemporal.querySelectorAll("td");
+
+      // Obtener datos del registro
+      const orden = celdas[2].textContent;
+      const caso = celdas[3].textContent;
+      const registro = datosTabla.find(item => item.orden === orden && item.caso === caso) || {};
+
+      const contenido = `
+        <p><strong>Fecha:</strong> ${celdas[6].textContent}</p>
+        <p><strong>Orden:</strong> ${orden}</p>
+        <p><strong>Caso:</strong> ${caso}</p>
+        <p><strong>Prestación:</strong> ${celdas[4].textContent}</p>
+        <p><strong>Descripción:</strong> ${celdas[5].textContent}</p>
+        <p><strong>Nuevo Estado:</strong>
+          <select id="nuevoEstado" onchange="toggleMotivoField()">
+            <option value="">Seleccione un estado</option>
+            <option value="APROBADO" ${registro.estado === "APROBADO" ? "selected" : ""}>Aprobado</option>
+            <option value="RECHAZADO" ${registro.estado === "RECHAZADO" ? "selected" : ""}>Rechazado</option>
+          </select>
+        </p>
+        <div id="motivoContainer" style="display: none;">
+          <p><strong>Motivo:</strong>
+            <select id="motivo">
+              <option value="Diferencia en Tarifas" ${registro.motivo === "Diferencia en Tarifas" ? "selected" : ""}>Diferencia en Tarifas</option>
+              <option value="Duplicidad de Registros" ${registro.motivo === "Duplicidad de Registros" ? "selected" : ""}>Duplicidad de Registros</option>
+              <option value="Deducciones no Justificadas" ${registro.motivo === "Deducciones no Justificadas" ? "selected" : ""}>Deducciones no Justificadas</option>
+              <option value="Inconsistencias en Códigos" ${registro.motivo === "Inconsistencias en Códigos" ? "selected" : ""}>Inconsistencias en Códigos</option>
+            </select>
+          </p>
+          <p><strong>Detalle:</strong><br>
+            <textarea id="detalle" placeholder="Escriba el detalle aquí...">${registro.detalle || ""}</textarea>
+          </p>
+        </div>
+      `;
+      document.getElementById("formularioCampos").innerHTML = contenido;
+      
+      // Mostrar campos de motivo si ya estaba en Rechazado
+      if (registro.estado === "RECHAZADO") {
+        document.getElementById("motivoContainer").style.display = "block";
+      }
+      
+      document.getElementById("popupForm").classList.remove("hidden");
+    }
+
+    function toggleMotivoField() {
+      const estado = document.getElementById("nuevoEstado").value;
+      const motivoContainer = document.getElementById("motivoContainer");
+      
+      if (estado === "RECHAZADO") {
+        motivoContainer.style.display = "block";
+      } else {
+        motivoContainer.style.display = "none";
+      }
+    }
+
+    function guardarFormulario() {
+      const nuevoEstado = document.getElementById("nuevoEstado").value;
+      
+      // Validar que se haya seleccionado un estado
+      if (!nuevoEstado) {
+        alert("Por favor seleccione un estado");
+        return;
+      }
+      
+      // Validar que si es Rechazado, tenga motivo y detalle
+      let motivo = "";
+      let detalle = "";
+      
+      if (nuevoEstado === "RECHAZADO") {
+        motivo = document.getElementById("motivo").value;
+        detalle = document.getElementById("detalle").value;
+        
+        if (!detalle.trim()) {
+          alert("Por favor ingrese un detalle para el rechazo");
+          return;
+        }
+      }
+
+      if (filaTemporal) {
+        // Actualizar la fila en la tabla
+        filaTemporal.querySelector(".col-status").textContent = nuevoEstado === "APROBADO" ? "Aprobado" : "Rechazado";
+        
+        // Actualizar el icono (reemplazar lápiz por email si es rechazado o aprobado)
+        const celdaMotivo = filaTemporal.querySelector(".col-motivo");
+        celdaMotivo.innerHTML = (nuevoEstado === "RECHAZADO" || nuevoEstado === "APROBADO") ? 
+          '<span class="popup-icon" onclick="verFormularioRespuesta(this)">📩</span>' : 
+          '<span class="popup-icon" onclick="abrirFormulario(this)">✏️</span>';
+        
+        // Cerrar popup
+        document.getElementById("popupForm").classList.add("hidden");
+
+        // Actualizar los datos originales
+        const orden = filaTemporal.querySelector("td:nth-child(3)").textContent;
+        const caso = filaTemporal.querySelector("td:nth-child(4)").textContent;
+        
+        const index = datosTabla.findIndex(item => item.orden === orden && item.caso === caso);
+        if (index !== -1) {
+          datosTabla[index].estado = nuevoEstado;
+          datosTabla[index].motivo = motivo;
+          datosTabla[index].detalle = detalle;
+        }
+
+        // Mostrar mensaje de éxito
+        document.getElementById("popupExito").classList.remove("hidden");
+      }
+    }
+
+    function verFormularioRespuesta(icono) {
+      const fila = icono.closest("tr");
+      const orden = fila.querySelector("td:nth-child(3)").textContent;
+      const caso = fila.querySelector("td:nth-child(4)").textContent;
+      
+      const registro = datosTabla.find(item => item.orden === orden && item.caso === caso);
+      
+      let contenido = `
+        <p><strong>Fecha:</strong> ${registro?.fecha || ""}</p>
+        <p><strong>Orden:</strong> ${orden}</p>
+        <p><strong>Caso:</strong> ${caso}</p>
+        <p><strong>Prestación:</strong> ${registro?.CUPS || ""}</p>
+        <p><strong>Descripción:</strong> ${registro?.desc_servicio || ""}</p>
+        <p><strong>Estado:</strong> ${registro?.estado === "APROBADO" ? "Aprobado" : "Rechazado"}</p>
+      `;
+      
+      if (registro?.estado === "RECHAZADO") {
+        contenido += `
+          <p><strong>Motivo:</strong> ${registro?.motivo || "No especificado"}</p>
+          <p><strong>Detalle:</strong> ${registro?.detalle || "No hay detalles disponibles"}</p>
+        `;
+      }
+      
+      document.getElementById("respuestaCampos").innerHTML = contenido;
+      document.getElementById("popupRespuesta").classList.remove("hidden");
+    }
+
+    function cerrarPopup(idPopup) {
+      document.getElementById(idPopup).classList.add("hidden");
+    }
+
+    // Cargar datos al iniciar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      mostrarTabla();
+    });
+  </script>
+</body>
+</html>

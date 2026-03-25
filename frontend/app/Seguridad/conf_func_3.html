@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionalidades - mySiss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --mysiss-purple: #800080;
+            --mysiss-light-purple: #EBE3F2;
+            --mysiss-hover-purple: #DFD1EE;
+            --mysiss-active-bg: #D0B8E6;
+        }
+        .custom-radio {
+            accent-color: var(--mysiss-purple);
+        }
+        .focus-outline:focus-visible {
+            outline: 2px solid var(--mysiss-purple);
+            outline-offset: 2px;
+        }
+        /* Estilos para el sidebar */
+        .submenu {
+            display: none;
+            padding-left: 1rem;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .nav-link.active {
+            background-color: var(--mysiss-active-bg);
+            font-weight: bold;
+            position: relative;
+        }
+        .nav-link.active::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--mysiss-purple);
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        /* Estilo para el contenedor del menú */
+        nav {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 80px); /* Ajustar según altura del logo */
+            position: relative;
+        }
+        /* Estilo para el enlace de cerrar sesión */
+        .logout-link {
+            margin-top: auto; /* Empuja el enlace hacia abajo */
+            position: sticky;
+            bottom: 0;
+            background-color: var(--mysiss-light-purple);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .custom-radio {
+            accent-color: var(--mysiss-purple);
+        }
+        .focus-outline:focus-visible {
+            outline: 2px solid var(--mysiss-purple);
+            outline-offset: 2px;
+        }
+        .file-input {
+            display: none;
+        }
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .table-row-inactive {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+        .table-row-active {
+            background-color: white;
+        }
+        .selected-row {
+            background-color: #DFD1EE;
+        }
+        .disabled-field {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+        /* Botón rojo fijo en esquina inferior derecha */
+        #devClearBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+			background: transparent;
+			color: transparent;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-48 h-full bg-[var(--mysiss-light-purple)] flex flex-col">
+        <div class="p-6">
+            <h1 class="text-[var(--mysiss-purple)] text-5xl font-bold">mySiss</h1>
+        </div>
+        <nav class="mt-4 flex flex-col" aria-label="Menú principal">
+            <!-- Configuración -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('config-submenu', this)">
+                    <strong>Configuración</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="config-submenu" class="submenu">
+                    <a href="conf_bas_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Base</a>
+                    <!-- <a href="conf_func_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>-->
+                    <a href="conf_func_3.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Funcionalidad</a>
+                    <a href="conf_role.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Roles</a>
+                </div>
+            </div>
+            
+            <!-- Usuario -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('usuario-submenu', this)">
+                    <strong>Usuario</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="usuario-submenu" class="submenu">
+                    <a href="conf_usua_1.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Crear Usuario</a>
+                    <a href="conf_rol.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Asignar Rol</a>
+                </div>
+            </div>
+
+            
+            <!-- Módulos - Estructura de tres niveles -->
+            <div class="menu-item">
+                <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('modulos-submenu', this)">
+                    <strong>Modulos</strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <div id="modulos-submenu" class="submenu">
+                    <!-- Honorarios -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('honorarios-submenu', this)">
+                            <span>Honorarios</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="honorarios-submenu" class="submenu">
+                            <a href="../Honorarios/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../Honorarios/Honorarios.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Auditoria -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('auditoria-submenu', this)">
+                            <span>Auditoria</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="auditoria-submenu" class="submenu">
+                            <a href="../auditoria/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../auditoria/auditoria.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Glosas -->
+                    <div class="menu-item">
+                        <a href="#" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline flex justify-between items-center" onclick="toggleSubmenu('glosas-submenu', this)">
+                            <span>Glosas</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </a>
+                        <div id="glosas-submenu" class="submenu">
+                            <a href="../glosas/configuracion.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Configuración</a>
+                            <a href="../glosas/glosas.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors focus-outline block">Proceso</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="../login.html" class="nav-link py-2 px-6 text-[var(--mysiss-purple)] hover:bg-[var(--mysiss-hover-purple)] transition-colors mt-44 focus-outline">
+                <strong>Cerrar Sesión</strong>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="flex-1 bg-white p-8 overflow-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-[var(--mysiss-purple)]">Funcionalidades</h2>
+            <div>
+                <button id="uploadTemplateBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline mr-2">
+                    Carga plantilla
+                </button>
+                <button id="nextBtn" class="hidden px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Siguiente
+                </button>
+            </div>
+        </div>
+
+        <!-- Pestañas -->
+        <div class="mb-8 border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px" id="tabs" role="tablist">
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="modulos-tab" data-tabs-target="#modulos" type="button" role="tab" aria-controls="modulos" aria-selected="true">Módulos</button>
+                </li>
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="funcionalidades-tab" data-tabs-target="#funcionalidades" type="button" role="tab" aria-controls="funcionalidades" aria-selected="false">Funcionalidades</button>
+                </li>
+                <li role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="actividades-tab" data-tabs-target="#actividades" type="button" role="tab" aria-controls="actividades" aria-selected="false">Actividades</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contenido de pestañas -->
+        <div id="tab-content">
+            <!-- Pestaña Módulos -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="modulos" role="tabpanel" aria-labelledby="modulos-tab">
+                <div class="overflow-x-auto">
+                    <div class="flex justify-end space-x-2 mb-4">
+                        <button id="deleteLineBtnModulos" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Borrar línea</button>
+                        <button id="createBtnModulos" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Crear</button>
+                        <button id="editBtnModulos" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Modificar</button>
+                        <button id="saveBtnModulos" class="px-3 py-1 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">Guardar</button>
+                    </div>
+                    
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">COD.Módulos</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Módulos</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha creación</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha modificación</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modificado por</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="modulosTableBody">
+                            <!-- Filas se generan dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pestaña Funcionalidades -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="funcionalidades" role="tabpanel" aria-labelledby="funcionalidades-tab">
+                <div class="overflow-x-auto">
+                    <div class="flex justify-end space-x-2 mb-4">
+                        <button id="deleteLineBtnFunc" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Borrar línea</button>
+                        <button id="createBtnFunc" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Crear</button>
+                        <button id="editBtnFunc" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Modificar</button>
+                        <button id="saveBtnFunc" class="px-3 py-1 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">Guardar</button>
+                    </div>
+                    
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">COD.Funcionalidades</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funcionalidades</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Módulo</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha creación</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha modificación</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modificado por</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="funcionalidadesTableBody">
+                            <!-- Filas se generan dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pestaña Actividades -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="actividades" role="tabpanel" aria-labelledby="actividades-tab">
+                <div class="overflow-x-auto">
+                    <div class="flex justify-end space-x-2 mb-4">
+                        <button id="deleteLineBtnAct" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Borrar línea</button>
+                        <button id="createBtnAct" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Crear</button>
+                        <button id="editBtnAct" class="px-3 py-1 bg-gray-200 rounded-md focus-outline">Modificar</button>
+                        <button id="saveBtnAct" class="px-3 py-1 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">Guardar</button>
+                    </div>
+                    
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">COD.Actividades</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actividades</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funcionalidad</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha creación</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha modificación</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modificado por</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="actividadesTableBody">
+                            <!-- Filas se generan dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para carga de plantilla -->
+    <div id="uploadTemplateModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-bold mb-4">Cargar plantilla</h3>
+            <div class="mb-4">
+                <p class="text-gray-700">Suba un archivo Excel con la estructura de módulos, funcionalidades y actividades. El sistema actualizará la información existente o creará nuevos registros según corresponda.</p>
+            </div>
+
+            <div class="mb-4">
+                <label for="fileInput" class="block text-lg font-medium text-gray-700 mb-2"></label>
+                <div class="flex">
+                    <input type="text" id="filePath" class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus-outline cursor-pointer" 
+                        placeholder="Seleccionar archivo..." readonly onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" class="file-input" accept=".xlsx">
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Seleccione un archivo en formato .XLSX</p>
+            </div>
+
+            <div class="flex justify-end space-x-2">
+                <button id="cancelUploadBtn" class="px-4 py-2 bg-gray-200 rounded-md focus-outline">
+                    Cancelar
+                </button>
+                <button id="executeBtn" class="btn-disabled px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Ejecutar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mensajes -->
+    <div id="messageModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 id="modalTitle" class="text-lg font-bold mb-4"></h3>
+            <p id="modalMessage" class="mb-4"></p>
+            <div class="flex justify-end">
+                <button id="modalCloseBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para búsqueda -->
+    <div id="searchModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg max-w-2xl w-full">
+            <h3 id="searchModalTitle" class="text-lg font-bold mb-4"></h3>
+            <div class="mb-4">
+                <input type="text" id="searchInput" class="border border-gray-300 rounded-md px-3 py-2 w-full focus-outline" placeholder="Buscar...">
+            </div>
+            <div class="max-h-96 overflow-y-auto mb-4">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seleccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="searchResults">
+                        <!-- Resultados de búsqueda -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end">
+                <button id="searchModalCloseBtn" class="px-4 py-2 bg-[var(--mysiss-purple)] text-white rounded-md focus-outline">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-->
+    <button id="devClearBtn">Limpiar</button>
+    
+<script>
+// Datos almacenados en localStorage
+let modulosData = JSON.parse(localStorage.getItem('modulosData')) || [
+];
+
+let funcionalidadesData = JSON.parse(localStorage.getItem('funcionalidadesData')) || [
+];
+
+let actividadesData = JSON.parse(localStorage.getItem('actividadesData')) || [
+];
+
+// Variables de estado
+let selectedRow = null;
+let selectedFuncRow = null;
+let selectedActRow = null;
+let isCreating = false;
+let isEditing = false;
+let currentUser = 'mySiss';
+let selectedModulo = null;
+let selectedFuncionalidad = null;
+
+// Inicializar tablas
+document.addEventListener('DOMContentLoaded', () => {
+    renderModulosTable();
+    renderFuncionalidadesTable();
+    renderActividadesTable();
+    setActiveMenu();
+    initializeTabs();
+    expandAllMenus();
+    document.getElementById('nextBtn').classList.add('hidden');
+    
+    // Inicializar eventos para el modal de carga de plantilla
+    document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
+        document.getElementById('uploadTemplateModal').classList.remove('hidden');
+    });
+    
+    document.getElementById('cancelUploadBtn').addEventListener('click', () => {
+        document.getElementById('uploadTemplateModal').classList.add('hidden');
+        document.getElementById('fileInput').value = '';
+        document.getElementById('filePath').value = '';
+        document.getElementById('executeBtn').classList.add('btn-disabled');
+    });
+    
+    document.getElementById('uploadTemplateModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('uploadTemplateModal')) {
+            document.getElementById('uploadTemplateModal').classList.add('hidden');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePath').value = '';
+            document.getElementById('executeBtn').classList.add('btn-disabled');
+        }
+    });
+});
+
+// Función para expandir todos los menús y submenús
+function expandAllMenus() {
+    document.querySelectorAll('.submenu').forEach(menu => menu.classList.add('active'));
+    document.querySelectorAll('.menu-item > a svg').forEach(icon => icon.classList.add('rotate-180'));
+}
+
+// Manejo de pestañas
+function initializeTabs() {
+    const tabs = document.querySelectorAll('[role="tab"]');
+    const tabPanels = document.querySelectorAll('[role="tabpanel"]');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            tabs.forEach(t => {
+                t.setAttribute('aria-selected', 'false');
+                t.classList.remove('border-[var(--mysiss-purple)]', 'text-[var(--mysiss-purple)]');
+                t.classList.add('border-transparent');
+            });
+            
+            tab.setAttribute('aria-selected', 'true');
+            tab.classList.add('border-[var(--mysiss-purple)]', 'text-[var(--mysiss-purple)]');
+            tab.classList.remove('border-transparent');
+            
+            tabPanels.forEach(panel => panel.classList.add('hidden'));
+            document.querySelector(tab.getAttribute('data-tabs-target')).classList.remove('hidden');
+            
+            if (tab.id === 'funcionalidades-tab') renderFuncionalidadesTable();
+            else if (tab.id === 'actividades-tab') renderActividadesTable();
+        });
+    });
+
+    tabs[0].click();
+}
+
+// Manejo de carga de archivo
+const fileInput = document.getElementById('fileInput');
+const filePath = document.getElementById('filePath');
+const executeBtn = document.getElementById('executeBtn');
+
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        filePath.value = file.name;
+        
+        if (!file.name.endsWith('.xlsx')) {
+            showModal('Error', 'Archivo subido diferente a .XLSX.');
+            executeBtn.classList.add('btn-disabled');
+            return;
+        }
+        
+        executeBtn.classList.remove('btn-disabled');
+    }
+});
+
+executeBtn.addEventListener('click', async () => {
+    if (executeBtn.classList.contains('btn-disabled')) return;
+    
+    const file = fileInput.files[0];
+    if (!file) {
+        showModal('Error', 'No se ha seleccionado ningún archivo');
+        return;
+    }
+
+    try {
+        const data = await readExcelFile(file);
+        processExcelData(data);
+        
+        fileInput.value = '';
+        filePath.value = '';
+        executeBtn.classList.add('btn-disabled');
+        
+        document.getElementById('uploadTemplateModal').classList.add('hidden');
+        showModal('Éxito', 'La información ha sido guardada correctamente');
+        
+        renderModulosTable();
+        renderFuncionalidadesTable();
+        renderActividadesTable();
+    } catch (error) {
+        console.error('Error al procesar el archivo:', error);
+        showModal('Error', 'Ocurrió un error al procesar el archivo. Verifique la estructura del Excel.');
+    }
+});
+
+// Función para leer archivo Excel (versión para hoja única)
+function readExcelFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                resolve(jsonData);
+            } catch (error) {
+                reject(error);
+            }
+        };
+        
+        reader.onerror = (error) => reject(error);
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// Función para procesar datos del Excel (versión para hoja única)
+function processExcelData(data) {
+    const today = new Date().toLocaleDateString('de-DE');
+    
+    // Procesar cada fila según su tipo
+    data.forEach(row => {
+        switch(row.Tipo) {
+            case 'Módulo':
+                processModulo(row, today);
+                break;
+            case 'Funcionalidad':
+                processFuncionalidad(row, today);
+                break;
+            case 'Actividad':
+                processActividad(row, today);
+                break;
+        }
+    });
+    
+    // Guardar en localStorage
+    localStorage.setItem('modulosData', JSON.stringify(modulosData));
+    localStorage.setItem('funcionalidadesData', JSON.stringify(funcionalidadesData));
+    localStorage.setItem('actividadesData', JSON.stringify(actividadesData));
+}
+
+function processModulo(row, today) {
+    const existingIndex = modulosData.findIndex(m => m.codigo === row.Código);
+    
+    if (existingIndex >= 0) {
+        // Actualizar módulo existente
+        modulosData[existingIndex] = {
+            ...modulosData[existingIndex],
+            nombre: row.Nombre,
+            fechaModificacion: today,
+            modificadoPor: currentUser
+        };
+    } else {
+        // Crear nuevo módulo
+        modulosData.unshift({
+            codigo: row.Código,
+            nombre: row.Nombre,
+            fechaCreacion: row['Fecha creación'] || today,
+            fechaModificacion: row['Fecha modificación'] || today,
+            creadoPor: row['Creado por'] || currentUser,
+            modificadoPor: currentUser
+        });
+    }
+}
+
+function processFuncionalidad(row, today) {
+    const existingIndex = funcionalidadesData.findIndex(f => f.codigo === row.Código);
+    
+    if (existingIndex >= 0) {
+        // Actualizar funcionalidad existente
+        funcionalidadesData[existingIndex] = {
+            ...funcionalidadesData[existingIndex],
+            nombre: row.Nombre,
+            modulo: row['Dependencia (Código)'],
+            fechaModificacion: today,
+            modificadoPor: currentUser
+        };
+    } else {
+        // Crear nueva funcionalidad
+        funcionalidadesData.unshift({
+            codigo: row.Código,
+            nombre: row.Nombre,
+            modulo: row['Dependencia (Código)'],
+            fechaCreacion: row['Fecha creación'] || today,
+            fechaModificacion: row['Fecha modificación'] || today,
+            creadoPor: row['Creado por'] || currentUser,
+            modificadoPor: currentUser
+        });
+    }
+}
+
+function processActividad(row, today) {
+    const existingIndex = actividadesData.findIndex(a => a.codigo === row.Código);
+    
+    if (existingIndex >= 0) {
+        // Actualizar actividad existente
+        actividadesData[existingIndex] = {
+            ...actividadesData[existingIndex],
+            nombre: row.Nombre,
+            funcionalidad: row['Dependencia (Código)'],
+            fechaModificacion: today,
+            modificadoPor: currentUser
+        };
+    } else {
+        // Crear nueva actividad
+        actividadesData.unshift({
+            codigo: row.Código,
+            nombre: row.Nombre,
+            funcionalidad: row['Dependencia (Código)'],
+            fechaCreacion: row['Fecha creación'] || today,
+            fechaModificacion: row['Fecha modificación'] || today,
+            creadoPor: row['Creado por'] || currentUser,
+            modificadoPor: currentUser
+        });
+    }
+}
+
+// Funciones para renderizar tablas
+function renderModulosTable() {
+    const tableBody = document.getElementById('modulosTableBody');
+    tableBody.innerHTML = '';
+    
+    modulosData.forEach((modulo, index) => {
+        const row = document.createElement('tr');
+        row.className = 'table-row-inactive';
+        row.dataset.id = index;
+        
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${modulo.codigo}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${modulo.nombre}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${modulo.fechaCreacion}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${modulo.fechaModificacion}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${modulo.creadoPor}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${modulo.modificadoPor}</td>
+        `;
+        
+        row.addEventListener('click', () => {
+            if (!isCreating && !isEditing) {
+                document.querySelectorAll('#modulosTableBody tr').forEach(r => r.classList.remove('selected-row'));
+                row.classList.add('selected-row');
+                selectedRow = index;
+                selectedModulo = modulo.codigo;
+            }
+        });
+        
+        tableBody.appendChild(row);
+    });
+}
+
+function renderFuncionalidadesTable() {
+    const tableBody = document.getElementById('funcionalidadesTableBody');
+    tableBody.innerHTML = '';
+    
+    let funcionalidadesToShow = selectedModulo 
+        ? funcionalidadesData.filter(f => f.modulo === selectedModulo)
+        : funcionalidadesData;
+    
+    if (funcionalidadesToShow.length === 0 && selectedModulo) {
+        const modulo = modulosData.find(m => m.codigo === selectedModulo);
+        if (modulo) {
+            tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center">No hay funcionalidades registradas para el módulo ${modulo.nombre}</td></tr>`;
+            return;
+        }
+    }
+    
+    funcionalidadesToShow.forEach((func, index) => {
+        const modulo = modulosData.find(m => m.codigo === func.modulo);
+        const moduloNombre = modulo ? modulo.nombre : 'Desconocido';
+        
+        const row = document.createElement('tr');
+        row.className = 'table-row-inactive';
+        row.dataset.id = index;
+        
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${func.codigo}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${func.nombre}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${moduloNombre}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${func.fechaCreacion}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${func.fechaModificacion}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${func.creadoPor}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${func.modificadoPor}</td>
+        `;
+        
+        row.addEventListener('click', () => {
+            if (!isCreating && !isEditing) {
+                document.querySelectorAll('#funcionalidadesTableBody tr').forEach(r => r.classList.remove('selected-row'));
+                row.classList.add('selected-row');
+                selectedFuncRow = index;
+                selectedFuncionalidad = func.codigo;
+            }
+        });
+        
+        tableBody.appendChild(row);
+    });
+}
+
+function renderActividadesTable() {
+    const tableBody = document.getElementById('actividadesTableBody');
+    tableBody.innerHTML = '';
+    
+    let actividadesToShow = selectedFuncionalidad 
+        ? actividadesData.filter(a => a.funcionalidad === selectedFuncionalidad)
+        : actividadesData;
+    
+    if (actividadesToShow.length === 0 && selectedFuncionalidad) {
+        const func = funcionalidadesData.find(f => f.codigo === selectedFuncionalidad);
+        if (func) {
+            tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center">No hay actividades registradas para la funcionalidad ${func.nombre}</td></tr>`;
+            return;
+        }
+    }
+    
+    actividadesToShow.forEach((act, index) => {
+        const func = funcionalidadesData.find(f => f.codigo === act.funcionalidad);
+        const funcNombre = func ? func.nombre : 'Desconocido';
+        
+        const row = document.createElement('tr');
+        row.className = 'table-row-inactive';
+        row.dataset.id = index;
+        
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${act.codigo}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${act.nombre}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${funcNombre}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${act.fechaCreacion}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${act.fechaModificacion}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${act.creadoPor}</td>
+            <td class="px-6 py-4 whitespace-nowrap disabled-field">${act.modificadoPor}</td>
+        `;
+        
+        row.addEventListener('click', () => {
+            if (!isCreating && !isEditing) {
+                document.querySelectorAll('#actividadesTableBody tr').forEach(r => r.classList.remove('selected-row'));
+                row.classList.add('selected-row');
+                selectedActRow = index;
+            }
+        });
+        
+        tableBody.appendChild(row);
+    });
+}
+
+// Funciones para botones de módulos
+document.getElementById('createBtnModulos').addEventListener('click', () => {
+    isCreating = true;
+    selectedRow = null;
+    selectedModulo = null;
+    
+    const tableBody = document.getElementById('modulosTableBody');
+    const newRow = document.createElement('tr');
+    newRow.className = 'table-row-active';
+    newRow.dataset.id = 'new';
+    
+    newRow.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value=""></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value=""></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+    `;
+    
+    tableBody.prepend(newRow);
+});
+
+document.getElementById('deleteLineBtnModulos').addEventListener('click', () => {
+    if (selectedRow !== null) {
+        const moduloCodigo = modulosData[selectedRow].codigo;
+        
+        const funcionalidadesAsociadas = funcionalidadesData.filter(f => f.modulo === moduloCodigo);
+        if (funcionalidadesAsociadas.length > 0) {
+            showModal('Error', 'No se puede eliminar el módulo porque tiene funcionalidades asociadas');
+            return;
+        }
+        
+        modulosData.splice(selectedRow, 1);
+        localStorage.setItem('modulosData', JSON.stringify(modulosData));
+        renderModulosTable();
+        showModal('Éxito', 'Registro eliminado exitosamente');
+        selectedRow = null;
+        selectedModulo = null;
+    } else {
+        showModal('Error', 'Por favor seleccione un registro para eliminar');
+    }
+});
+
+document.getElementById('editBtnModulos').addEventListener('click', () => {
+    if (selectedRow !== null) {
+        isEditing = true;
+        const modulo = modulosData[selectedRow];
+        
+        const tableBody = document.getElementById('modulosTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        const row = rows[selectedRow];
+        row.className = 'table-row-active';
+        
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value="${modulo.codigo}"></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value="${modulo.nombre}"></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${modulo.fechaCreacion}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${modulo.creadoPor}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+        `;
+    } else {
+        showModal('Error', 'Por favor seleccione un registro para modificar');
+    }
+});
+
+document.getElementById('saveBtnModulos').addEventListener('click', () => {
+    const tableBody = document.getElementById('modulosTableBody');
+    const activeRow = tableBody.querySelector('.table-row-active');
+    
+    if (activeRow) {
+        const inputs = activeRow.querySelectorAll('input');
+        const newModulo = {
+            codigo: inputs[0].value,
+            nombre: inputs[1].value,
+            fechaCreacion: inputs[2].value,
+            fechaModificacion: inputs[3].value,
+            creadoPor: inputs[4].value,
+            modificadoPor: inputs[5].value
+        };
+        
+        if (!newModulo.codigo || !newModulo.nombre) {
+            showModal('Error', 'Los campos Código y Nombre son obligatorios');
+            return;
+        }
+        
+        if (isCreating && modulosData.some(m => m.codigo === newModulo.codigo)) {
+            showModal('Error', 'El código del módulo ya existe');
+            return;
+        }
+        
+        if (isCreating) {
+            modulosData.unshift(newModulo);
+            showModal('Éxito', 'Se agregó registro exitosamente');
+        } else if (isEditing) {
+            modulosData[selectedRow] = newModulo;
+            showModal('Éxito', 'Se modificó registro exitosamente');
+        }
+        
+        localStorage.setItem('modulosData', JSON.stringify(modulosData));
+        isCreating = false;
+        isEditing = false;
+        selectedRow = null;
+        renderModulosTable();
+    }
+});
+
+// Funciones para botones de funcionalidades
+document.getElementById('createBtnFunc').addEventListener('click', () => {
+    if (!selectedModulo && modulosData.length > 0) {
+        showModal('Aviso', 'Por favor seleccione un módulo para asociar la funcionalidad');
+        return;
+    }
+    
+    isCreating = true;
+    selectedFuncRow = null;
+    selectedFuncionalidad = null;
+    
+    const tableBody = document.getElementById('funcionalidadesTableBody');
+    const newRow = document.createElement('tr');
+    newRow.className = 'table-row-active';
+    newRow.dataset.id = 'new';
+    
+    newRow.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value=""></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value=""></td>
+        <td class="px-6 py-4 whitespace-nowrap">${selectedModulo ? modulosData.find(m => m.codigo === selectedModulo).nombre : ''}</td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+    `;
+    
+    tableBody.prepend(newRow);
+});
+
+document.getElementById('deleteLineBtnFunc').addEventListener('click', () => {
+    if (selectedFuncRow !== null) {
+        const funcionalidadCodigo = funcionalidadesData[selectedFuncRow].codigo;
+        
+        const actividadesAsociadas = actividadesData.filter(a => a.funcionalidad === funcionalidadCodigo);
+        if (actividadesAsociadas.length > 0) {
+            showModal('Error', 'No se puede eliminar la funcionalidad porque tiene actividades asociadas');
+            return;
+        }
+        
+        funcionalidadesData.splice(selectedFuncRow, 1);
+        localStorage.setItem('funcionalidadesData', JSON.stringify(funcionalidadesData));
+        renderFuncionalidadesTable();
+        showModal('Éxito', 'Registro eliminado exitosamente');
+        selectedFuncRow = null;
+        selectedFuncionalidad = null;
+    } else {
+        showModal('Error', 'Por favor seleccione un registro para eliminar');
+    }
+});
+
+document.getElementById('editBtnFunc').addEventListener('click', () => {
+    if (selectedFuncRow !== null) {
+        isEditing = true;
+        const func = funcionalidadesData[selectedFuncRow];
+        const modulo = modulosData.find(m => m.codigo === func.modulo);
+        const moduloNombre = modulo ? modulo.nombre : 'Desconocido';
+        
+        const tableBody = document.getElementById('funcionalidadesTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        const row = rows[selectedFuncRow];
+        row.className = 'table-row-active';
+        
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value="${func.codigo}"></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value="${func.nombre}"></td>
+            <td class="px-6 py-4 whitespace-nowrap">${moduloNombre}</td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${func.fechaCreacion}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${func.creadoPor}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+        `;
+    } else {
+        showModal('Error', 'Por favor seleccione un registro para modificar');
+    }
+});
+
+document.getElementById('saveBtnFunc').addEventListener('click', () => {
+    const tableBody = document.getElementById('funcionalidadesTableBody');
+    const activeRow = tableBody.querySelector('.table-row-active');
+    
+    if (activeRow) {
+        const inputs = activeRow.querySelectorAll('input');
+        const newFunc = {
+            codigo: inputs[0].value.trim(),
+            nombre: inputs[1].value.trim(),
+            modulo: selectedModulo || '',
+            fechaCreacion: inputs[3].value,
+            fechaModificacion: new Date().toLocaleDateString('de-DE'), // Siempre actualizar fecha modificación
+            creadoPor: inputs[5].value,
+            modificadoPor: currentUser
+        };
+        
+        // Validaciones
+        if (!newFunc.codigo || !newFunc.nombre) {
+            showModal('Error', 'Los campos Código y Nombre son obligatorios');
+            return;
+        }
+        
+        if (!newFunc.modulo) {
+            showModal('Error', 'Debe seleccionar un módulo para la funcionalidad');
+            return;
+        }
+        
+        // Verificar si el código ya existe (solo en creación)
+        if (isCreating && funcionalidadesData.some(f => f.codigo === newFunc.codigo)) {
+            showModal('Error', 'El código de la funcionalidad ya existe');
+            return;
+        }
+        
+        // Guardar en el array y localStorage
+        if (isCreating) {
+            funcionalidadesData.unshift(newFunc);
+            showModal('Éxito', 'Funcionalidad creada exitosamente');
+        } else if (isEditing) {
+            funcionalidadesData[selectedFuncRow] = newFunc;
+            showModal('Éxito', 'Funcionalidad actualizada exitosamente');
+        }
+        
+        localStorage.setItem('funcionalidadesData', JSON.stringify(funcionalidadesData));
+        
+        // Resetear estados y renderizar
+        isCreating = false;
+        isEditing = false;
+        selectedFuncRow = null;
+        renderFuncionalidadesTable();
+    } else {
+        showModal('Error', 'No hay una funcionalidad activa para guardar');
+    }
+});
+
+// Funciones para botones de actividades
+document.getElementById('createBtnAct').addEventListener('click', () => {
+    if (!selectedFuncionalidad && funcionalidadesData.length > 0) {
+        showModal('Aviso', 'Por favor seleccione una funcionalidad para asociar la actividad');
+        return;
+    }
+    
+    isCreating = true;
+    selectedActRow = null;
+    
+    const tableBody = document.getElementById('actividadesTableBody');
+    const newRow = document.createElement('tr');
+    newRow.className = 'table-row-active';
+    newRow.dataset.id = 'new';
+    
+    newRow.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value=""></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value=""></td>
+        <td class="px-6 py-4 whitespace-nowrap">${selectedFuncionalidad ? funcionalidadesData.find(f => f.codigo === selectedFuncionalidad).nombre : ''}</td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+        <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+    `;
+    
+    tableBody.prepend(newRow);
+});
+
+document.getElementById('deleteLineBtnAct').addEventListener('click', () => {
+    if (selectedActRow !== null) {
+        actividadesData.splice(selectedActRow, 1);
+        localStorage.setItem('actividadesData', JSON.stringify(actividadesData));
+        renderActividadesTable();
+        showModal('Éxito', 'Registro eliminado exitosamente');
+        selectedActRow = null;
+    } else {
+        showModal('Error', 'Por favor seleccione un registro para eliminar');
+    }
+});
+
+document.getElementById('editBtnAct').addEventListener('click', () => {
+    if (selectedActRow !== null) {
+        isEditing = true;
+        const act = actividadesData[selectedActRow];
+        const func = funcionalidadesData.find(f => f.codigo === act.funcionalidad);
+        const funcNombre = func ? func.nombre : 'Desconocido';
+        
+        const tableBody = document.getElementById('actividadesTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        const row = rows[selectedActRow];
+        row.className = 'table-row-active';
+        
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value="${act.codigo}"></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline" value="${act.nombre}"></td>
+            <td class="px-6 py-4 whitespace-nowrap">${funcNombre}</td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${act.fechaCreacion}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${new Date().toLocaleDateString('de-DE')}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${act.creadoPor}" readonly></td>
+            <td class="px-6 py-4 whitespace-nowrap"><input type="text" class="border border-gray-300 rounded-md px-2 py-1 w-full focus-outline disabled-field" value="${currentUser}" readonly></td>
+        `;
+    } else {
+        showModal('Error', 'Por favor seleccione un registro para modificar');
+    }
+});
+
+document.getElementById('saveBtnAct').addEventListener('click', () => {
+    const tableBody = document.getElementById('actividadesTableBody');
+    const activeRow = tableBody.querySelector('.table-row-active');
+    
+    if (activeRow) {
+        const inputs = activeRow.querySelectorAll('input');
+        const newAct = {
+            codigo: inputs[0].value.trim(),
+            nombre: inputs[1].value.trim(),
+            funcionalidad: selectedFuncionalidad || '',
+            fechaCreacion: inputs[3].value,
+            fechaModificacion: new Date().toLocaleDateString('de-DE'), // Siempre actualizar fecha modificación
+            creadoPor: inputs[5].value,
+            modificadoPor: currentUser
+        };
+        
+        // Validaciones
+        if (!newAct.codigo || !newAct.nombre) {
+            showModal('Error', 'Los campos Código y Nombre son obligatorios');
+            return;
+        }
+        
+        if (!newAct.funcionalidad) {
+            showModal('Error', 'Debe seleccionar una funcionalidad para la actividad');
+            return;
+        }
+        
+        // Verificar si el código ya existe (solo en creación)
+        if (isCreating && actividadesData.some(a => a.codigo === newAct.codigo)) {
+            showModal('Error', 'El código de la actividad ya existe');
+            return;
+        }
+        
+        // Guardar en el array y localStorage
+        if (isCreating) {
+            actividadesData.unshift(newAct);
+            showModal('Éxito', 'Actividad creada exitosamente');
+        } else if (isEditing) {
+            actividadesData[selectedActRow] = newAct;
+            showModal('Éxito', 'Actividad actualizada exitosamente');
+        }
+        
+        localStorage.setItem('actividadesData', JSON.stringify(actividadesData));
+        
+        // Resetear estados y renderizar
+        isCreating = false;
+        isEditing = false;
+        selectedActRow = null;
+        renderActividadesTable();
+    } else {
+        showModal('Error', 'No hay una actividad activa para guardar');
+    }
+});
+
+// Manejo del modal
+const messageModal = document.getElementById('messageModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalMessage = document.getElementById('modalMessage');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+function showModal(title, message) {
+    modalTitle.textContent = title;
+    modalMessage.innerHTML = message;
+    messageModal.classList.remove('hidden');
+}
+
+modalCloseBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
+messageModal.addEventListener('click', (e) => {
+    if (e.target === messageModal) messageModal.classList.add('hidden');
+});
+
+// Manejo del modal de búsqueda
+const searchModal = document.getElementById('searchModal');
+const searchModalTitle = document.getElementById('searchModalTitle');
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+const searchModalCloseBtn = document.getElementById('searchModalCloseBtn');
+
+searchModalCloseBtn.addEventListener('click', () => searchModal.classList.add('hidden'));
+searchModal.addEventListener('click', (e) => {
+    if (e.target === searchModal) searchModal.classList.add('hidden');
+});
+
+searchInput.addEventListener('input', () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const rows = searchResults.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+function setActiveMenu() {
+    const currentPath = window.location.pathname.split('/').pop();
+    
+    document.querySelectorAll('.nav-link[href]').forEach(link => {
+        const linkPath = link.getAttribute('href').split('/').pop();
+        link.classList.toggle('active', linkPath === currentPath);
+    });
+}
+
+function toggleSubmenu(id, element) {
+    const submenu = document.getElementById(id);
+    const icon = element.querySelector('svg');
+    submenu.classList.toggle('active');
+    icon.classList.toggle('rotate-180');
+}
+
+document.getElementById("devClearBtn").onclick = function() {
+    localStorage.clear();
+    alert("LocalStorage limpiado ✅");
+};
+</script>
+</body>
+</html>
