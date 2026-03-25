@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<title>Gestión unificada objeciones — mySiss</title>
+<style>
+  body{margin:0;font-family:Arial,sans-serif;background:#fff}
+  .container{display:flex}
+  .sidebar{width:180px;background:#eee6f8;padding:20px;height:100vh;position:fixed;top:0;left:0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto}
+  .sidebar h1{color:purple;font-weight:bold;font-size:50px;margin-bottom:30px}
+  .sidebar a{display:block;margin:10px 0;color:purple;text-decoration:none;font-weight:bold}
+  .logout{color:purple;text-decoration:none;font-weight:bold}
+  .main{margin-left:240px;flex:1;background:#fff;padding:20px 40px}
+  [hidden]{display:none !important}
+
+  .submenu-radicacion,.submenu-devolucion,.submenu-objecion,.submenu-gestion,.submenu-conciliacion{
+    display:flex;flex-direction:column;gap:4px;margin:4px 0 8px 12px
+  }
+  .submenu-radicacion a,.submenu-devolucion a,.submenu-objecion a,.submenu-gestion a,.submenu-conciliacion a{
+    margin:0;font-weight:normal;font-size:14px
+  }
+
+  .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+  .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px;margin-bottom:22px}
+  .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .btn{background:purple;color:#fff;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6;font-weight:600}
+
+  .input-icon{position:relative;display:inline-block}
+  .input-icon input{padding:10px 36px 10px 12px;min-width:240px;border:1px solid #8b3b98;border-radius:10px;outline:none}
+  .input-icon button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;cursor:pointer}
+  .input-icon i{color:#7b1e85}
+  select,input[type="date"]{border:1px solid #8b3b98;border-radius:10px;padding:10px 12px;outline:none}
+
+  .picker{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #cbb6d7;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.12);padding:6px;z-index:10005;max-height:260px;overflow:auto}
+  .picker a{display:block;padding:6px 8px;color:#3d0a46;text-decoration:none;white-space:nowrap}
+  .picker a:hover{background:#f6f2fa}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th, td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400}
+  th{background:#f5f1f9;font-size:13px;text-align:center}
+  td .ico-btn{background:none;border:0;cursor:pointer}
+  .sem{width:20px;height:20px;border-radius:50%;border:3px solid #98a6ad;background:#f4f6f7;display:inline-block}
+  .sem.red{border-color:#cc1e1e;background:#ffefef}
+  .sem.green{border-color:#198754;background:#ecffef}
+  .sem.yellow{border-color:#c79500;background:#fff9e6}
+
+  #detalleWrap{overflow-x:auto}
+  #tblDetalle{min-width:1500px}
+
+  .cell-esp{position:relative;padding-right:26px}
+  .cell-esp .clip{-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
+  .cell-esp .btn-exp{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
+
+  .pop-esp{position:fixed;z-index:10006;background:#fff;border:1px solid #cbb6d7;border-radius:10px;box-shadow:0 12px 28px rgba(0,0,0,.18);max-width:520px;width:min(520px,calc(100% - 24px))}
+  .pop-esp .hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid #eee}
+  .pop-esp .hd h5{margin:0;font-size:14px;font-weight:700}
+  .pop-esp .close{background:transparent;border:0;font-size:16px;cursor:pointer}
+  .pop-esp .bd{padding:10px;max-height:360px;overflow:auto;white-space:pre-wrap;line-height:1.35}
+
+  .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:10010;align-items:center;justify-content:center}
+  .modal{
+    background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+    width:calc(100% - 24px); max-width:820px;
+    padding:20px; position:relative; max-height:88vh; overflow:auto;
+  }
+  .modal h4{margin:0 0 15px;font-weight:800;text-align:center;font-size:18px;color:#3d0a46}
+  .closeX{position:absolute;right:15px;top:15px;border:none;background:transparent;font-size:20px;cursor:pointer;color:#555}
+
+  .iterList{display:flex;flex-direction:column;gap:6px}
+  .iterLine{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+  .iterBtn{border:1px solid #e0d7ea;border-radius:10px;padding:7px 10px;background:#fff;cursor:pointer;text-align:left;font-weight:700}
+  .chkBtn{width:28px;height:28px;border:1px solid #8b3b98;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .chkBtn.checked{background:#f0e6f7}
+
+  .k{font-weight:700;color:#3d0a46;font-size:13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3c{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .input{border:1px solid #8b3b98;border-radius:10px;padding:8px 10px;outline:none;font-size:13px}
+  .ro{background:#faf9fc}
+  .actionsRight{display:flex;justify-content:flex-end;margin-top:15px}
+  .block{border:1px solid #e0d7ea;border-radius:12px;padding:15px;margin-top:12px;background:#faf9fc}
+  .block h5{margin:0 0 10px;font-size:14px;color:#3d0a46;font-weight:700}
+  .legend{display:flex;align-items:center;gap:8px;margin:4px 0;justify-content:space-between}
+  .muted{color:#6b6b6b;font-size:12px}
+  .pill{margin-left:8px;background:purple;color:#fff;border:none;border-radius:16px;padding:6px 12px;cursor:pointer;box-shadow:0 2px 0 #b9a8c6;font-weight:700;font-size:12px}
+
+  .info-grid {display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:15px}
+  .info-item {display:flex;flex-direction:column;gap:4px}
+  .info-label {font-weight:700;color:#3d0a46;font-size:13px}
+  .info-value {padding:8px 10px;border:1px solid #e0d7ea;border-radius:8px;background:#faf9fc;font-size:13px}
+  .valores-grid {display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:15px}
+  .valor-item {display:flex;flex-direction:column;gap:4px}
+  .valor-label {font-weight:700;color:#3d0a46;font-size:13px}
+  .valor-value {padding:8px 10px;border:1px solid #e0d7ea;border-radius:8px;background:#fff;font-size:13px;text-align:right;font-weight:600}
+
+  .prestador-fila {display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px}
+  .prestador-campo {display:flex;flex-direction:column;gap:4px}
+
+  .estado-msg{margin-top:10px;padding:10px;border-radius:10px;background:#faf6ff;border:1px dashed #cbb6d7;color:#3d0a46;text-align:center;font-weight:700}
+
+  #blkAsegCall .call-wrap{display:flex;align-items:center;justify-content:space-between}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <h1>mySiss</h1>
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div class="submenu-radicacion" id="submenu-radicacion" hidden>
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html" id="devolucion-link">Devolución facturas</a>
+        <div class="submenu-devolucion" id="submenu-devolucion" hidden>
+          <a href="reg_dev.html">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+        <a href="cargue.html">Cargue objeciones</a>
+        <div class="submenu-objecion" id="submenu-objecion" hidden>
+          <a href="carg_obj.html">Cargar archivo objeción</a>
+          <a href="conr_obj.html">Consultar responsable objeción</a>
+          <a href="cam_obj.html">Cambiar responsable objeción</a>
+          <a href="conc_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+        <div class="submenu-gestion" id="submenu-gestion">
+          <a href="uni_gestion.html" style="text-decoration: underline;">Gestionar objeciones</a>
+        </div>
+
+        <a href="conciliacion.html" id="conciliacion-link">Conciliación objeciones</a>
+        <div class="submenu-conciliacion" id="submenu-conciliacion" hidden>
+          <a href="con_glo.html">Conciliación glosa a conciliar</a>
+          <a href="con_glo.html">Conciliación glosa</a>
+          <a href="cons_glo.html">Consultar glosas conciliadas</a>
+        </div>
+      </div>
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <div class="main">
+      <h2 class="h2">Gestión unificada de objeciones</h2>
+
+      <!-- Criterios de búsqueda -->
+      <div class="title-row"><h3 class="h2">Criterios de búsqueda</h3></div>
+      <div class="section" id="filtros">
+        <div class="row" style="display:grid;grid-template-columns:auto auto auto;gap:12px;align-items:end;">
+          <div style="display:grid;gap:6px;max-width:240px;">
+            <label for="fRadExt">No. Radicado Externo</label>
+            <div class="input-icon">
+              <input type="text" id="fRadExt" placeholder="Ej: 00000">
+              <button id="btnLupaRadExt" class="btn-ico" title="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <div style="display:grid;gap:6px;max-width:240px;">
+            <label for="fFactura">No. Factura</label>
+            <div class="input-icon">
+              <input type="text" id="fFactura" placeholder="Ej: 000000000">
+              <button id="btnLupaFactura" class="btn-ico" title="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <div style="display:grid;gap:6px;max-width:220px;">
+            <label for="fEstado">Estado Factura</label>
+            <select id="fEstado">
+              <option value="objetada">Objetada</option>
+              <option value=""></option>
+              
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="display:grid;grid-template-columns:auto auto;gap:12px;align-items:end;margin-top:12px;">
+          <div style="display:grid;gap:6px;">
+            <label>Fecha Objeción</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="date" id="fIni" style="width:150px;">
+              <span style="font-weight:700">a</span>
+              <input type="date" id="fFin" style="width:150px;">
+            </div>
+          </div>
+          <button id="btnBuscar" class="btn" style="height:38px;white-space:nowrap;background:#f3e9f8;color:#3d0a46;border:1px solid #d9c7e6">Buscar</button>
+        </div>
+      </div>
+
+      <!-- Facturas -->
+      <div id="secFacturas" hidden>
+        <div class="title-row"><h3 class="h2">Facturas</h3></div>
+        <div class="section">
+          <table id="tblFacturas">
+            <thead>
+              <tr>
+                <!--<th style="width:40px;"><input type="checkbox" disabled></th>-->
+                <th style="width:70px;">Detalle</th>
+                <th style="width:70px;">Indicador</th>
+                <th>Aseguradora</th>
+                <th>No. Factura</th>
+                <th>No. Radicado Externo</th>
+                <th>Estado</th>
+                <th>Fecha Objeción</th>
+                <th>Responsable</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detalle -->
+      <div id="secDetalle" hidden>
+        <div class="title-row"><h3 class="h2">Detalle</h3></div>
+        <div class="section" id="detalleWrap">
+          <table id="tblDetalle">
+            <thead>
+              <tr>
+                <th>Posición</th>
+                <th>Prestación</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Valor Total</th>
+                <th>Motivo Objeción</th>
+                <th>Motivo Específico</th>
+                <th>Valor Objetado</th>
+                <th>Nota Aseguradora</th>
+                <th>Responsable</th>
+                <th style="width:50px;">Iteración</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Popover texto -->
+  <div id="popEsp" style="display:none"></div>
+
+  <!-- Popup Iteraciones (intacta) -->
+  <div class="backdrop" id="popIters" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="closeX" id="xIters" title="Cerrar">✕</button>
+      <h4>Iteraciones</h4>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <strong id="labCod">Cod: -</strong>
+        <strong id="labEstado">Estado: ORA</strong>
+      </div>
+      <div id="iterList" class="iterList"></div>
+      <div id="estadoMsg" class="estado-msg" hidden>Glosa ya conciliada</div>
+    </div>
+  </div>
+
+  <!-- Popup Registro iteración -->
+  <div class="backdrop" id="popReg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="closeX" id="xReg" title="Cerrar">✕</button>
+      <h4>Registro iteración</h4>
+
+      <!-- Información básica -->
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Cod. Servicio:</div>
+          <div class="info-value" id="vCod"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Descripción:</div>
+          <div class="info-value" id="vDesc"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Hora:</div>
+          <div class="info-value" id="vHora"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Fecha:</div>
+          <div class="info-value" id="vFecha"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Cantidad:</div>
+          <div class="info-value" id="vCant"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Vr Servicio:</div>
+          <div class="info-value" id="vVrServ" style="text-align:right"></div>
+        </div>
+      </div>
+
+      <!-- Valores -->
+      <div class="valores-grid">
+        <div class="valor-item"><div class="valor-label">Vr Total:</div><div class="valor-value" id="vVrTotal"></div></div>
+        <div class="valor-item"><div class="valor-label">Vr No Objetado:</div><div class="valor-value" id="vVrNoObj"></div></div>
+        <div class="valor-item"><div class="valor-label">Vr Objetado:</div><div class="valor-value" id="vVrObj"></div></div>
+      </div>
+
+      <div class="info-item" style="margin-bottom:8px">
+        <div class="info-label">Nota aseguradora (del archivo):</div>
+        <div class="info-value" id="vNotaAseg"></div>
+      </div>
+
+      <!-- Historial de iteraciones previas (orden exacto) -->
+      <div id="histPrev"></div>
+
+      <!-- Llamado Aseguradora de la iteración actual -->
+      <div class="block" id="blkAsegCall" hidden>
+        <div class="legend">
+          <h5 id="titAsegCall">Valores Aseguradora - I<span id="iterAsegCall">2</span></h5>
+          <span class="muted">Debe registrarse antes que Prestador</span>
+        </div>
+        <div class="call-wrap">
+          <div class="muted">Registra primero el valor y la nota de Aseguradora.</div>
+          <button id="btnAbrirAseg" class="pill">Registrar Aseguradora</button>
+        </div>
+      </div>
+
+      <!-- Resumen Aseguradora (de esta iteración) -->
+      <div class="block" id="blkAsegResumen" hidden>
+        <div class="legend">
+          <h5 id="titAseg">Valores Aseguradora</h5>
+          <span class="muted" id="asegDateRight"></span>
+        </div>
+        <div class="prestador-fila">
+          <div class="prestador-campo">
+            <div class="k" style="margin-bottom:6px">Vr aceptado aseguradora</div>
+            <input id="resAsegVr" class="input ro" readonly>
+          </div>
+          <div class="prestador-campo">
+            <div class="k" style="margin-bottom:6px">Vr no aceptado (aseguradora)</div>
+            <input id="resAsegNoAcept" class="input ro" readonly>
+          </div>
+          <div class="prestador-campo">
+            <div class="k" style="margin-bottom:6px">Nota aseguradora</div>
+            <input id="resAsegNota" class="input ro" readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque actual: Prestador -->
+      <div class="block" id="blkPrest">
+        <div class="legend">
+          <h5 id="titPrest" style="margin:0">Valores Prestador - I<span id="iterActual">1</span></h5>
+          <span class="muted" id="prestDateRight"></span>
+        </div>
+
+        <div id="avisoPrimeroAseg" class="estado-msg" style="margin:6px 0" hidden>
+          Primero registra Aseguradora para esta iteración.
+        </div>
+
+        <div class="prestador-fila" id="filaPrest">
+          <div class="prestador-campo">
+            <div class="k" style="margin-bottom:6px">Vr Prestador</div>
+            <input id="inpVrPrest" class="input" inputmode="numeric" placeholder="Ej: 17000">
+          </div>
+          <div class="prestador-campo">
+            <div class="k" style="margin-bottom:6px">Vr no aceptado prestador</div>
+            <input id="inpVrNoAcept" class="input ro" readonly>
+          </div>
+          <div class="prestador-campo">
+            <div class="k" style="margin-bottom:6px">Nota Prestador</div>
+            <input id="inpNotaPrest" class="input" placeholder="Escriba la nota…">
+          </div>
+        </div>
+      </div>
+
+      <div class="actionsRight">
+        <button class="btn" id="btnGuardar">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Aseguradora -->
+  <div class="backdrop" id="popAseg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" style="max-width:460px">
+      <button class="closeX" id="xAseg">✕</button>
+      <h4>Valores Aseguradora - I<span id="iterAsegActual">1</span></h4>
+      <div class="grid2" style="margin-top:4px">
+        <div><div class="k">Vr aceptado aseguradora:</div><input id="asegVr" class="input" inputmode="numeric" placeholder="Ej: 7000"></div>
+        <div><div class="k">Vr no aceptado (aseguradora):</div><input id="asegVrNoAcept" class="input ro" readonly></div>
+      </div>
+      <div class="grid2"><div class="k">Nota aseguradora:</div><input id="asegNota" class="input" placeholder="Escriba la nota…"></div>
+      <div class="muted" id="fechitaAseg" style="margin-top:6px"></div>
+      <div class="actionsRight"><button id="btnAsegSave" class="btn">Guardar</button></div>
+    </div>
+  </div>
+
+  <!-- Popup Mensajes -->
+  <div class="backdrop" id="popMsg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" style="max-width:460px">
+      <h4 id="msgTitle">Mensaje</h4>
+      <div class="actionsRight"><button id="okMsg" class="btn">OK</button></div>
+    </div>
+  </div>
+
+  <div id="toast" style="position:fixed;right:16px;bottom:16px;background:#3b7e3b;color:#fff;padding:9px 12px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);transition:.2s">Guardado correctamente.</div>
+
+<script>
+(function(){
+  // === Claves EXACTAS que ya usas ===
+  const OBJ_KEY='objeciones_data';
+  const ITER_KEY='obj_iteraciones_v15';
+
+  const $=s=>document.querySelector(s);
+  function loadData(){ try{ return JSON.parse(localStorage.getItem(OBJ_KEY)||'[]') }catch{ return [] } }
+  function loadIters(){ try{ return JSON.parse(localStorage.getItem(ITER_KEY)||'{}') }catch{ return {} } }
+  function saveIters(d){ localStorage.setItem(ITER_KEY, JSON.stringify(d||{})); }
+  function now(){ const z=n=>String(n).padStart(2,'0'); const t=new Date(); return {f:`${z(t.getDate())}/${z(t.getMonth()+1)}/${t.getFullYear()}`, h:`${z(t.getHours())}:${z(t.getMinutes())}:${z(t.getSeconds())}`}; }
+  const fmt=v=>v==null?'':String(v);
+  const pick=(o,...k)=>{ for(const x of k){ if(o && o[x]!=null && o[x]!=='') return o[x]; } return '' };
+  const toInt=s=>{ const n=parseInt(String(s||'').replace(/[^\d-]/g,''),10); return isNaN(n)?0:n; };
+  const sep=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+
+  // ====== Pickers (no tocado) ======
+  function openPicker(btn, values, onPick){
+    const box = btn.closest('.input-icon');
+    box.querySelectorAll('.picker').forEach(n=>n.remove());
+    const menu=document.createElement('div'); menu.className='picker';
+    values.forEach(v=>{ const a=document.createElement('a'); a.href='#'; a.textContent=v; a.onclick=(e)=>{e.preventDefault(); onPick(v); menu.remove();}; menu.appendChild(a); });
+    box.appendChild(menu);
+    const close=(ev)=>{ if(!menu.contains(ev.target) && ev.target!==btn){ menu.remove(); document.removeEventListener('click',close); } };
+    setTimeout(()=>document.addEventListener('click',close),0);
+  }
+  $('#btnLupaRadExt').onclick=(e)=>{ const d=loadData(); const arr=[...new Set(d.map(x=>x.radicado_externo).filter(Boolean))].sort().reverse().slice(0,80); openPicker(e.currentTarget,arr,v=>$('#fRadExt').value=v); };
+  $('#btnLupaFactura').onclick=(e)=>{ const d=loadData(); const arr=[...new Set(d.map(x=>x.numero_factura).filter(Boolean))].sort().reverse().slice(0,80); openPicker(e.currentTarget,arr,v=>$('#fFactura').value=v); };
+
+  // ====== Tablas ======
+  const secFact = $('#secFacturas');
+  const tFact   = $('#tblFacturas tbody');
+  const secDet  = $('#secDetalle');
+  const tDet    = $('#tblDetalle tbody');
+  let facturaSel=null, idxDetActual=-1;
+
+  function semHtml(est){ const s=(est||'').toLowerCase(); let c=''; if(s==='objetada') c='red'; else if(s==='generada') c='green'; else if(s==='radicada') c='yellow'; return `<span class="sem ${c}"></span>`; }
+
+  $('#btnBuscar').onclick=()=>{
+    const data=loadData();
+    const rad=($('#fRadExt').value||'').toLowerCase();
+    const fac=($('#fFactura').value||'').toLowerCase();
+    const est=($('#fEstado').value||'').toLowerCase();
+    const ini=$('#fIni').value||''; const fin=$('#fFin').value||'';
+    const rows=data.filter(r=>{
+      const okR=!rad || (String(r.radicado_externo||'').toLowerCase().includes(rad));
+      const okF=!fac || (String(r.numero_factura||'').toLowerCase().includes(fac));
+      const okE=!est || (String(r.estado||'').toLowerCase()===est);
+      let okD=true; const f=(r.fecha_objecion_iso||'').substring(0,10);
+      if(ini && f && f<ini) okD=false; if(fin && f && f>fin) okD=false;
+      return okR && okF && okE && okD;
+    });
+
+    secFact.hidden = !rows.length;
+    secDet.hidden=true;
+
+    tFact.innerHTML='';
+    rows.forEach(r=>{
+      const tr=document.createElement('tr');
+      tr.dataset.key=`${r.numero_factura}||${r.radicado_externo}`;
+      tr.innerHTML=`
+        <td style="text-align:center;">
+          <button class="ico-btn btn-detalle" title="Detalle"><i class="far fa-clipboard" style="color:#4b0055"></i></button>
+        </td>
+        <td style="text-align:center;">${semHtml(r.estado)}</td>
+        <td>${fmt(r.pagador)}</td>
+        <td>${fmt(r.numero_factura)}</td>
+        <td>${fmt(r.radicado_externo)}</td>
+        <td style="text-transform:capitalize">${fmt(r.estado)}</td>
+        <td>${fmt((r.fecha_objecion||'').replaceAll('.','/'))}</td>
+        <td>${fmt(r.responsable)}</td>`;
+      tFact.appendChild(tr);
+    });
+  };
+
+  // *** DETALLE: delegación sobre #tblFacturas (sin cambios de ID/CLASE) ***
+  document.getElementById('tblFacturas').addEventListener('click',(e)=>{
+    const btn=e.target.closest('.btn-detalle'); if(!btn) return;
+    const [fact,rad]=btn.closest('tr').dataset.key.split('||');
+    const data=loadData(); facturaSel = data.find(x=>x.numero_factura==fact && x.radicado_externo==rad) || null;
+    renderDetalle(facturaSel);
+    secDet.hidden=false;
+    document.getElementById('detalleWrap').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  // Render detalle (igual estructura/IDs)
+  function renderDetalle(rec){
+    tDet.innerHTML='';
+    if(!rec || !Array.isArray(rec.detalle) || !rec.detalle.length){
+      tDet.innerHTML='<tr><td colspan="13" style="text-align:center;color:#777">El registro no tiene detalle.</td></tr>'; return;
+    }
+    rec.detalle.forEach((d,i)=>{
+      const motObj=pick(d,'Motivo objeción','Motivo Objeción','motivo_objecion','motivo');
+      const motEsp=pick(d,'Motivo Específico','Motivo específico','motivo_especifico','motivo_esp');
+      const nota=pick(d,'nota_pagador','nota_aseguradora','nota_aseg');
+      const tr=document.createElement('tr'); tr.dataset.idx=i;
+      tr.innerHTML=`
+        <td>${fmt(d.consecutivo||i+1)}</td>
+        <td>${fmt(pick(d,'codigo_servicio','cod_servicio'))}</td>
+        <td>${fmt(pick(d,'descripcion_servicio','desc_servicio'))}</td>
+        <td style="text-align:right">${fmt(pick(d,'cantidad','cantidad_servicio'))}</td>
+        <td style="text-align:right">${fmt(d.valor_servicio)}</td>
+        <td style="text-align:right">${fmt(d.valor_total)}</td>
+        <td>${fmt(motObj)}</td>
+        <td class="cell-esp">
+          <div class="clip">${fmt(motEsp)}</div>
+          ${ motEsp ? `<button class="btn-exp" title="Ver completo"><i class="fas fa-caret-down"></i></button>` : `` }
+        </td>
+        <td style="text-align:right">${fmt(d.valor_objetado)}</td>
+        <td style="text-align:center">${ nota ? `<button class="ico-btn btn-nota" title="Ver nota"><i class="fas fa-search"></i></button>` : ''}</td>
+        <td>${fmt(d.responsable)}</td>
+        <td style="text-align:center"><button class="ico-btn btn-plus" title="Iteraciones"><i class="fas fa-plus"></i></button></td>`;
+      tDet.appendChild(tr);
+    });
+  }
+
+  // Popovers
+  let pop=null;
+  function closePop(){ if(pop){ pop.remove(); pop=null; document.removeEventListener('click',autoClose,true); } }
+  function autoClose(ev){ if(pop && !pop.contains(ev.target) && !ev.target.closest('.btn-exp') && !ev.target.closest('.btn-nota')) closePop(); }
+  function openPop(btn,title,text){
+    closePop();
+    const el=document.createElement('div'); el.className='pop-esp';
+    el.innerHTML=`<div class="hd"><h5>${title}</h5><button class="close">✕</button></div><div class="bd"></div>`;
+    el.querySelector('.bd').textContent=text||'(sin texto)';
+    document.body.appendChild(el);
+    const r=btn.getBoundingClientRect(), pw=el.offsetWidth, ph=el.offsetHeight;
+    let left=r.right-pw; if(left<8) left=8; if(left+pw>innerWidth-8) left=innerWidth-pw-8;
+    let top=r.bottom+6; if(top+ph>innerHeight-8) top=Math.max(8,r.top-ph-6);
+    el.style.left=(scrollX+left)+'px'; el.style.top=(scrollY+top)+'px';
+    el.querySelector('.close').onclick=closePop;
+    setTimeout(()=>document.addEventListener('click',autoClose,true),0);
+    pop=el;
+  }
+  document.getElementById('tblDetalle').addEventListener('click',(e)=>{
+    const b=e.target.closest('.btn-nota'); if(!b) return;
+    const row=b.closest('tr'); const idx=parseInt(row.dataset.idx,10);
+    const d=(facturaSel?.detalle||[])[idx]||{};
+    openPop(b,'Nota aseguradora',fmt(pick(d,'nota_pagador','nota_aseguradora','nota_aseg')));
+  });
+  document.getElementById('tblDetalle').addEventListener('click',(e)=>{
+    const b=e.target.closest('.btn-exp'); if(!b) return;
+    const row=b.closest('tr'); const idx=parseInt(row.dataset.idx,10);
+    const d=(facturaSel?.detalle||[])[idx]||{};
+    openPop(b,'Motivo específico',fmt(pick(d,'Motivo Específico','Motivo específico','motivo_especifico','motivo_esp')));
+  });
+
+  // ===== Iteraciones (popup Iteraciones NO tocada visualmente) =====
+  function detKey(rec, det){
+    return `${rec.numero_factura||''}||${rec.radicado_externo||''}||${pick(det,'codigo_servicio','cod_servicio')}||${det.consecutivo||''}`;
+  }
+  function suma(arr,c){return arr.reduce((a,x)=>a+toInt(x[c]||0),0)}
+  function restanteGlobal(key, vObj){
+    const it=loadIters()[key]||[];
+    return Math.max(0, vObj - suma(it,'vr_aseg') - suma(it,'vr_prest'));
+  }
+  function estadoPorIter(n){
+    if(n>=4) return 'PCN';
+    if(n===0) return 'ORA';
+    return (n % 2 === 0) ? 'ROA' : 'OCO';
+  }
+
+  document.getElementById('tblDetalle').addEventListener('click',(e)=>{
+    const b=e.target.closest('.btn-plus'); if(!b) return;
+    const row=b.closest('tr'); idxDetActual=parseInt(row.dataset.idx,10);
+    abrirPopupIteraciones();
+  });
+
+  function abrirPopupIteraciones(){
+    const d=(facturaSel?.detalle||[])[idxDetActual];
+    const key=detKey(facturaSel,d);
+    const vObj=toInt(pick(d,'valor_objetado','valorObjetado')||0);
+    const it=loadIters()[key]||[];
+    const maxIter = it.length ? Math.max(...it.map(x=>x.iter)) : 0;
+    const rest = restanteGlobal(key, vObj);
+
+    $('#labEstado').textContent='Estado: '+estadoPorIter(it.length);
+    $('#labCod').textContent='Cod: '+(pick(d,'codigo_servicio','cod_servicio')||'-');
+
+    const cont=document.getElementById('iterList'); cont.innerHTML='';
+    it.sort((a,b)=>a.iter-b.iter).forEach(r=> cont.appendChild(linea(r.iter, !!r.vr_prest || restanteGlobal(key,vObj)===0)) );
+    if(rest===0){ $('#estadoMsg').hidden=false; }
+    else{
+      $('#estadoMsg').hidden=true;
+      if(maxIter===0) cont.appendChild(linea(1,false));
+      else{
+        const last=it.find(x=>x.iter===maxIter);
+        if(last && last.vr_prest && maxIter<4) cont.appendChild(linea(maxIter+1,false));
+        else{
+          const info=document.createElement('div'); info.className='estado-msg'; info.textContent='Completa Prestador para habilitar la siguiente iteración.'; cont.appendChild(info);
+        }
+      }
+    }
+    function linea(n,done){
+      const wrap=document.createElement('div'); wrap.className='iterLine';
+      const b1=document.createElement('button'); b1.className='iterBtn'; b1.textContent=`Iteración #${n}`;
+      const b2=document.createElement('div'); b2.className='chkBtn'+(done?' checked':''); b2.innerHTML='<i class="fas fa-check"></i>';
+      b1.onclick=()=> abrirRegistro(n);
+      wrap.appendChild(b1); wrap.appendChild(b2);
+      return wrap;
+    }
+
+    const pi=$('#popIters');
+    pi.style.display='flex'; pi.setAttribute('aria-hidden','false');
+    $('#xIters').onclick=()=>{ pi.style.display='none'; pi.setAttribute('aria-hidden','true'); };
+  }
+
+  // ===== Registro iteración (solo lógica; UI intacta) =====
+  let iterCtx={n:null,key:null,vObj:0};
+
+  function renderHistorialOrdenado(lista, n){
+    const hist = $('#histPrev'); hist.innerHTML='';
+    // I1 siempre Prestador si existe
+    const it1 = lista.find(x=>x.iter===1);
+    if(it1 && (it1.vr_prest || it1.nota_prest)){
+      hist.appendChild(bloquePrest(1,it1));
+    }
+    // Desde I2 hasta n-1: primero Aseg, luego Prest (si existen)
+    for(let k=2;k<n;k++){
+      const x = lista.find(e=>e.iter===k);
+      if(!x) continue;
+      if(x.vr_aseg || x.nota_aseg) hist.appendChild(bloqueAseg(k,x));
+      if(x.vr_prest || x.nota_prest) hist.appendChild(bloquePrest(k,x));
+    }
+
+    function bloquePrest(i,r){
+      const el=document.createElement('div'); el.className='block';
+      el.innerHTML=`
+        <div class="legend"><h5>Valores Prestador - I${i}</h5><span class="muted">${fmt(r.fecha||'-')} ${fmt(r.hora||'')}</span></div>
+        <div class="prestador-fila" style="margin-top:6px">
+          <div class="prestador-campo"><div class="k" style="margin-bottom:6px">Vr Prestador</div><input class="input ro" readonly value="${fmt(r.vr_prest||'')}"></div>
+          <div class="prestador-campo"><div class="k" style="margin-bottom:6px">Vr no aceptado prestador</div><input class="input ro" readonly value="${fmt(r.vr_no_acept||'')}"></div>
+          <div class="prestador-campo"><div class="k" style="margin-bottom:6px">Nota Prestador</div><input class="input ro" readonly value="${fmt(r.nota_prest||'')}"></div>
+        </div>`;
+      return el;
+    }
+    function bloqueAseg(i,r){
+      const el=document.createElement('div'); el.className='block';
+      el.innerHTML=`
+        <div class="legend"><h5>Valores Aseguradora - I${i}</h5><span class="muted">${fmt(r.fecha_aseg||'-')} ${fmt(r.hora_aseg||'')}</span></div>
+        <div class="prestador-fila" style="margin-top:6px">
+          <div class="prestador-campo"><div class="k" style="margin-bottom:6px">Vr Aceptado Aseguradora</div><input class="input ro" readonly value="${fmt(r.vr_aceptado_aseg||r.vr_aseg||'')}"></div>
+          <div class="prestador-campo"><div class="k" style="margin-bottom:6px">Vr no aceptado (aseguradora)</div><input class="input ro" readonly value="${fmt(r.vr_no_acept_aseg||'')}"></div>
+          <div class="prestador-campo"><div class="k" style="margin-bottom:6px">Nota Aseguradora</div><input class="input ro" readonly value="${fmt(r.nota_aseg||'')}"></div>
+        </div>`;
+      return el;
+    }
+  }
+
+  function abrirRegistro(n){
+    const d=(facturaSel?.detalle||[])[idxDetActual]||{};
+    const key=detKey(facturaSel,d);
+    const iters=loadIters(); const arr=(iters[key]||[]).sort((a,b)=>a.iter-b.iter);
+    const regAct=arr.find(x=>x.iter===n)||null;
+    const stamp=now();
+
+    iterCtx={n,key,vObj:toInt(pick(d,'valor_objetado','valorObjetado')||0)};
+
+    // Encabezado
+    $('#vCod').textContent=fmt(pick(d,'codigo_servicio','cod_servicio'));
+    $('#vDesc').textContent=fmt(pick(d,'descripcion_servicio','desc_servicio'));
+    $('#vFecha').textContent=regAct?.fecha || stamp.f;
+    $('#vHora').textContent=regAct?.hora  || stamp.h;
+    $('#vCant').textContent=fmt(pick(d,'cantidad','cantidad_servicio'));
+    $('#vVrServ').textContent=fmt(d.valor_servicio);
+    $('#vVrTotal').textContent=fmt(d.valor_total);
+    $('#vVrNoObj').textContent=fmt(d.valor_no_objetado||'');
+    $('#vVrObj').textContent=sep(iterCtx.vObj);
+    $('#vNotaAseg').textContent=fmt(pick(d,'nota_pagador','nota_aseguradora','nota_aseg'));
+
+    // Historial previo ordenado
+    renderHistorialOrdenado(arr, n);
+
+    // Estado de esta iteración
+    const prestExiste=!!(regAct && regAct.vr_prest);
+    const asegExiste =!!(regAct && regAct.vr_aseg);
+
+    // UI según reglas
+    prepararUIActual(n, asegExiste, prestExiste);
+
+    // Relleno de resúmenes/valores si existen
+    if(asegExiste){
+      $('#blkAsegResumen').hidden=false;
+      $('#resAsegVr').value      = fmt(regAct.vr_aceptado_aseg || regAct.vr_aseg || '');
+      $('#resAsegNoAcept').value = fmt(regAct.vr_no_acept_aseg || '');
+      $('#resAsegNota').value    = fmt(regAct.nota_aseg || '');
+      $('#asegDateRight').textContent = `${fmt(regAct.fecha_aseg||'-')} ${fmt(regAct.hora_aseg||'')}`;
+    }else{
+      $('#blkAsegResumen').hidden=true;
+      $('#resAsegVr').value=''; $('#resAsegNoAcept').value=''; $('#resAsegNota').value=''; $('#asegDateRight').textContent='';
+    }
+
+    $('#inpVrPrest').value   = prestExiste ? (regAct.vr_prest||'') : '';
+    $('#inpNotaPrest').value = prestExiste ? (regAct.nota_prest||'') : '';
+    $('#inpVrNoAcept').value = prestExiste ? (regAct.vr_no_acept||'') : '';
+
+    // cálculos
+    const recalcPrest=()=>{
+      const itAll=loadIters()[key]||[];
+      const listaPrev=itAll.filter(x=>x.iter<n);
+      const totalAsegPrev=suma(listaPrev,'vr_aseg');
+      const totalPrestPrev=suma(listaPrev,'vr_prest');
+      const asegActual=toInt((itAll.find(x=>x.iter===n)?.vr_aseg)||0);
+      const prestNew=toInt($('#inpVrPrest').value||0);
+      const restante=Math.max(0, iterCtx.vObj - totalAsegPrev - totalPrestPrev - asegActual - prestNew);
+      $('#inpVrNoAcept').value=String(restante);
+    };
+    $('#inpVrPrest').oninput=recalcPrest; recalcPrest();
+
+    // abrir/cerrar
+    const pr=$('#popReg'); pr.style.display='flex'; pr.setAttribute('aria-hidden','false');
+    $('#xReg').onclick=()=>{ pr.style.display='none'; pr.setAttribute('aria-hidden','true'); };
+
+    // Abrir modal de Aseguradora cuando aún no existe (I≥2)
+    $('#btnAbrirAseg').onclick=()=>{
+      $('#iterAsegActual').textContent = n;
+      const recalcAseg=()=>{
+        const itAll=loadIters()[key]||[];
+        const listaPrev=itAll.filter(x=>x.iter<n);
+        const totalAsegPrev=suma(listaPrev,'vr_aseg');
+        const totalPrestPrev=suma(listaPrev,'vr_prest');
+        const vrAsegAct=toInt($('#asegVr').value||0);
+        const vrPrestUI=toInt($('#inpVrPrest').value||0);
+        const restante=Math.max(0, iterCtx.vObj - totalAsegPrev - totalPrestPrev - vrAsegAct - vrPrestUI);
+        $('#asegVrNoAcept').value=String(restante);
+      };
+      $('#asegVr').value=regAct?.vr_aseg||'';
+      $('#asegNota').value=regAct?.nota_aseg||'';
+      $('#fechitaAseg').textContent = (regAct?.fecha_aseg||regAct?.hora_aseg)?`Última guarda: ${fmt(regAct?.fecha_aseg||'-')} ${fmt(regAct?.hora_aseg||'')}`:'';
+      recalcAseg(); $('#asegVr').oninput=recalcAseg;
+
+      $('#popAseg').style.display='flex'; $('#popAseg').setAttribute('aria-hidden','false');
+    };
+    $('#xAseg').onclick=()=>{ $('#popAseg').style.display='none'; $('#popAseg').setAttribute('aria-hidden','true'); };
+
+    // Guardar PRESTADOR
+    $('#btnGuardar').onclick=()=>{
+      const it=loadIters(); const arr=it[key]||[];
+      const idx=arr.findIndex(x=>x.iter===n);
+
+      if(n>=2){ // exigir Aseguradora primero
+        const reg=arr.find(x=>x.iter===n);
+        if(!reg || !reg.vr_aseg){ showMsg('Primero debes registrar Aseguradora para esta iteración.'); return; }
+      }
+
+      const t=now();
+      const vrPrest=$('#inpVrPrest').value;
+      const notaP=$('#inpNotaPrest').value;
+
+      const listaPrev=arr.filter(x=>x.iter<n);
+      const totalAsegPrev=suma(listaPrev,'vr_aseg');
+      const totalPrestPrev=suma(listaPrev,'vr_prest');
+      const asegActual=toInt((arr.find(x=>x.iter===n)?.vr_aseg)||0);
+      const prestNew=toInt(vrPrest||0);
+      const restante=Math.max(0, iterCtx.vObj - totalAsegPrev - totalPrestPrev - asegActual - prestNew);
+
+      const baseP={iter:n, fecha:t.f, hora:t.h, vr_prest:vrPrest, nota_prest:notaP, vr_no_acept:String(restante)};
+      if(idx>=0) arr[idx]={...arr[idx], ...baseP}; else arr.push(baseP);
+      it[key]=arr; saveIters(it);
+
+      toast('Prestador guardado.');
+      $('#popReg').style.display='none'; $('#popReg').setAttribute('aria-hidden','true');
+
+      const restGlobal = restanteGlobal(key, iterCtx.vObj);
+      if(restGlobal===0){
+        showMsg('Glosa ya conciliada');
+      }else if(n===4){
+        showMsg('Glosa pasa a conciliación');
+      }
+    };
+  }
+
+  function prepararUIActual(n, asegYaExiste, prestYaExiste){
+    const requiereAsegPrimero = (n>=2);
+    // Mostrar/ocultar bloques sin tocar estilos globales
+    $('#blkAsegCall').hidden   = !(requiereAsegPrimero && !asegYaExiste);
+    $('#blkAsegResumen').hidden= !asegYaExiste;
+    $('#filaPrest').hidden     = (requiereAsegPrimero && !asegYaExiste);
+
+    // Títulos / iteraciones
+    $('#iterActual').textContent = n;
+    $('#iterAsegCall').textContent = n;
+    $('#titAseg').textContent = `Valores Aseguradora - I${n}`;
+    $('#titAsegCall').textContent = `Valores Aseguradora - I${n}`;
+    $('#titPrest').innerHTML = `Valores Prestador - I<span id="iterActual">${n}</span>`;
+
+    // Campos editables según estado
+    const camposEditables = !prestYaExiste && (!requiereAsegPrimero || asegYaExiste);
+    ['inpVrPrest','inpNotaPrest'].forEach(id=>{
+      const el=$('#'+id); el.readOnly = !camposEditables; el.classList.toggle('ro', !camposEditables);
+    });
+    $('#btnGuardar').style.display = camposEditables ? 'inline-block' : 'none';
+    $('#avisoPrimeroAseg').hidden = !(!camposEditables && requiereAsegPrimero && !asegYaExiste);
+  }
+
+  // Guardar ASEGURADORA
+  $('#btnAsegSave').onclick=()=>{
+    const n=iterCtx.n, key=iterCtx.key, vObj=iterCtx.vObj;
+    if(n==null || !key){ $('#popAseg').style.display='none'; $('#popAseg').setAttribute('aria-hidden','true'); return; }
+
+    const it=loadIters(); const arr=it[key]||[];
+    const idx=arr.findIndex(x=>x.iter===n);
+    const t=now();
+    const vAseg=$('#asegVr').value;
+    const notaA=$('#asegNota').value;
+
+    const listaPrev=arr.filter(x=>x.iter<n);
+    const totalAsegPrev=suma(listaPrev,'vr_aseg');
+    const totalPrestPrev=suma(listaPrev,'vr_prest');
+    const prestUI=toInt($('#inpVrPrest')?.value||0);
+    const vrNoAcept=Math.max(0, vObj - totalAsegPrev - totalPrestPrev - toInt(vAseg||0) - prestUI);
+
+    const baseA={iter:n, vr_aseg:vAseg, vr_aceptado_aseg:vAseg, nota_aseg:notaA, vr_no_acept_aseg:String(vrNoAcept), fecha_aseg:t.f, hora_aseg:t.h};
+    if(idx>=0) arr[idx]={...arr[idx], ...baseA}; else arr.push(baseA);
+    it[key]=arr; saveIters(it);
+
+    toast('Aseguradora guardada.');
+    $('#popAseg').style.display='none'; $('#popAseg').setAttribute('aria-hidden','true');
+
+    // Si la pantalla de Registro está abierta, habilitar Prestador
+    if($('#popReg').style.display==='flex'){
+      const reg= (loadIters()[key]||[]).find(x=>x.iter===n);
+      $('#blkAsegCall').hidden=true;
+      $('#blkAsegResumen').hidden=false;
+      $('#resAsegVr').value      = fmt(reg.vr_aceptado_aseg || reg.vr_aseg || '');
+      $('#resAsegNoAcept').value = fmt(reg.vr_no_acept_aseg || '');
+      $('#resAsegNota').value    = fmt(reg.nota_aseg || '');
+      $('#asegDateRight').textContent = `${fmt(reg.fecha_aseg||'-')} ${fmt(reg.hora_aseg||'')}`;
+
+      ['inpVrPrest','inpNotaPrest'].forEach(id=>{ const el=$('#'+id); el.readOnly=false; el.classList.remove('ro'); });
+      $('#filaPrest').hidden=false; $('#btnGuardar').style.display='inline-block'; $('#avisoPrimeroAseg').hidden=true;
+    }
+
+    const restGlobal = restanteGlobal(key, vObj);
+    if(restGlobal===0){
+      $('#popReg').style.display='none'; $('#popReg').setAttribute('aria-hidden','true');
+      showMsg('Glosa ya conciliada');
+    }
+  };
+
+  // Mensajes / utilidades
+  function toast(t){ const el=$('#toast'); el.textContent=t; el.style.opacity=1; el.style.transform='none'; setTimeout(()=>{ el.style.opacity=0; el.style.transform='translateY(8px)'; }, 1200); }
+  function showMsg(txt){ $('#msgTitle').textContent=txt; $('#popMsg').style.display='flex'; $('#popMsg').setAttribute('aria-hidden','false'); }
+  $('#okMsg').onclick=()=>{ $('#popMsg').style.display='none'; $('#popMsg').setAttribute('aria-hidden','true'); };
+
+  // ESC cierra popups
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape'){
+      ['popReg','popIters','popAseg','popMsg'].forEach(id=>{ const el=document.getElementById(id); if(el && el.style.display==='flex'){ el.style.display='none'; el.setAttribute('aria-hidden','true'); }});
+      const p=document.querySelector('.pop-esp'); if(p) p.remove();
+    }
+  });
+})();
+</script>
+</body>
+</html>

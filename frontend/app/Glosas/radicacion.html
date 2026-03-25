@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <title>Radicación Glosas - mySiss Cloud</title>
+  <link rel="stylesheet" href="../css/radicacion.css">
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <h1>mySiss</h1>
+		<a href="radicacion.html" id="radicacion-link" style="text-decoration: underline;">Radicación facturas</a>
+		<!-- Submenú Radicación -->
+		<div class="submenu-radicacion" id="submenu-radicacion">
+		  <a href="radicar_fact.html">Radicar facturas</a>
+		  <a href="actualizar_rad.html">Actualizar radicación</a>
+		  <a href="consultar_fact.html">Consultar facturas radicadas</a>
+		</div>
+
+		<!-- Submenú Devolución -->
+        <a href="devolucion.html">Devolución facturas</a>
+		<div class="submenu-devolucion" id="submenu-devolucion" hidden>
+		  <a href="reg_dev.html">Registrar devoluciones</a>
+		  <a href="con_dev.html">Consultar devoluciones</a>
+		</div>
+
+		<!-- Submenú Objeciones -->
+        <a href="cargue.html">Cargue objeciones</a>
+		<div class="submenu-objecion" id="submenu-objecion" hidden>
+		  <a href="carg_obj.html">Cargar archivo objeción</a>
+		  <a href="conr_obj.html">Consultar responsable objeción</a>
+		  <a href="carg_obj.html">Cambiar responsable objeción</a>
+		  <a href="conr_obj.html">Consultar objeción</a>
+		</div>
+
+		<!-- Submenú Gestión -->
+        <a href="gestion.html">Gestión objeciones y glosas</a>
+		<div class="submenu-gestion" id="submenu-gestion" hidden>
+		  <a href="cont_obj.html">Contestar objeción</a>
+		  <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+		  <a href="uni_gestion.html">Responder objeción aseguradora</a>
+		  <a href="cons_obj.html">Consultar objeción</a>
+		</div>
+
+		<!-- Submenú Conciliación -->
+        <a href="conciliacion.html">Conciliación objeciones</a>
+		<div class="submenu-conciliacion" id="submenu-conciliacion" hidden>
+		  <a href="con_glo.html">Conciliación glosa a conciliar</a>
+		  <a href="con_glo.html">Conciliación glosa</a>
+		  <a href="resultados_rad.html">Consultar glosas conciliadas</a>
+		</div>
+        <!-- Submenú Reportes -->
+        <a href="reportes.html">Reportes e Informes</a>
+        <div class="submenu-reportes" id="submenu-reportes">
+          <a href="reportes1.html" style="text-decoration: underline;">Reportes</a>
+          <a href="informes1.html">Informes</a>
+        </div>
+
+      </div>
+      <a href="../../mySiss_Cloud_Login.html" class="logout">Cerrar sesión</a>
+    </div>
+ 
+    <div class="main">
+      <h2>Radicación de facturas</h2>
+	    <div class="img-container">
+			<img src="Documentos/img/rad_fact.png" alt="Radicación" class="img-radicacion">
+	    </div>
+  </div>
+  
+  <!-- Modal para actualizar WS -->
+  <div id="wsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p>¿Desea actualizar la información del Web Service?</p>
+      <div class="modal-buttons">
+        <button class="cancel">Cancelar</button>
+        <button class="accept">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  
+<script src="../js/radicacion.js"></script>
+</body>
+</html>

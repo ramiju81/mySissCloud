@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Resultados Glosas - mySiss Cloud</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #fff;
+  }
+
+  .container {
+    display: flex;
+  }
+
+  .sidebar {
+    width: 180px;
+    background: #eee6f8;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .sidebar h1 {
+    color: purple;
+    font-weight: bold;
+    font-size: 50px;
+    margin-bottom: 30px;
+  }
+
+  .sidebar a {
+    display: block;
+    margin: 20px 0;
+    color: purple;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 20px 40px;
+  }
+
+  .logout {
+    color: purple;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  #radicacion-link {
+    text-decoration: underline;
+  }
+
+  .submenu-radicacion {
+    margin: 4px 0 8px 12px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .submenu-radicacion a {
+    margin: 0;
+    font-weight: normal;
+    font-size: 14px;
+    color: purple;
+    text-decoration: none;
+  }
+
+  /* ====== Estilos internos ====== */
+  .h2 {
+    font-size: 24px;   /* más pequeño */
+    font-weight: 400;  /* sin negrilla */
+    margin: 4px 0 10px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    padding: 18px;
+    margin-bottom: 22px;
+  }
+
+  .kpi {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .kpi div {
+    background: #f6f2fa;
+    border: 1px solid #e0d7ea;
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+  }
+
+  .kpi b {
+    font-size: 28px;   /* más pequeño */
+    font-weight: 400;  /* sin negrilla */
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+  }
+
+  th,
+  td {
+    border: 1px solid #e0d7ea;
+    padding: 10px;
+    text-align: left;
+    background: #fff;
+    font-weight: 400;  /* sin negrilla */
+  }
+
+  th {
+    background: #f5f1f9;
+    font-size: 13px;   /* más pequeño */
+    text-align: center;/* centrados */
+  }
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div>
+        <h1>mySiss</h1>
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div id="submenu-radicacion" class="submenu-radicacion">
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+          <a href="resultados_rad.html" style="text-decoration: underline;">Resultados</a>
+        </div>
+        <a href="#">Devolución facturas</a>
+        <a href="#">Cargue objeciones</a>
+        <a href="#">Gestión objeciones y glosas</a>
+        <a href="#">Conciliación objeciones</a>
+      </div>
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <div class="main">
+      <h3 class="h2">Resultados</h3>
+      <div class="card">
+        <div class="kpi" id="kpis"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px;">Últimas radicaciones</h3>
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Radicado Int</th>
+              <th>Factura</th>
+              <th>Fecha</th>
+              <th>Responsable</th>
+              <th>Valor</th>
+              <th>Radicado Ext</th>
+              <th>Fecha Rad Ext</th>
+              <th>Hora Rad Ext</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('submenu-radicacion').style.display = 'flex';
+    function loadState(){ return JSON.parse(localStorage.getItem('mysiss_state') || '{}'); }
+    let state = loadState(); if(!state.facturas) state.facturas=[];
+
+    const kpis = document.getElementById('kpis');
+    const tbody = document.querySelector('#tbl tbody');
+
+    function render(){
+      const total = state.facturas.length;
+      const rad = state.facturas.filter(f=>f.estado==='Radicada').length;
+      const gen = state.facturas.filter(f=>f.estado==='Generada').length;
+      const conExt = state.facturas.filter(f=>f.radicadoExt).length;
+      kpis.innerHTML = `
+        <div><div>Facturas</div><b>${total}</b></div>
+        <div><div>Generadas</div><b>${gen}</b></div>
+        <div><div>Radicadas</div><b>${rad}</b></div>
+        <div><div>Con Radicado Ext</div><b>${conExt}</b></div>
+      `;
+
+      const ult = state.facturas.filter(f=>f.estado==='Radicada')
+                    .sort((a,b)=> (b.radicadoInt||0)-(a.radicadoInt||0)).slice(0,10);
+      tbody.innerHTML='';
+      ult.forEach(f=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${f.radicadoInt ?? ''}</td>
+          <td>${f.factura}</td>
+          <td>${new Date(f.fecha).toLocaleDateString('es-CO')}</td>
+          <td>${f.resp}</td>
+          <td>${f.valor?.toLocaleString('es-CO')}</td>
+          <td>${f.radicadoExt ?? ''}</td>
+          <td>${f.fechaRadExt ?? ''}</td>
+          <td>${f.horaRadExt ?? ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    render();
+  </script>
+</body>
+</html>

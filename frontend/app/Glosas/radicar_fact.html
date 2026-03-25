@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <title>Radicar facturas - mySiss Cloud</title>
+
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff}
+    .container{display:flex}
+    .sidebar{width:180px;background:#eee6f8;padding:20px;height:100vh;position:fixed;top:0;left:0;display:flex;flex-direction:column;justify-content:space-between}
+    .sidebar h1{color:purple;font-weight:bold;font-size:50px;margin-bottom:30px}
+    .sidebar a{display:block;margin:20px 0;color:purple;text-decoration:none;font-weight:bold}
+    .logout{color:purple;text-decoration:none;font-weight:bold}
+    .main{margin-left:240px;flex:1;background:#fff;padding:20px 40px}
+
+    #radicacion-link{text-decoration:underline}
+    .submenu-radicacion{margin:4px 0 8px 12px;display:none;flex-direction:column;gap:4px}
+    .submenu-radicacion a{margin:0;font-weight:normal;font-size:14px;color:purple;text-decoration:none}
+    .submenu-radicacion a:hover{text-decoration:underline}
+
+    .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+    .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px 18px 12px;margin-bottom:22px}
+    .row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+    .row label{min-width:180px;font-weight:400}
+    .row input[type="date"],.row select,.row input[type="text"]{border:1px solid #8b3b98;border-radius:10px;padding:10px 12px;min-width:200px;outline:none}
+    .btn{background:purple;color:#fff;border:none;border-radius:10px;padding:12px 18px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6;transition:.15s transform ease;font-weight:400}
+    .btn--outline{background:#f3e9f8;color:#3d0a46;font-weight:400}
+    .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .title-row h3{font-size:22px;margin:0;font-weight:400}
+    .pill{background:#f6f2fa;padding:6px 10px;border-radius:999px;font-weight:400;color:#3d0a46}
+
+    table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+    th,td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400}
+    th{background:#f5f1f9;font-size:13px;text-align:center}
+    td{text-align:left}
+    .col-ico{width:44px;text-align:center}
+    .clip{font-size:18px;color:#3d0a46}
+    .chk{transform:scale(1.2);cursor:pointer}
+    .row-selected td{background:#e7d7eb!important}
+    .cell-money{text-align:right}
+
+    .cloud-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid #cbb6d7;background:#fff;cursor:pointer}
+    .cloud-btn i{color:#7b1e85}
+    .cloud-btn[disabled]{opacity:.35;cursor:not-allowed}
+
+    .semaforo1{display:flex;justify-content:center}
+    .dot{width:22px;height:22px;border-radius:50%;border:3px solid #1f5577;background:#fff;display:inline-block}
+    .dot.ok{background:#4bb543;border-color:#4bb543}
+
+    .result-card{display:none;margin:18px auto 6px;width:min(520px,95%);background:#f6f2fa;border:3px solid #2a3350;border-radius:22px;text-align:center;padding:16px 12px 22px}
+    .result-card .nro{font-size:24px;font-weight:400;color:#2a3350;margin-bottom:10px}
+
+    /* Modal Soportes */
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999}
+    .modal__card{background:#fff;width:min(860px,92%);margin:8vh auto;border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.25);overflow:hidden}
+    .modal__hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#f5f1f9}
+    .modal__hd h4{margin:0;font-size:18px;font-weight:400}
+    .modal__bd{padding:16px 18px 18px}
+    .x{background:none;border:none;font-size:22px;cursor:pointer;color:#5a2f7a}
+    .doc-list td{vertical-align:middle}
+    .action-cell{display:flex;gap:10px;justify-content:center}
+    .pdf-link{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #cbb6d7;border-radius:10px;background:#fff}
+    .pdf-link i{color:#b31217}
+    .status-ck{width:22px;height:22px;border-radius:50%;border:3px solid #1f5577;display:block;margin:auto;background:#fff;pointer-events:none}
+    .status-ck.ok{background:#4bb543;border-color:#4bb543}
+    .modal__ft{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16px;background:#faf7fd;border-top:1px solid #eadff1}
+    .btn-cancel{background:#f3e9f8;color:#3d0a46;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .btn-upload{background:purple;color:#fff;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6}
+    .btn-upload[disabled]{opacity:.5;cursor:not-allowed}
+
+    /* Toast */
+    .toast{display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 16px;background:#eaf7ec;border:1px solid #7ad186;color:#165c1b;border-radius:10px;font-weight:400;z-index:9999}
+
+    /* Confirmación radicado */
+    .modal-confirm{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.35)}
+    .confirm-card{width:min(520px,92%);margin:7vh auto;background:#fff;border-radius:18px;border:3px solid #2a3350;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .confirm-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 8px;background:#f6f2fa;border-bottom:1px solid #eadff1}
+    .confirm-title{font-size:22px;color:#7b1e85;font-weight:700}
+    .confirm-check{width:32px;height:32px;border-radius:999px;border:3px solid #7b1e85;display:flex;align-items:center;justify-content:center;color:#7b1e85}
+    .confirm-bd{padding:14px 18px 18px;background:#fff}
+    .confirm-bd .row{margin:4px 0;gap:10px}
+    .confirm-note{margin:12px 0 0;color:#333;line-height:1.35}
+    .confirm-actions{display:flex;justify-content:flex-end;margin-top:16px}
+    .btn-accept{background:purple;color:#fff;border:0;border-radius:12px;padding:10px 16px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6}
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div>
+        <h1>mySiss</h1>
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div id="submenu-radicacion" class="submenu-radicacion">
+          <a href="radicar_fact.html" style="text-decoration: underline;">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html">Devolución facturas</a>
+        <div class="submenu-devolucion" id="submenu-devolucion" hidden>
+          <a href="reg_dev.html">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+        <a href="cargue.html">Cargue objeciones</a>
+        <div class="submenu-objecion" id="submenu-objecion" hidden>
+          <a href="carg_obj.html">Cargar archivo objeción</a>
+          <a href="conr_obj.html">Consultar responsable objeción</a>
+          <a href="cam_obj.html">Cambiar responsable objeción</a>
+          <a href="conc_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="gestion.html">Gestión objeciones y glosas</a>
+        <div class="submenu-gestion" id="submenu-gestion" hidden>
+          <a href="cont_obj.html">Contestar objeción</a>
+          <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+          <a href="resp_asig.html">Responder objeción aseguradora</a>
+          <a href="cons_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="conciliacion.html">Conciliación objeciones</a>
+        <div class="submenu-conciliacion" id="submenu-conciliacion" hidden>
+          <a href="cong_glo.html">Conciliación glosa a conciliar</a>
+          <a href="con_glo.html">Conciliación glosa</a>
+          <a href="cons_glo.html">Consultar glosas conciliadas</a>
+        </div>
+      </div>
+        <!-- Submenú Reportes -->
+        <a href="reportes.html">Reportes e Informes</a>
+        <div class="submenu-reportes" id="submenu-reportes">
+        </div>
+
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <h2>Radicación de facturas</h2>
+      <div class="title-row"><h3 class="h2">Criterios de búsqueda</h3></div>
+      <div class="section">
+        <div class="row" style="display:grid;grid-template-columns:auto auto auto;gap:12px;align-items:end;">
+          <div style="display:grid;gap:6px;max-width:320px;">
+            <label for="fResp">Aseguradora</label>
+            <select id="fResp" style="width:100%;min-width:240px;">
+              <option value=""></option>
+              <option>Nueva EPS</option>
+              <option>Sura</option>
+              <option>Comfenalco</option>
+            </select>
+          </div>
+          <div style="display:grid;gap:6px;max-width:200px;">
+            <label for="fNro">Nº Factura</label>
+            <input type="text" id="fNro" placeholder="Ej: 90007505" style="width:100%;">
+          </div>
+          <div style="display:grid;gap:6px;max-width:200px;">
+            <label for="fEstado">Estado Factura</label>
+            <select id="fEstado" style="width:100%;">
+              <option value="" selected></option>
+              <option value="Generada">Generada</option>
+              <option value="Radicada">Radicada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="display:grid;grid-template-columns:auto auto;gap:12px;align-items:end;margin-top:12px;">
+          <div style="display:grid;gap:6px;">
+            <label>Fecha</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="date" id="fIni" style="width:150px;">
+              <span style="font-weight:700">a</span>
+              <input type="date" id="fFin" style="width:150px;">
+            </div>
+          </div>
+          <button id="btnBuscar" class="btn btn--outline" style="height:38px;white-space:nowrap;">Buscar</button>
+        </div>
+      </div>
+
+      <div class="title-row"><h3 class="h2">Facturas</h3></div>
+      <div class="section">
+        <button id="btnRadicar" class="btn" style="margin-bottom:12px;">Radicar</button>
+        <table id="tblFacturas" aria-label="Listado de facturas">
+          <thead>
+            <tr>
+              <th class="col-ico" title="Seleccionar todo"><input type="checkbox" id="chkAll" class="chk" aria-label="Seleccionar todas las filas"></th>
+              <th class="col-ico">Detalle</th>
+              <th class="col-ico" title="Indicador">Indicador</th>
+              <th>Aseguradora</th>
+              <th>Fecha Factura</th>
+              <th>Factura</th>
+              <th>Estado</th>
+              <th class="cell-money">Valor</th>
+              <th>Moneda</th>
+              <th style="width:120px; text-align:center;">Cargar Archivos</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div id="cardRadicado" class="result-card">
+          <div class="nro" id="nroRadicado">Número de radicado: —</div>
+          <button id="btnImprimir" class="btn">Imprimir Formulario</button>
+        </div>
+      </div>
+
+      <div class="title-row"><h3 class="h2">Detalle factura</h3></div>
+      <div class="section">
+        <table id="tblDetalle">
+          <thead>
+            <tr>
+              <th style="width:110px">Posición</th>
+              <th>Prestación</th>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Valor Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align:center; color:#777;">Seleccione una factura…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Cargar soportes de facturación -->
+  <div id="mdSoportes" class="modal" aria-hidden="true">
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="mdTitle">
+      <div class="modal__hd">
+        <h4 id="mdTitle">Cargar soportes de facturación</h4>
+        <button class="x" id="mdClose"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal__bd">
+        <h3 style="font-weight:900; font-size:26px; margin:0 0 12px;">Listado de soportes</h3>
+        <table class="doc-list">
+          <thead>
+            <tr>
+              <th>Nombre Documento</th>
+              <th style="width:130px; text-align:center;">Seleccionar Archivo</th>
+              <th style="width:120px; text-align:center;">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="docBody"></tbody>
+        </table>
+      </div>
+      <div class="modal__ft">
+        <button id="mdCancel" class="btn-cancel">Cancelar</button>
+        <button id="mdUpload" class="btn-upload" disabled>Cargar soportes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">No. Radicado grabado exitosamente ✔</div>
+
+  <!-- POPUP CONFIRMACIÓN RADICADO -->
+  <div id="mdRadicado" class="modal-confirm" aria-hidden="true">
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="confirm-hd">
+        <div class="confirm-title" id="confirmTitle">No Radicado: <span id="confNum">—</span></div>
+        <div class="confirm-check"><i class="fas fa-check"></i></div>
+      </div>
+      <div class="confirm-bd">
+        <div class="row">Fecha radicación:&nbsp;<b id="confFecha">—</b></div>
+        <div class="row">Hora radicación:&nbsp;<b id="confHora">—</b></div>
+        <p class="confirm-note">La presentación de los soportes por este medio, no conlleva la aprobación y pago de la factura.</p>
+        <p class="confirm-note">Vía e-mail se envía la relación de las facturas radicadas junto con sus soportes.</p>
+        <div class="confirm-actions"><button id="confOk" class="btn-accept">Aceptar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ===== Submenú visible =====
+  document.getElementById('submenu-radicacion').style.display = 'flex';
+
+  // ===== Storage y utilidades =====
+  const STORAGE_KEY = 'radicar_fact_data';
+  const SUPPORT_NAMES = ['Factura de venta','Resultado de los procedimientos de apoyo diagnóstico'];
+
+  function loadState(){
+    const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (!Number.isFinite(s.lastRadicado) || s.lastRadicado < 10114) s.lastRadicado = 10114;
+    if (!Array.isArray(s.facturas)) s.facturas = [];
+    return s;
+  }
+  function saveState(s){ localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+  let state = loadState();
+
+  // ===== Referencias UI =====
+  const tbody    = document.querySelector('#tblFacturas tbody');
+  const tbodyDet = document.querySelector('#tblDetalle tbody');
+  const card     = document.getElementById('cardRadicado');
+  const chkAll   = document.getElementById('chkAll');
+  const fmtCOP   = n => (n ?? 0).toLocaleString('es-CO');
+
+  let seleccionados = new Set();
+  let facturaFocus  = null;
+
+  function mostrarFecha(ymd){
+    if(!ymd) return '';
+    if(/^\d{4}-\d{2}-\d{2}$/.test(ymd)){ const [y,m,d] = ymd.split('-'); return `${d}/${m}/${y}`; }
+    if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(ymd)) return ymd;
+    try{ const [y,m,d]=ymd.split('-').map(Number); return new Date(y,(m||1)-1,d||1).toLocaleDateString('es-CO'); }
+    catch{ return String(ymd); }
+  }
+
+  function renderInicioVacio(){
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Usa los filtros y presiona <b>Buscar</b> para ver resultados</td></tr>`;
+    tbodyDet.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#777;">Seleccione una factura…</td></tr>`;
+    card.style.display = 'none';
+    seleccionados.clear();
+    if (chkAll){ chkAll.checked=false; chkAll.indeterminate=false; }
+  }
+
+  function openConfirmPopup(nro){
+    const now = new Date();
+    document.getElementById('confNum').textContent   = nro;
+    document.getElementById('confFecha').textContent = now.toLocaleDateString('es-CO');
+    document.getElementById('confHora').textContent  = now.toLocaleTimeString('es-CO',{hour12:false});
+    document.getElementById('mdRadicado').style.display='block';
+  }
+  function closeConfirmPopup(){ document.getElementById('mdRadicado').style.display='none'; }
+  document.getElementById('confOk').addEventListener('click', closeConfirmPopup);
+  document.getElementById('mdRadicado').addEventListener('click', e=>{ if(e.target.id==='mdRadicado') closeConfirmPopup(); });
+
+  function syncSoportes(f){
+    const existing = Array.isArray(f.soportes)? f.soportes : [];
+    const map = new Map(existing.map(s=>[s.nombre,s]));
+    f.soportes = SUPPORT_NAMES.map(n=>{
+      const prev = map.get(n);
+      return prev ? {nombre:n, ok:!!prev.ok, url:prev.url||null} : {nombre:n, ok:false, url:null};
+    });
+  }
+  function migrarTodasLasFacturas(){
+    let changed=false;
+    state.facturas.forEach(f=>{
+      const before = JSON.stringify(f.soportes||[]);
+      syncSoportes(f);
+      if(JSON.stringify(f.soportes)!==before) changed=true;
+    });
+    if(changed) saveState(state);
+  }
+
+  function completos(soportes){
+    if(!Array.isArray(soportes)||soportes.length===0) return false;
+    return soportes.every(s=>!!s && s.ok===true);
+  }
+  function setFocus(id){
+    facturaFocus = Number(id);
+    document.querySelectorAll('#tblFacturas tbody tr').forEach(tr=>{
+      tr.style.background = Number(tr.dataset.id) === facturaFocus ? '#e7d7eb' : '';
+    });
+  }
+  function updateSemaforoRow(id){
+    id = Number(id);
+    const f = state.facturas.find(x=>x.id===id);
+    const tr = tbody.querySelector(`tr[data-id="${id}"]`);
+    if(!tr || !f) return;
+    const dot = tr.querySelector('.dot');
+    if(completos(f.soportes)) dot.classList.add('ok'); else dot.classList.remove('ok');
+  }
+
+  /* ===================== Selección de filas ===================== */
+  function setRowSelection(id, checked){
+    id = Number(id);
+    const tr = tbody.querySelector(`tr[data-id="${id}"]`);
+    if(!tr) return;
+    const cb = tr.querySelector('.chk');
+    if(cb) cb.checked = checked;
+    if(checked){ seleccionados.add(id); tr.classList.add('row-selected'); }
+    else { seleccionados.delete(id); tr.classList.remove('row-selected'); }
+  }
+  function updateHeaderSelectAll(){
+    const boxes = tbody.querySelectorAll('.chk');
+    const total = boxes.length;
+    const selected = seleccionados.size;
+    if(!chkAll) return;
+    chkAll.indeterminate = selected>0 && selected<total;
+    chkAll.checked = total>0 && selected===total;
+  }
+  if(chkAll){
+    chkAll.addEventListener('change', ()=>{
+      const checked = chkAll.checked;
+      tbody.querySelectorAll('tr').forEach(tr=>{
+        const id = Number(tr.dataset.id);
+        if(id) setRowSelection(id, checked);
+      });
+      updateHeaderSelectAll();
+    });
+    // Click en celda contenedora también alterna
+    chkAll.parentElement.addEventListener('click', (e)=>{
+      if(e.target.id==='chkAll') return;
+      chkAll.checked = !chkAll.checked;
+      chkAll.dispatchEvent(new Event('change'));
+    });
+  }
+
+  /* ===================== Render tabla principal ===================== */
+  function renderTabla(list){
+    tbody.innerHTML='';
+    if(!list.length){ renderInicioVacio(); return; }
+
+    list.forEach(f=>{
+      syncSoportes(f);
+      const tr = document.createElement('tr');
+      tr.dataset.id = f.id;
+      tr.innerHTML = `
+        <td class="col-ico"><input type="checkbox" class="chk"></td>
+        <td class="col-ico"><i class="far fa-clipboard clip" title="Detalle"></i></td>
+        <td class="col-ico"><div class="semaforo1"><span class="dot ${completos(f.soportes)?'ok':''}"></span></div></td>
+        <td>${f.resp||''}</td>
+        <td>${mostrarFecha(f.fecha)}</td>
+        <td>${f.factura||''}</td>
+        <td>${f.estado||''}</td>
+        <td class="cell-money">${fmtCOP(f.valor)}</td>
+        <td>${f.moneda||''}</td>
+        <td style="text-align:center">
+          <button class="cloud-btn" data-accion="cargar" title="Cargar Archivos"><i class="fas fa-cloud-download-alt"></i></button>
+        </td>
+      `;
+      tr.addEventListener('click', e=>{
+        if(e.target.closest('input,button,.cloud-btn')) return;
+        setFocus(f.id);
+        renderDetalle(f);
+      });
+      tr.querySelector('.chk').addEventListener('change', e=>{
+        setRowSelection(f.id, e.target.checked);
+        updateHeaderSelectAll();
+      });
+      tr.querySelector('.cloud-btn').addEventListener('click', ()=> abrirModalSoportes(f));
+      tbody.appendChild(tr);
+    });
+
+    saveState(state);
+    updateHeaderSelectAll();
+  }
+
+  function renderDetalle(f){
+    tbodyDet.innerHTML='';
+    if(!f || !Array.isArray(f.detalle) || !f.detalle.length){
+      tbodyDet.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#777;">Seleccione una factura…</td></tr>';
+      return;
+    }
+    f.detalle.forEach(d=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${d.pos??''}</td>
+        <td>${d.prest??''}</td>
+        <td>${d.desc??''}</td>
+        <td>${(d.cant??0).toFixed(1)}</td>
+        <td class="cell-money">${fmtCOP(d.precio)}</td>
+        <td class="cell-money">${fmtCOP(d.total)}</td>
+      `;
+      tbodyDet.appendChild(tr);
+    });
+  }
+
+  function filtrosVacios(){
+    const nro =(document.getElementById('fNro')?.value||'').trim();
+    const aseg=(document.getElementById('fResp')?.value||'').trim();
+    const est =(document.getElementById('fEstado')?.value||'').trim();
+    const ini = document.getElementById('fIni')?.value||'';
+    const fin = document.getElementById('fFin')?.value||'';
+    return !nro && !aseg && !est && !ini && !fin;
+  }
+  function inRange(fecha,ini,fin){
+    if(!fecha) return false;
+    if(ini && fecha<ini) return false;
+    if(fin && fecha>fin) return false;
+    return true;
+  }
+
+  document.getElementById('btnBuscar').addEventListener('click', ()=>{
+    if(filtrosVacios()){ alert('Debe ingresar al menos un criterio de búsqueda.'); return; }
+    state = loadState();
+    migrarTodasLasFacturas();
+
+    const nro =(document.getElementById('fNro')?.value||'').trim().toLowerCase();
+    const aseg=(document.getElementById('fResp')?.value||'').trim();
+    const est =(document.getElementById('fEstado')?.value||'').trim();
+    const ini = document.getElementById('fIni')?.value||'';
+    const fin = document.getElementById('fFin')?.value||'';
+
+    const data = state.facturas.filter(f=>{
+      const matchNro  = !nro || String(f.factura||'').toLowerCase().includes(nro);
+      const matchAseg = !aseg || (f.resp===aseg);
+      const matchEst  = !est  || (f.estado===est);
+      const matchFecha= (!ini && !fin) ? true : inRange(f.fecha||'',ini,fin);
+      return (matchNro && matchAseg && matchEst && matchFecha && f.estado!=='Radicada');
+    }).sort((a,b)=>{
+      const A = a.createdAt ?? new Date(a.fecha||'1900-01-01').getTime();
+      const B = b.createdAt ?? new Date(b.fecha||'1900-01-01').getTime();
+      return B - A;
+    });
+
+    seleccionados.clear();
+    card.style.display='none';
+    if(chkAll){ chkAll.checked=false; chkAll.indeterminate=false; }
+    renderTabla(data);
+    tbodyDet.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#777;">Seleccione una factura…</td></tr>';
+  });
+
+  document.getElementById('btnRadicar').addEventListener('click', ()=>{
+    if(seleccionados.size===0){ alert('Seleccione al menos una factura.'); return; }
+
+    const faltantes=[];
+    state.facturas.forEach(f=>{
+      if(seleccionados.has(Number(f.id)) && !completos(f.soportes)){
+        faltantes.push(f.factura||f.id);
+      }
+    });
+    if(faltantes.length){ alert('Adjunte todos los documentos requeridos.'); return; }
+
+    state.lastRadicado += 1;
+    const nro = state.lastRadicado;
+    const nowISO = new Date().toISOString();
+
+    state.facturas.forEach(f=>{
+      if(seleccionados.has(Number(f.id))){
+        f.radicadoInt = nro;
+        f.estado = 'Radicada';
+        f.updatedAt = nowISO;
+      }
+    });
+    saveState(state);
+
+    document.getElementById('cardRadicado').style.display='none';
+    openConfirmPopup(nro);
+
+    // Limpieza de filtros y tabla
+    ['fNro','fResp','fEstado','fIni','fFin'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    renderInicioVacio();
+    seleccionados.clear();
+  });
+
+  document.getElementById('btnImprimir').addEventListener('click', ()=> window.print());
+
+  /* ===================== Modal Soportes ===================== */
+  const md        = document.getElementById('mdSoportes');
+  const mdClose   = document.getElementById('mdClose');
+  const mdCancel  = document.getElementById('mdCancel');
+  const mdUpload  = document.getElementById('mdUpload');
+  const docBody   = document.getElementById('docBody');
+
+  let modalFactura = null;
+  let pendingFiles = new Map(); // idx -> File
+
+  function abrirModalSoportes(f){
+    modalFactura = f;
+    pendingFiles = new Map();
+    docBody.innerHTML='';
+    mdUpload.disabled = true;
+
+    f.soportes.forEach((s,idx)=>{
+      const inputId = `file_${f.id}_${idx}`;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${s.nombre}</td>
+        <td class="action-cell">
+          <label class="cloud-btn" title="Seleccionar archivo">
+            <input type="file" id="${inputId}" accept="application/pdf" style="display:none" />
+            <i class="fas fa-cloud-download-alt"></i>
+          </label>
+        </td>
+        <td style="text-align:center"><span class="status-ck ${s.ok?'ok':''}" data-status="${idx}"></span></td>
+      `;
+      const input = tr.querySelector('#'+CSS.escape(inputId));
+      const statusEl = tr.querySelector(`[data-status="${idx}"]`);
+
+      input.addEventListener('change', ()=>{
+        const file = input.files[0];
+        if(!file){
+          pendingFiles.delete(idx);
+          statusEl.classList.remove('ok');      // sin archivo => queda blanco
+        }else{
+          pendingFiles.set(idx,file);
+          statusEl.classList.add('ok');         // *** VERDE INMEDIATO EN LA POPUP ***
+        }
+        mdUpload.disabled = pendingFiles.size===0;
+      });
+
+      docBody.appendChild(tr);
+    });
+
+    md.style.display='block';
+  }
+
+  function cerrarModal(){ modalFactura=null; pendingFiles.clear(); md.style.display='none'; }
+
+  mdClose.addEventListener('click', cerrarModal);
+  md.addEventListener('click', e=>{ if(e.target===md) cerrarModal(); });
+  mdCancel.addEventListener('click', cerrarModal);
+
+  // Persistir cambios al pulsar "Cargar soportes"
+  mdUpload.addEventListener('click', ()=>{
+    if(!modalFactura){ cerrarModal(); return; }
+    if(pendingFiles.size===0){ alert('Seleccione al menos un archivo para cargar.'); return; }
+
+    pendingFiles.forEach((file, idx)=>{
+      const url = URL.createObjectURL(file);
+      if(modalFactura.soportes[idx]){
+        modalFactura.soportes[idx].url = url;
+        modalFactura.soportes[idx].ok  = true;
+      }
+    });
+    saveState(state);
+    updateSemaforoRow(modalFactura.id);
+
+    const toast = document.getElementById('toast');
+    const prev  = toast.textContent;
+    toast.textContent = 'Soportes cargados correctamente ✔';
+    toast.style.display = 'block';
+    setTimeout(()=>{ toast.style.display='none'; toast.textContent=prev; }, 2000);
+
+    cerrarModal();
+  });
+
+  /* ===================== Inicial ===================== */
+  function migrarYArranque(){
+    state = loadState();
+    migrarTodasLasFacturas();
+    renderInicioVacio();
+  }
+  migrarYArranque();
+  </script>
+</body>
+</html>

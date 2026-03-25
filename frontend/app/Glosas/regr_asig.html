@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <title>Registrar respuesta objeción aseguradora - mySiss</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#fff}
+    .container{display:flex}
+    .sidebar{
+      width:180px;background:#eee6f8;padding:20px;height:100vh;position:fixed;top:0;left:0;
+      display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto;
+      z-index:1000; /* Sidebar siempre por encima */
+    }
+    .sidebar h1{color:purple;font-weight:bold;font-size:50px;margin-bottom:30px}
+    .sidebar a{display:block;margin:10px 0;color:purple;text-decoration:none;font-weight:bold}
+    .logout{color:purple;text-decoration:none;font-weight:bold}
+    .main{margin-left:240px;flex:1;background:#fff;padding:20px 40px}
+    [hidden]{display:none !important}
+    .submenu-radicacion,.submenu-devolucion,.submenu-objecion,.submenu-gestion,.submenu-conciliacion{
+      display:flex;flex-direction:column;gap:4px;margin:4px 0 8px 12px}
+    .submenu-radicacion a,.submenu-devolucion a,.submenu-objecion a,.submenu-gestion a,.submenu-conciliacion a{
+      margin:0;font-weight:normal;font-size:14px}
+
+    :root{
+      --morado:#800080;
+      --morado-borde:#8b3b98;
+      --fondo-suave:#F5F1F9;
+      --sombra:#b9a8c6;
+    }
+    .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px 18px 12px;margin-bottom:22px}
+    .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+    .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .title-row h3{font-size:22px;margin:0;font-weight:400}
+
+    /* ====== FILTROS (stickies) ====== */
+    .section--sticky-filtros{
+      position:sticky;top:0;z-index:1; /* pasa por debajo del sidebar */
+      background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06)
+    }
+    .filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+    .colL{display:grid;grid-template-columns:180px 220px;gap:6px;align-items:center}
+    .colR-row1{display:grid;grid-template-columns:160px 220px 24px 220px;gap:6px;align-items:center}
+    .colR-row2{display:grid;grid-template-columns:160px 220px 1fr;gap:6px;align-items:center}
+    select,input[type="date"]{border:1px solid var(--morado-borde);border-radius:10px;padding:10px 12px;background:#fff;outline:none}
+    .row select,.row input[type="text"],.row input[list]{border:1px solid var(--morado-borde);border-radius:10px;padding:10px 12px;min-width:200px;outline:none;background:#fff}
+    .input-wrapper{position:relative;width:100%}
+    .input-wrapper>select,.input-wrapper>input{width:100%;padding-right:38px}
+    .icon-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .icon-btn i{color:var(--morado);font-size:14px}
+    #fSelFactura,#fRadExt{
+      -webkit-appearance:none;-moz-appearance:none;appearance:none;
+      border:2px solid var(--morado);border-radius:16px;background-image:none;padding:10px 12px;
+    }
+    .btn{background:var(--morado);color:#fff;border:none;border-radius:10px;padding:12px 18px;cursor:pointer;box-shadow:0 3px 0 var(--sombra);transition:.15s transform ease;font-weight:400}
+    .actions{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:10px}
+
+    /* ====== tablas / popover (Motivo Específico exacto) ====== */
+    .table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+    .table th,.table td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400;vertical-align:top}
+    .table th{background:var(--fondo-suave);font-size:13px;text-align:left}
+    .empty{padding:16px;text-align:center;color:#666;border:1px dashed #c9b3ee;border-radius:10px;background:#fff}
+    .semaforo{width:16px;height:16px;border-radius:50%;border:2px solid #888;background:#fff;display:inline-block}
+    .ellip{display:flex;align-items:flex-start;gap:6px}
+    .ellip__txt{-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+    .ellip__btn{width:22px;height:22px;border:1px solid var(--morado-borde);border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:auto}
+    .popover{position:absolute;z-index:9999;max-width:480px;background:#fff;border:1px solid var(--morado-borde);border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.18);padding:14px 36px 14px 14px}
+    .popover-close{position:absolute;right:8px;top:6px;border:none;background:transparent;font-size:16px;cursor:pointer}
+    .nota-pagador{width:100%}
+    #toast{position:fixed;right:22px;bottom:22px;background:#3b7e3b;color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);transition:.2s}
+    #toast.show{opacity:1;transform:none}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <h1>mySiss</h1>
+
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div class="submenu-radicacion" id="submenu-radicacion" hidden>
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html" id="devolucion-link">Devolución facturas</a>
+        <div class="submenu-devolucion" id="submenu-devolucion" hidden>
+          <a href="reg_dev.html">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+        <a href="cargue.html" id="objecion-link">Cargue objeciones</a>
+        <div class="submenu-objecion" id="submenu-objecion" hidden>
+          <a href="carg_obj.html">Cargar archivo objeción</a>
+          <a href="conr_obj.html">Consultar responsable objeción</a>
+          <a href="cam_obj.html">Cambiar responsable objeción</a>
+          <a href="conc_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+        <div class="submenu-gestion" id="submenu-gestion" hidden>
+          <a href="cont_obj.html">Contestar objeción</a>
+          <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+          <a href="cons_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="conciliacion.html" id="conciliacion-link">Conciliación objeciones</a>
+        <div class="submenu-conciliacion" id="submenu-conciliacion" hidden>
+          <a href="con_glo.html">Conciliación glosa a conciliar</a>
+          <a href="con_glo.html">Conciliación glosa</a>
+          <a href="cons_glo.html">Consultar glosas conciliadas</a>
+        </div>
+      </div>
+
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="title-row">
+        <h3 class="h2">Registrar respuesta objeción aseguradora</h3>
+      </div>
+
+      <!-- Criterios (sticky debajo del sidebar) -->
+      <div class="section section--sticky-filtros">
+        <h3 class="h2">Criterios de búsqueda</h3>
+
+        <div class="filters">
+          <div class="colL">
+            <label for="fRadExt">No. Radicado Externo</label>
+            <div class="input-wrapper">
+              <input type="text" id="fRadExt" list="radicadosList" placeholder="Ej: 00000" autocomplete="off" inputmode="numeric"/>
+              <datalist id="radicadosList">
+                <option value="202510"></option>
+              </datalist>
+              <button type="button" id="btnLupaRadExt" class="icon-btn" title="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+
+            <label for="fSelFactura">No. Factura</label>
+            <div class="input-wrapper">
+              <input id="fSelFactura" list="facturasList" placeholder="Ej: 0000000000" autocomplete="off" inputmode="numeric"/>
+              <datalist id="facturasList">
+                <option value="90007472"></option>
+                <option value="90003577"></option>
+                <option value="90007491"></option>
+                <option value="90007512"></option>
+              </datalist>
+              <button type="button" id="btnLupaFactura" class="icon-btn" title="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <div class="colR-row1">
+              <label for="fDesde">Fecha Objeción</label>
+              <input id="fDesde" type="date">
+              <div style="text-align:center">a</div>
+              <input id="fHasta" type="date">
+            </div>
+
+            <div class="colR-row2" style="margin-top:4px">
+              <label for="fEstado">Estado Factura</label>
+              <select id="fEstado">
+                <option value="" selected>Seleccione…</option>
+                <option value="GE">GE – Generada</option>
+                <option value="RA">RA – Radicada</option>
+                <option value="DE">DE – Devuelta</option>
+                <option value="OB">OB – Objetada</option>
+                <option value="CO">CO – Conciliada</option>
+                <option value="AN">AN – Anulada</option>
+              </select>
+              <div class="actions" style="margin:0;">
+                <button class="btn" id="btnBuscar"><i class="fas fa-search"></i>&nbsp;Buscar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- compatibilidad (no se toca, solo ocultos) -->
+        <input type="hidden" id="fNoFactura" value="">
+        <button id="icoNoFactura" hidden></button>
+        <button id="icoRadExt" hidden></button>
+      </div>
+
+      <!-- Resultados (se conserva, oculto visualmente) -->
+      <div class="section" id="sectionResultados" style="display:none">
+        <div class="title-row"><h3 class="h2">Resultados</h3></div>
+        <div id="panelResultados"><div class="empty">Realiza una búsqueda para ver resultados.</div></div>
+      </div>
+
+      <!-- Factura -->
+      <div class="section">
+        <div class="title-row"><h3 class="h2">Factura</h3></div>
+        <div id="panelFactura"></div>
+        <div class="empty" id="msgFactura">Selecciona una factura y pulsa Buscar.</div>
+      </div>
+
+      <!-- Detalle -->
+      <div class="section">
+        <div class="title-row"><h3 class="h2">Detalle</h3></div>
+        <div id="panelDetalle"><div class="empty">Pulsa “Detalle” para ver la información.</div></div>
+        <div class="actions">
+          <button class="btn" id="btnRegistrar"><i class="fas fa-file-signature"></i> Registrar respuesta objeción aseguradora</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">Se guardó respuesta correctamente.</div>
+
+  <script>
+    (function(){
+      /* ====== Seed ====== */
+      const SEED_KEY = "regr_asig_data_v1";
+      const seed = {
+        facturas: [{
+          pagador:"SURA", no_factura:"90007472", radicado_ext:"202510",
+          fecha_radicacion_ext:"06.10.2025", estado_factura_id:"OBJ",
+          estado_factura_desc:"OBJETADA", valor_factura:"692.010",
+          fecha_objecion:"07.10.2025", hora_objecion:"7:36:00"
+        }],
+        detalle:{
+          "90007472":[{
+            consecutivo_servicio:"1",
+            cod_servicio:"21201",
+            desc_servicio:"RADIOGRAFÍA TÓRAX",
+            valor_servicio:"67.000",
+            cantidad_servicio:"1",
+            valor_total:"67.000",
+
+            id_estado_servicio:"ORA",
+            desc_estado_posicion:"OBJECIÓN REGISTRADA Y ASIGNADA",
+            id_motivo_obj:"TA08",
+            motivo_obj:"Apoyo diagnóstico",
+            id_motivo_esp:"TA0801",
+            motivo_esp:"Los cargos por apoyo diagnóstico que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+            usuario_asignado:"AGUAJO",
+            valor_objetado:"27.000",
+            valor_no_objetado:"40.000",
+            nota_pagador:"Se objeta por inconsistencia en valores.",
+
+            /* === valores solicitados === */
+            valor_aceptado_prestador:"17.000",
+            valor_no_aceptado_prestador:"10.000",
+            nota_contestar:"Se valida la tarifa del contrato, el valor acordado es $50.000",
+
+            fecha_contestar:"07.10.2025",
+            hora_contestar:"10:00:00",
+
+            /* nuevos campos editables en esta pantalla (inician vacíos) */
+            valor_aceptado_aseg:"",
+            nota_respuesta_aseg:"",
+            valor_aceptado_prestador2:"",
+            nota_contestar2:""
+          }]
+        }
+      };
+      if(!localStorage.getItem(SEED_KEY)){
+        localStorage.setItem(SEED_KEY, JSON.stringify(seed));
+      }
+
+      const $ = s => document.querySelector(s);
+      function loadData(){ try{ return JSON.parse(localStorage.getItem(SEED_KEY)||'null'); }catch(e){ return seed; } }
+      function saveData(d){ localStorage.setItem(SEED_KEY, JSON.stringify(d)); }
+      function escapeHtml(str){return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;")}
+
+      /* ====== Motivo Específico EXACTO (como cont_obj.html) ====== */
+      function ellipHTML(text){
+        const t=escapeHtml(text||"");
+        return `<div class="ellip" data-full="${t}">
+                  <span class="ellip__txt">${t}</span>
+                  <button type="button" class="ellip__btn" title="Ver completo"><i class="fas fa-chevron-down" style="font-size:12px"></i></button>
+                </div>`;
+      }
+      function attachEllipHandlers(root){
+        root.querySelectorAll('.ellip__btn').forEach(btn=>{
+          btn.addEventListener('click',(e)=>{
+            e.stopPropagation();
+            const wrap=btn.closest('.ellip');
+            const full=wrap?wrap.getAttribute('data-full'):'';
+            const pop=document.createElement('div');
+            pop.className='popover';
+            pop.innerHTML=`<button class="popover-close" aria-label="Cerrar">×</button>
+                           <div style="white-space:pre-wrap;line-height:1.25">${full}</div>`;
+            document.body.appendChild(pop);
+            const r=btn.getBoundingClientRect();
+            const top=window.scrollY + r.bottom + 6;
+            const left=window.scrollX + r.right - pop.offsetWidth;
+            pop.style.top=top+'px';
+            pop.style.left=Math.max(12,left)+'px';
+            const close=()=>{pop.remove();document.removeEventListener('click',outside);};
+            function outside(ev){ if(!pop.contains(ev.target)) close(); }
+            pop.querySelector('.popover-close').addEventListener('click',close);
+            setTimeout(()=>document.addEventListener('click',outside),0);
+          });
+        });
+      }
+
+      /* ====== Tablas ====== */
+      function renderFacturaHeader(){
+        return `
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Selección</th>
+                <th>Detalle</th>
+                <th>Semáforo</th>
+                <th>Nombre pagador</th>
+                <th>Número de factura</th>
+                <th>Número radicado externo</th>
+                <th>Fecha radicación externa</th>
+                <th>ID Estado factura</th>
+                <th>Estado factura</th>
+                <th>Valor factura</th>
+                <th>Fecha objeción</th>
+                <th>Hora objeción</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>`;
+      }
+      const FOLIO_SVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#8b008b"/><stop offset="1" stop-color="#5a0a60"/></linearGradient></defs>
+          <path fill="url(#g)" d="M16 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 2v2H8V4h8zM9 12h6v2H9v-2zm0 4h6v2H9v-2zM9 8h6v2H9V8z"/>
+        </svg>`;
+      function renderFacturaRow(f){
+        const rojo=(f.estado_factura_id==='OBJ'||f.estado_factura_id==='OB');
+        return `
+          <tr>
+            <td style="text-align:center"><input id="chkSel" type="checkbox" checked></td>
+            <td style="text-align:center"><a class="portfolio-link" id="lnkDetalle" title="Ver detalle" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${FOLIO_SVG}</a></td>
+            <td style="text-align:center"><span id="semaforo" class="semaforo" title="${rojo?'Objetada':'Pendiente'}" style="${rojo?'background:#e53935;border-color:#b71c1c;':''}"></span></td>
+            <td>${escapeHtml(f.pagador)}</td>
+            <td>${escapeHtml(f.no_factura)}</td>
+            <td>${escapeHtml(f.radicado_ext)}</td>
+            <td>${escapeHtml(f.fecha_radicacion_ext)}</td>
+            <td>${escapeHtml(f.estado_factura_id)}</td>
+            <td>${escapeHtml(f.estado_factura_desc)}</td>
+            <td>${escapeHtml(f.valor_factura)}</td>
+            <td>${escapeHtml(f.fecha_objecion)}</td>
+            <td>${escapeHtml(f.hora_objecion)}</td>
+          </tr>`;
+      }
+
+      function renderDetalleHeader(){
+        return `
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Consecutivo servicio</th>
+                <th>Código servicio facturado</th>
+                <th>Descripción servicio</th>
+                <th>Valor servicio</th>
+                <th>Cantidad servicio</th>
+                <th>Valor total</th>
+                <th>ID estado Servicio</th>
+                <th>Descripción Estado Posición</th>
+                <th>ID motivo Objeción</th>
+                <th>Motivo Objeción</th>
+                <th>ID motivo Específico</th>
+                <th>Motivo Específico</th>
+                <th>Usuario Asignado</th>
+                <th>Valor objetado</th>
+                <th>Valor no objetado</th>
+                <th>Nota pagador</th>
+                <th>Valor aceptado prestador</th>
+                <th>Valor no aceptado prestador</th>
+                <th>Nota contestar objeción</th>
+                <th>Fecha contestar objeción</th>
+                <th>Hora contestar objeción</th>
+                <th>Valor aceptado aseguradora</th>
+                <th>Nota respuesta aseguradora</th>
+                <th>Valor aceptado prestador-2</th>
+                <th>Nota contestar objeción-2</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>`;
+      }
+
+      function renderDetalleRows(items){
+        const FECHA_FIJA="07.10.2025";
+        const HORA_FIJA="10:00:00";
+        return items.map((it,idx)=>`
+          <tr>
+            <td>${escapeHtml(it.consecutivo_servicio)}</td>
+            <td>${escapeHtml(it.cod_servicio)}</td>
+            <td>${escapeHtml(it.desc_servicio)}</td>
+            <td>${escapeHtml(it.valor_servicio)}</td>
+            <td>${escapeHtml(it.cantidad_servicio)}</td>
+            <td>${escapeHtml(it.valor_total)}</td>
+            <td class="cell-id-estado">${escapeHtml(it.id_estado_servicio)}</td>
+            <td class="cell-desc-estado">${escapeHtml(it.desc_estado_posicion)}</td>
+            <td>${escapeHtml(it.id_motivo_obj)}</td>
+            <td>${escapeHtml(it.motivo_obj)}</td>
+            <td>${escapeHtml(it.id_motivo_esp)}</td>
+            <td>${ellipHTML(it.motivo_esp)}</td>
+            <td>${escapeHtml(it.usuario_asignado)}</td>
+            <td>${escapeHtml(it.valor_objetado)}</td>
+            <td>${escapeHtml(it.valor_no_objetado)}</td>
+            <!-- MOSTRAR NOTA PAGADOR SIEMPRE -->
+            <td>${escapeHtml(it.nota_pagador || 'Se objeta por inconsistencia en valores.')}</td>
+            <td>${escapeHtml(it.valor_aceptado_prestador||'17.000')}</td>
+            <td>${escapeHtml(it.valor_no_aceptado_prestador||'10.000')}</td>
+            <!-- AYUDA EXTENDIDA TAMBIÉN EN NOTA CONTESTAR OBJECIÓN -->
+            <td>${ellipHTML(it.nota_contestar || 'Se valida la tarifa del contrato, el valor acordado es $50.000')}</td>
+            <td>${FECHA_FIJA}</td>
+            <td>${HORA_FIJA}</td>
+            <td><input type="text" class="inp-final" data-index="${idx}" data-field="valor_aceptado_aseg" value="${escapeHtml(it.valor_aceptado_aseg||'')}"></td>
+            <td><input type="text" class="inp-final" data-index="${idx}" data-field="nota_respuesta_aseg" value="${escapeHtml(it.nota_respuesta_aseg||'')}"></td>
+            <td><input type="text" class="inp-final" data-index="${idx}" data-field="valor_aceptado_prestador2" value="${escapeHtml(it.valor_aceptado_prestador2||'')}"></td>
+            <td><input type="text" class="inp-final" data-index="${idx}" data-field="nota_contestar2" value="${escapeHtml(it.nota_contestar2||'')}"></td>
+          </tr>`).join('');
+      }
+
+      /* pintar cabeceras una vez */
+      (function paintSkeletons(){
+        $('#panelFactura').innerHTML=renderFacturaHeader();
+        $('#msgFactura').style.display='none';
+        $('#panelDetalle').innerHTML=renderDetalleHeader();
+      })();
+
+      /* ====== búsqueda (misma lógica) ====== */
+      function parseFecha(d){
+        if(!d) return null;
+        if(d.includes('.')){ const [dd,mm,aa]=d.split('.'); return new Date(+aa,+mm-1,+dd); }
+        if(d.includes('-')){ const [aa,mm,dd]=d.split('-'); return new Date(+aa,+mm-1,+dd); }
+        return null;
+      }
+      function doSearch(){
+        const data=loadData()||seed;
+        const nf=($('#fSelFactura')?.value||$('#fNoFactura')?.value||'').trim();
+        const re=($('#fRadExt')?.value||'').trim();
+        const est=($('#fEstado')?.value||'').trim();
+        const fd=$('#fDesde')?.value||'';
+        const fh=$('#fHasta')?.value||'';
+
+        const res=[];
+        for(const f of (data.facturas||[])){
+          let ok=true;
+          if(nf && f.no_factura!==nf) ok=false;
+          if(re && f.radicado_ext!==re) ok=false;
+          if(est && f.estado_factura_id!==est && est!=='OB') ok=false;
+          if(fd && parseFecha(f.fecha_radicacion_ext) < parseFecha(fd)) ok=false;
+          if(fh && parseFecha(f.fecha_radicacion_ext) > parseFecha(fh)) ok=false;
+          if(ok) res.push(f);
+        }
+        if(res.length===0 && nf==='90007472'){ res.push(seed.facturas[0]); }
+
+        $('#panelFactura').innerHTML=renderFacturaHeader();
+        $('#panelDetalle').innerHTML=renderDetalleHeader();
+
+        if(res.length===0){
+          $('#panelDetalle').insertAdjacentHTML('beforeend','<div class="empty">No se encuentran resultados.</div>');
+          return;
+        }
+
+        const f=res[0];
+        document.querySelector('#panelFactura tbody').insertAdjacentHTML('beforeend',renderFacturaRow(f));
+
+        const openDetalle=()=>{
+          const items=(loadData()||seed).detalle[f.no_factura]||[];
+          document.querySelector('#panelDetalle tbody').innerHTML=renderDetalleRows(items);
+          attachEllipHandlers(document.getElementById('panelDetalle'));
+        };
+        const lnk=document.getElementById('lnkDetalle');
+        if(lnk) lnk.addEventListener('click',openDetalle);
+        openDetalle();
+      }
+
+      /* ====== registrar: guarda y vuelve estáticos los 4 campos ====== */
+      function registrar(){
+        const valorSel=($('#fSelFactura')?.value||'').trim();
+        const nof=valorSel||"90007472";
+        const data=loadData()||seed;
+
+        const sem=document.getElementById('semaforo');
+        if(sem){sem.style.background='#4caf50';sem.style.borderColor='#2e7d32';sem.title='Guardado';}
+
+        const arr=(data.detalle&&data.detalle[nof])?data.detalle[nof]:[];
+        document.querySelectorAll('#panelDetalle .inp-final').forEach(inp=>{
+          const idx=parseInt(inp.dataset.index,10);
+          const field=inp.dataset.field;
+          if(arr[idx]){ arr[idx][field]=inp.value; }
+          const td=inp.parentElement; td.textContent=inp.value||'-';
+        });
+
+        /* actualiza estado a OCO / OBJECIÓN CONTESTADA */
+        document.querySelectorAll('#panelDetalle .cell-id-estado').forEach(td=>td.textContent='OCO');
+        document.querySelectorAll('#panelDetalle .cell-desc-estado').forEach(td=>td.textContent='OBJECIÓN CONTESTADA');
+
+        if(arr[0]){ arr[0].id_estado_servicio='OCO'; arr[0].desc_estado_posicion='OBJECIÓN CONTESTADA'; }
+        if(data.detalle){ data.detalle[nof]=arr; }
+        saveData(data);
+
+        const t=document.getElementById('toast');
+        t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800);
+      }
+
+      /* ====== listeners ====== */
+      document.getElementById('btnBuscar').addEventListener('click',doSearch);
+      const btnLupaFactura=document.getElementById('btnLupaFactura'); if(btnLupaFactura) btnLupaFactura.addEventListener('click',doSearch);
+      const btnLupaRadExt=document.getElementById('btnLupaRadExt'); if(btnLupaRadExt) btnLupaRadExt.addEventListener('click',doSearch);
+      const icoNF=document.getElementById('icoNoFactura'); if(icoNF) icoNF.addEventListener('click',doSearch);
+      const icoRE=document.getElementById('icoRadExt'); if(icoRE) icoRE.addEventListener('click',doSearch);
+      document.getElementById('btnRegistrar').addEventListener('click',registrar);
+    })();
+  </script>
+
+  <!-- Sidebar behavior (sin cambios) -->
+  <script>
+    (function(){
+      const page = location.pathname.split('/').pop();
+      const groups = {
+        devolucion:["devolucion.html","reg_dev.html","con_dev.html"],
+        objecion:["cargue.html","carg_obj.html","conr_obj.html","cam_obj.html","conc_obj.html"],
+        gestion:["gestion.html","cont_obj.html","regr_asig.html","resp_asig.html","cons_obj.html"],
+        conciliacion:["conciliacion.html","con_glo.html","cons_glo.html"]
+      };
+      const submenuEls={
+        devolucion:document.getElementById('submenu-devolucion'),
+        objecion:document.getElementById('submenu-objecion'),
+        gestion:document.getElementById('submenu-gestion'),
+        conciliacion:document.getElementById('submenu-conciliacion')
+      };
+      const parentLinks={
+        devolucion:document.getElementById('devolucion-link'),
+        objecion:document.getElementById('objecion-link'),
+        gestion:document.getElementById('gestion-link'),
+        conciliacion:document.getElementById('conciliacion-link')
+      };
+      let activeGroup=null;
+      for(const [group,files] of Object.entries(groups)){ if(files.includes(page)){ activeGroup=group; break; } }
+      for(const [group,el] of Object.entries(submenuEls)){
+        if(!el) continue;
+        if(group===activeGroup){ el.removeAttribute('hidden'); if(parentLinks[group]) parentLinks[group].style.textDecoration='underline'; }
+        else { el.setAttribute('hidden',''); if(parentLinks[group]) parentLinks[group].style.textDecoration='none'; }
+      }
+      document.querySelectorAll('.submenu-devolucion a, .submenu-objecion a, .submenu-gestion a, .submenu-conciliacion a')
+        .forEach(a=>{ const isCurrent=a.getAttribute('href')===page; a.style.textDecoration=isCurrent?'underline':'none'; a.style.fontWeight=isCurrent?'bold':'normal'; });
+    })();
+  </script>
+</body>
+</html>
+

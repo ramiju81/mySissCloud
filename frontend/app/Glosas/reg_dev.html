@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrar devoluciones - mySiss Cloud</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  :root{
+    --morado:#800080; 
+    --morado-osc:#3d0a46; 
+    --lila:#eee6f8; 
+    --lila-suave:#f5f1f9; 
+    --borde:#e0d7ea;
+  }
+
+  *[hidden]{display:none !important;}
+  body{ margin:0; font-family: Arial, sans-serif; background:#fff; color:#222; }
+  .container{ display:flex; }
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    width:180px;
+    background:#eee6f8;
+    padding:20px;
+    height:100vh;
+    position:fixed;
+    top:0; left:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    overflow-y:auto;
+  }
+  .sidebar h1{
+    color:purple;
+    font-weight:bold;
+    font-size:50px;
+    margin-bottom:30px;
+  }
+  .sidebar a{
+    display:block;
+    margin:10px 0;
+    color:purple;
+    text-decoration:none;
+    font-weight:bold;
+  }
+  .submenu{
+    margin:4px 0 8px 12px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .submenu a{
+    margin:0;
+    font-weight:normal;
+    font-size:14px;
+    color:purple;
+    text-decoration:none;
+  }
+  .submenu a:hover{ text-decoration:underline; }
+  .logout{ color:purple; text-decoration:none; font-weight:bold; }
+
+  /* ===== Main ===== */
+  .main{ margin-left:240px; flex:1; padding:20px 40px; }
+  .title-row{ margin:6px 0 2px; }
+  .h2{ font-size:20px; font-weight:600; margin:4px 0 10px; }
+  .section{
+    background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.06);
+    padding:14px; margin-bottom:16px; overflow-x:auto;
+  }
+
+  /* ===== Formularios ===== */
+  .row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+  .row label{ min-width:180px; font-weight:500; font-size:13px; }
+  .row input[type="text"], .row input[type="date"], .row select, .row textarea{
+    border:1px solid #8b3b98; border-radius:10px; padding:8px 10px; min-width:160px; outline:none; background:#fff; font-size:13px;
+  }
+  .row textarea{ width:100%; min-width:260px; }
+
+  /* ===== Botones ===== */
+  .btn{
+    background:var(--morado); color:#fff; border:none; border-radius:10px; 
+    padding:10px 14px; cursor:pointer; box-shadow:0 2px 0 #b9a8c6; font-weight:600; font-size:13px;
+  }
+  .btn--outline{ background:#f3e9f8; color:var(--morado-osc); }
+  .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+  .btn-ico{
+    border:1px solid var(--borde); background:#fff; color:var(--morado-osc);
+    border-radius:10px; padding:6px 10px; cursor:pointer;
+  }
+  .btn-ico:hover{ background:#f3e9f8; }
+
+  /* ===== Inputs con lupa ===== */
+  .with-ico{
+    position:relative; display:inline-block; width:100%; max-width:200px;
+  }
+  .with-ico input{
+    width:100%;
+    padding-right:22px;
+    border:1px solid #8b3b98;
+    border-radius:10px;
+    padding-left:8px;
+    box-sizing:border-box;
+  }
+  .with-ico .ico-btn{
+    position:absolute;
+    right:2px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--morado);
+    cursor:pointer;
+    font-size:12px;
+    line-height:1;
+    width:18px;
+    height:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* ===== Tablas ===== */
+  table{ width:100%; border-collapse:collapse; font-size:13px; table-layout:auto; }
+  th, td{ border:1px solid var(--borde); padding:6px 8px; text-align:left; background:#fff; font-weight:400; }
+  th{ background:var(--lila-suave); font-size:12px; text-align:center; }
+  .col-ico{ width:42px; text-align:center; white-space:nowrap; }
+  .cell-money{ text-align:right; }
+  .empty{ text-align:center; color:#777; padding:10px 6px; }
+  .row-selected td{ background:#e7d7eb !important; }
+  .chip{ display:inline-block; background:#f3e9f8; color:var(--morado-osc); padding:6px 10px; border-radius:999px; font-weight:600; font-size:12px; }
+  .dot{ width:14px; height:14px; border-radius:50%; display:inline-block; background:#4bb543; border:2px solid #4bb543; }
+
+  /* ===== Picker flotante ===== */
+  .picker{
+    position:absolute; z-index:1000; background:#fff; border:1px solid #d4c7e0; border-radius:10px;
+    box-shadow:0 8px 20px rgba(0,0,0,.12); max-height:280px; overflow:auto; min-width:280px;
+  }
+  .picker-item{ padding:10px 12px; cursor:pointer; border-bottom:1px solid #f1eaf7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .picker-item:hover{ background:#f3e9f8; }
+  .picker-empty{ padding:12px; color:#777; }
+
+  /* ===== Tabla de devolución ===== */
+  #tblDev th:nth-child(1), #tblDev td:nth-child(1){ width:70px; }  
+  #tblDev th:nth-child(3), #tblDev td:nth-child(3){ width:70px; }  
+
+  /* Cajones (inputs ID con lupa) más pequeños */
+  .with-ico--id{
+    max-width:85px !important;
+    width:85px !important;
+    position:relative;
+  }
+  .with-ico--id input{
+    min-width:0 !important;
+    width:100% !important;
+    padding:10px 22px 10px 8px !important;
+    font-size:13px !important;
+    text-align:center;
+    border:1px solid #8b3b98;
+    border-radius:10px;
+    box-sizing:border-box;
+  }
+  .with-ico--id .ico-btn{
+    position:absolute;
+    right:2px !important;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:13px !important;
+    color:var(--morado);
+    cursor:pointer;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* ===== Modal popup ===== */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:2000;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .modal-card{
+    background:#fff; border-radius:12px; box-shadow:0 12px 28px rgba(0,0,0,.22);
+    width:min(680px,92vw); padding:16px 18px; border:1px solid var(--borde);
+  }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+  .modal-title{ font-weight:700; color:var(--morado-osc); font-size:16px; }
+  .modal-close{
+    border:none; background:#f3e9f8; color:var(--morado-osc);
+    border-radius:10px; padding:6px 10px; cursor:pointer;
+  }
+  .modal-body{ font-size:14px; line-height:1.4; white-space:pre-wrap; }
+
+  /* ===== Responsividad ===== */
+  @media (max-width:1200px){
+    .main{ margin-left:220px; } 
+    .sidebar{ width:180px; } 
+    .sidebar h1{ font-size:40px; }
+  }
+  @media (max-width:900px){
+    .main{ margin-left:200px; } 
+    .sidebar{ width:160px; } 
+    .sidebar h1{ font-size:32px; } 
+    .row label{ min-width:140px; }
+  }
+  @media (max-width:680px){
+    .main{ margin-left:0; }
+    .sidebar{ position:static; width:100%; height:auto; flex-direction:row; gap:10px; }
+    .sidebar h1{ font-size:26px; margin:0; }
+    .submenu{ display:none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div>
+        <h1>mySiss</h1>
+
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div id="submenu-radicacion" class="submenu" hidden>
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html" id="devolucion-link" style="text-decoration: underline;">Devolución facturas</a>
+        <div id="submenu-devolucion" class="submenu" hidden>
+          <a href="reg_dev.html" style="text-decoration: underline;">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+	  <a href="cargue.html" id="objecion-link">Cargue objeciones</a>
+	  <div class="submenu-objecion" id="submenu-objecion" hidden>
+		<a href="carg_obj.html">Cargar archivo objeción</a>
+		<a href="conr_obj.html">Consultar responsable objeción</a>
+		<a href="cam_obj.html">Cambiar responsable objeción</a>
+		<a href="conc_obj.html">Consultar objeción</a>
+	  </div>
+
+        <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+        <div id="submenu-gestion" class="submenu" hidden>
+          <a href="cont_obj.html">Contestar objeción</a>
+          <a href="regr_asig.html">Registrar respuesta objeción aseguradora</a>
+          <a href="resp_asig.html">Responder objeción aseguradora</a>
+          <a href="cons_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="conciliacion.html" id="conciliacion-link">Conciliación objeciones</a>
+        <div id="submenu-conciliacion" class="submenu" hidden>
+          <a href="cong_glo.html">Conciliación glosa a conciliar</a>
+          <a href="con_glo.html">Conciliación glosa</a>
+          <a href="cons_glo.html">Consultar glosas conciliadas</a>
+        </div>
+      </div>
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="title-row"><h2 class="h2">Registrar devolución</h2></div>
+      <div class="title-row"><h3 class="h2" style="font-weight:normal;">Criterios de búsqueda</h3></div>
+
+      <!-- Filtros -->
+      <div class="section">
+        <div class="row">
+          <label>No. Radicado Externo</label>
+          <div class="with-ico" id="wrapRadExt">
+            <input type="text" id="fRadExt" placeholder="">
+            <i id="btnLupaRadExt" class="fas fa-search ico-btn" title="Buscar No. Radicado Externo"></i>
+          </div>
+        </div>
+        <div class="row">
+          <label>No. Factura</label>
+          <div class="with-ico" id="wrapFactura">
+            <input type="text" id="fFactura" placeholder="">
+            <i id="btnLupaFactura" class="fas fa-search ico-btn" title="Buscar No. Factura (Radicadas)"></i>
+          </div>
+          <div style="width:12px;"></div>
+          <button id="btnBuscar" class="btn btn--outline">Buscar</button>
+        </div>
+      </div>
+
+      <!-- Tabla Facturas -->
+      <div id="secFacturas" class="section" hidden>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <h3 class="h2" style="margin:0;">Facturas</h3>
+        </div>
+        <table id="tblFact">
+          <thead>
+            <tr>
+              <th class="col-ico" title="Seleccionar todo"><input type="checkbox" id="chkAll" aria-label="Seleccionar todas las filas"></th>
+              <th class="col-ico">Detalle</th>
+              <th class="col-ico" title="Semáforo">Indicador</th>
+              <th>Nombre pagador</th>
+              <th>Número de factura</th>
+              <th class="cell-money">Valor</th>
+              <th>No. Radicado Interno</th>
+              <th>No. Radicado Externo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="8" class="empty">Usa las lupas o el botón Buscar para ver resultados</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Detalle factura -->
+      <div id="secDetalle" class="section" hidden>
+        <h3 class="h2" style="margin:0 0 8px;">Detalle factura</h3>
+        <table id="tblDet">
+          <thead>
+            <tr>
+              <th>Consec.</th>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Cant.</th>
+              <th>Valor</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+        <tbody><tr><td colspan="6" class="empty">Seleccione una factura…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Datos de la devolución -->
+      <div id="secDev" class="section" hidden>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px; gap:10px;">
+          <h3 class="h2" style="margin:0;">Datos de la devolución</h3>
+          <button id="btnGuardar" class="btn">Guardar devolución</button>
+        </div>
+
+        <table id="tblDev">
+          <thead>
+            <tr>
+              <th>ID Motivo</th>
+              <th>Motivo</th>
+              <th>ID Submotivo</th>
+              <th>Submotivo</th>
+              <th>Nota</th>
+              <th>ID Estado</th>
+              <th>Estado</th>
+              <th>Usuario</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="10" class="empty">Selecciona una factura para diligenciar la devolución.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /main -->
+  </div><!-- /container -->
+
+  <!-- Popup de descripción (genérico) -->
+  <div id="infoModal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div id="modalTitle" class="modal-title">Descripción</div>
+        <button id="modalClose" class="modal-close">Cerrar</button>
+      </div>
+      <div id="modalContent" class="modal-body"></div>
+    </div>
+  </div>
+
+<script>
+  /* ===== Submenú visible solo en Devolución ===== */
+  document.getElementById('submenu-devolucion').hidden = false;
+
+  /* ====== Helpers Storage ====== */
+  const PREFERRED = ['radicar_fact_data','mysiss_state','mysiss','state_fact','radicacion_state'];
+  function pickArrayLike(obj){
+    if (!obj || typeof obj !== 'object') return null;
+    if (Array.isArray(obj)) return obj;
+    if (Array.isArray(obj.facturas)) return obj.facturas;
+    if (Array.isArray(obj.items)) return obj.items;
+    if (Array.isArray(obj.data)) return obj.data;
+    if (Array.isArray(obj.registros)) return obj.registros;
+    return null;
+  }
+  function safeParse(raw){ try{ return JSON.parse(raw);}catch{ return null;} }
+  function loadState(){
+    for (const k of PREFERRED){
+      const v = safeParse(localStorage.getItem(k));
+      const arr = pickArrayLike(v);
+      if (arr) return { _storageKey:k, facturas:arr, _raw:v };
+    }
+    for (let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      const v = safeParse(localStorage.getItem(k));
+      const arr = pickArrayLike(v);
+      if (arr) return { _storageKey:k, facturas:arr, _raw:v };
+    }
+    return { _storageKey:null, facturas:[], _raw:null };
+  }
+  function saveBack(state, newFacturas){
+    const k = state._storageKey || PREFERRED[0];
+    const original = state._raw;
+    if (original && typeof original === 'object' && !Array.isArray(original)){
+      original.facturas = newFacturas;
+      localStorage.setItem(k, JSON.stringify(original));
+    } else {
+      localStorage.setItem(k, JSON.stringify(newFacturas));
+    }
+  }
+
+  let state = loadState();
+
+  /* ====== DOM refs ====== */
+  const secFacturas = document.getElementById('secFacturas');
+  const secDetalle  = document.getElementById('secDetalle');
+  const secDev      = document.getElementById('secDev');
+
+  const tbody = document.querySelector('#tblFact tbody');
+  const tbDet = document.querySelector('#tblDet tbody');
+  const tbDev = document.querySelector('#tblDev tbody');
+  const chkAll = document.getElementById('chkAll');
+
+  const btnBuscar = document.getElementById('btnBuscar');
+  const fRadExt   = document.getElementById('fRadExt');
+  const fFactura  = document.getElementById('fFactura');
+
+  const fmtCOP = n => Number(n||0).toLocaleString('es-CO');
+  const upper  = v => (v==null ? '' : String(v)).trim().toUpperCase();
+
+  let currentList = [];
+  let seleccionados = new Set();
+
+  /* ====== Motivos/Submotivos ====== */
+  const MOTIVOS = [
+    { code:'DE16', text:'Factura corresponde a otro responsable de pago.' },
+    { code:'DE01', text:'Factura sin soportes completos.' },
+    { code:'DE02', text:'Factura con datos inconsistentes.' }
+  ];
+  const SUBMOTIVOS = [
+    { code:'01', text:'Pertenecía a otro responsable al momento de la atención.' },
+    { code:'02', text:'Afiliación vencida o inactiva.' },
+    { code:'03', text:'Falta firma de profesional tratante.' }
+  ];
+  const mapMot = Object.fromEntries(MOTIVOS.map(m=>[m.code,m.text]));
+  const mapSub = Object.fromEntries(SUBMOTIVOS.map(m=>[m.code,m.text]));
+
+  /* ====== Popup Descripción (por si se reutiliza) ====== */
+  const $modal = document.getElementById('infoModal');
+  const $modalContent = document.getElementById('modalContent');
+  const $modalClose = document.getElementById('modalClose');
+
+  function openInfoPopup(title, text){
+    document.getElementById('modalTitle').textContent = title || 'Descripción';
+    $modalContent.textContent = text || 'Sin descripción.';
+    $modal.hidden = false;
+  }
+  function closeInfoPopup(){ $modal.hidden = true; }
+
+  $modalClose.addEventListener('click', closeInfoPopup);
+  $modal.addEventListener('click', (e)=>{ if(e.target === $modal) closeInfoPopup(); });
+  window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && !$modal.hidden) closeInfoPopup(); });
+
+  /* ====== Detalle ====== */
+  function pintarDetalleFactura(f){
+    secDetalle.hidden = false;
+    tbDet.innerHTML = '';
+    const det = Array.isArray(f.detalle) ? f.detalle
+              : Array.isArray(f.det) ? f.det
+              : Array.isArray(f.items) ? f.items
+              : null;
+    if (det && det.length){
+      det.forEach(d=>{
+        const pos    = d.pos ?? d.consec ?? d.consecutivo ?? d.item ?? '';
+        const prest  = d.prest ?? d.codigo ?? d.cod ?? '';
+        const desc   = d.desc ?? d.descripcion ?? '';
+        const cant   = Number(d.cant ?? d.cantidad ?? 0);
+        const precio = Number(d.precio ?? d.valor ?? d.valorServicio ?? 0);
+        const total  = Number(d.total ?? d.valorTotal ?? (precio*cant));
+        const r = document.createElement('tr');
+        r.innerHTML = `
+          <td>${pos}</td>
+          <td>${prest}</td>
+          <td>${desc}</td>
+          <td>${cant.toFixed(1)}</td>
+          <td class="cell-money">${fmtCOP(precio)}</td>
+          <td class="cell-money">${fmtCOP(total)}</td>
+        `;
+        tbDet.appendChild(r);
+      });
+    } else {
+      tbDet.innerHTML = '<tr><td colspan="6" class="empty">Sin detalle disponible</td></tr>';
+    }
+  }
+
+  /* ===== Feedback botón ===== */
+  function setSearching(on){
+    btnBuscar.disabled = on;
+    btnBuscar.textContent = on ? 'Buscando…' : 'Buscar';
+  }
+
+  /* ====== Facturas ====== */
+  function rowFactura(f, idx){
+    const tr = document.createElement('tr');
+    const idRow = f.id != null ? String(f.id) : (f._id != null ? String(f._id) : String(idx));
+    tr.dataset.id = idRow;
+
+    const pagador = f.pagador ?? f.resp ?? '';
+    const numeroFactura = f.factura ?? f.nroFactura ?? f.numeroFactura ?? '';
+    const valorFactura = Number(f.valor ?? f.valorFactura ?? 0);
+    const radInt = f.radicadoInt ?? f.radInt ?? f.radicadoInterno ?? '';
+    const radExt = f.radicadoExt ?? f.radExt ?? f.radicadoExterno ?? '';
+
+    tr.innerHTML = `
+      <td class="col-ico"><input type="checkbox" class="chk-select" data-index="${idx}"></td>
+      <td class="col-ico"><button class="btn-ico btn-det" data-index="${idx}" title="Ver detalle de la factura"><i class="far fa-clipboard clip"></i></button></td>
+      <td class="col-ico"><span class="dot" title="Estado OK"></span></td>
+      <td>${pagador}</td>
+      <td>${numeroFactura}</td>
+      <td class="cell-money">${fmtCOP(valorFactura)}</td>
+      <td>${radInt}</td>
+      <td>${radExt}</td>
+    `;
+
+    const chk = tr.querySelector('.chk-select');
+    chk.addEventListener('change', ()=>{
+      if (chk.checked){ tr.classList.add('row-selected'); seleccionados.add(idRow); }
+      else { tr.classList.remove('row-selected'); seleccionados.delete(idRow); }
+      updateHeaderSelectAll();
+      secDev.hidden = seleccionados.size === 0;
+      if (!secDev.hidden && (!tbDev.querySelector('tr') || tbDev.querySelector('.empty'))) ensureDevRow();
+    });
+
+    tr.addEventListener('click', (e)=>{
+      if (e.target.closest('button') || e.target.closest('input')) return;
+      const box = tr.querySelector('.chk-select');
+      box.checked = !box.checked;
+      box.dispatchEvent(new Event('change'));
+    });
+
+    tr.querySelector('.btn-det').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      pintarDetalleFactura(currentList[idx]);
+    });
+
+    return tr;
+  }
+
+  function render(list){
+    currentList = list.slice();
+    tbody.innerHTML = '';
+    seleccionados.clear();
+    secDetalle.hidden = true;
+    secDev.hidden = true;
+
+    if (!list.length){
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">Sin resultados para los filtros aplicados</td></tr>';
+      updateHeaderSelectAll();
+      return;
+    }
+    list.forEach((f, idx)=> tbody.appendChild(rowFactura(f, idx)) );
+    updateHeaderSelectAll();
+  }
+
+  function updateHeaderSelectAll(){
+    const boxes = tbody.querySelectorAll('.chk-select');
+    const total = boxes.length;
+    const selected = Array.from(boxes).filter(b => b.checked).length;
+    chkAll.indeterminate = selected > 0 && selected < total;
+    chkAll.checked = total > 0 && selected === total;
+  }
+  chkAll.addEventListener('change', ()=>{
+    const checked = chkAll.checked;
+    seleccionados.clear();
+    tbody.querySelectorAll('tr').forEach(tr=>{
+      const cb = tr.querySelector('.chk-select');
+      if (!cb) return;
+      cb.checked = checked;
+      tr.classList.toggle('row-selected', checked);
+      if (checked) seleccionados.add(tr.dataset.id);
+    });
+    secDev.hidden = seleccionados.size === 0;
+    if (!secDev.hidden) ensureDevRow();
+    updateHeaderSelectAll();
+  });
+
+  /* ====== Búsqueda (EXACTA por criterio; requiere al menos uno) ====== */
+  function ejecutarBusqueda(){
+    const critRadExt = upper(fRadExt.value);
+    const critFac    = upper(fFactura.value);
+
+    if (!critRadExt && !critFac){
+      alert('Diligencia al menos un criterio de búsqueda (Radicado Externo y/o Número de Factura).');
+      return;
+    }
+
+    try{
+      setSearching(true);
+      state = loadState();
+
+      let data = (state.facturas || []).slice()
+        .filter(f => upper(f.estado ?? f.estadoFactura ?? 'RADICADA') === 'RADICADA');
+
+      if (critRadExt){
+        data = data.filter(f => upper(f.radicadoExt ?? f.radExt ?? f.radicadoExterno ?? '') === critRadExt);
+      }
+      if (critFac){
+        data = data.filter(f => upper(f.factura ?? f.nroFactura ?? f.numeroFactura ?? '') === critFac);
+      }
+
+      data.sort((a,b)=>{
+        const A = Date.parse(a.updatedAt || a.fecha || a.fechaFactura || '1900-01-01');
+        const B = Date.parse(b.updatedAt || b.fecha || b.fechaFactura || '1900-01-01');
+        return B - A;
+      });
+
+      secFacturas.hidden = false;
+      render(data);
+
+      if (!data.length){
+        (critFac ? fFactura : fRadExt).focus();
+      }
+    } catch (err){
+      console.error(err);
+      alert('Ocurrió un error al buscar. Revisa la consola para más detalles.');
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  btnBuscar.addEventListener('click', ejecutarBusqueda);
+
+  [fRadExt, fFactura].forEach(inp=>{
+    inp.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter') ejecutarBusqueda();
+    });
+  });
+
+  /* ====== Pickers (lupas) ====== */
+  let activePicker = null;
+  let activeAnchor = null;
+
+  function closePicker(){
+    if (activePicker && activePicker.parentNode) activePicker.parentNode.removeChild(activePicker);
+    activePicker = null; activeAnchor = null;
+  }
+  function buildPicker(anchorEl, values, onPick){
+    if (activeAnchor === anchorEl){ closePicker(); return; }
+    closePicker();
+
+    const rect = anchorEl.getBoundingClientRect();
+    const picker = document.createElement('div');
+    picker.className = 'picker';
+
+    if (!values.length){
+      const empty = document.createElement('div');
+      empty.className = 'picker-empty';
+      empty.textContent = 'Sin opciones';
+      picker.appendChild(empty);
+    } else {
+      values.forEach(txt=>{
+        const it = document.createElement('div');
+        it.className = 'picker-item';
+        it.textContent = txt; it.title = txt;
+        it.addEventListener('click', ()=>{ onPick(txt); closePicker(); });
+        picker.appendChild(it);
+      });
+    }
+
+    document.body.appendChild(picker);
+    picker.style.left = (rect.left + window.scrollX) + 'px';
+    picker.style.top  = (rect.bottom + window.scrollY + 6) + 'px';
+    picker.style.minWidth = rect.width + 'px';
+
+    activePicker = picker; activeAnchor = anchorEl;
+
+    setTimeout(()=>{
+      const outside = (e)=>{ if (!picker.contains(e.target) && !anchorEl.contains(e.target)) closePicker(); };
+      const esc     = (e)=>{ if (e.key === 'Escape') closePicker(); };
+      window.addEventListener('click', outside, { once:true });
+      window.addEventListener('keydown', esc,   { once:true });
+    },0);
+  }
+
+  // Lupa Radicado Externo: solo llena el campo, NO busca
+  document.getElementById('btnLupaRadExt').addEventListener('click', ()=>{
+    state = loadState();
+    const data = (state.facturas || []);
+    const values = Array.from(new Set(
+      data.map(f => (f.radicadoExt ?? f.radExt ?? f.radicadoExterno ?? '')).filter(v => v && String(v).trim()!=='')
+    ));
+    buildPicker(document.getElementById('wrapRadExt'), values, (picked)=>{
+      fRadExt.value = picked;
+      // NO ejecuta búsqueda aquí. El usuario debe dar clic en "Buscar".
+    });
+  });
+
+  // Lupa Factura: solo llena el campo, NO busca
+  document.getElementById('btnLupaFactura').addEventListener('click', ()=>{
+    state = loadState();
+    const data = (state.facturas || []);
+    const values = Array.from(new Set(
+      data
+        .filter(f => upper(f.estado ?? f.estadoFactura ?? '') === 'RADICADA')
+        .map(f => (f.factura ?? f.nroFactura ?? f.numeroFactura ?? ''))
+        .filter(v => v && String(v).trim()!=='')
+    ));
+    buildPicker(document.getElementById('wrapFactura'), values, (picked)=>{
+      fFactura.value = picked;
+      // NO ejecuta búsqueda aquí. El usuario debe dar clic en "Buscar".
+    });
+  });
+
+  /* ====== Devolución: fila editable con nuevo orden de columnas ====== */
+  const DEV_KEY = 'devoluciones_data';
+
+  function getDevoluciones(){
+    const raw = safeParse(localStorage.getItem(DEV_KEY));
+    if (raw && typeof raw === 'object' && Array.isArray(raw.items)) return raw;
+    if (raw && Array.isArray(raw)) return { items: raw };
+    return { items: [] };
+  }
+  function saveDevoluciones(D){
+    localStorage.setItem(DEV_KEY, JSON.stringify(D));
+  }
+
+  function ensureDevRow(){
+    tbDev.innerHTML = '';
+    const tr = document.createElement('tr');
+    const cell = () => document.createElement('td');
+
+    // ID Motivo (input + lupa)
+    const tdIdMot = cell();
+    const wrapIdMot = document.createElement('div'); 
+    wrapIdMot.className='with-ico with-ico--id';
+    const inIdMot = document.createElement('input'); 
+    inIdMot.type='text'; 
+    inIdMot.placeholder='ID…';
+    const iMot = document.createElement('i'); 
+    iMot.className='fas fa-search ico-btn'; 
+    iMot.title='Buscar ID Motivo';
+    wrapIdMot.append(inIdMot, iMot);
+    tdIdMot.append(wrapIdMot);
+
+    // Motivo (texto directo)
+    const tdMot = cell();
+    const lblMot = document.createElement('span');
+    tdMot.append(lblMot);
+
+    // ID Submotivo (input + lupa)
+    const tdIdSub = cell();
+    const wrapIdSub = document.createElement('div'); 
+    wrapIdSub.className='with-ico with-ico--id';
+    const inIdSub = document.createElement('input'); 
+    inIdSub.type='text'; 
+    inIdSub.placeholder='ID…';
+    const iSub = document.createElement('i'); 
+    iSub.className='fas fa-search ico-btn'; 
+    iSub.title='Buscar ID Submotivo';
+    wrapIdSub.append(inIdSub, iSub);
+    tdIdSub.append(wrapIdSub);
+
+    // Submotivo (texto directo)
+    const tdSub = cell();
+    const lblSub = document.createElement('span');
+    tdSub.append(lblSub);
+
+    // Nota
+    const tdNota = cell();
+    const ta = document.createElement('textarea'); 
+    ta.rows = 2; 
+    tdNota.append(ta);
+
+    // ID Estado / Estado / Usuario / Fecha / Hora
+    const tdIdEst = cell(); 
+    const tdEst   = cell(); 
+
+    const tdUser  = cell(); 
+    tdUser.textContent = localStorage.getItem('session_user') || 'AGUAJO';
+
+    const tdFecha = cell(); 
+    const tdHora  = cell();
+
+    // Orden final:
+    // 0 ID Motivo
+    // 1 Motivo
+    // 2 ID Submotivo
+    // 3 Submotivo
+    // 4 Nota
+    // 5 ID Estado
+    // 6 Estado
+    // 7 Usuario
+    // 8 Fecha
+    // 9 Hora
+    tr.append(tdIdMot, tdMot, tdIdSub, tdSub, tdNota, tdIdEst, tdEst, tdUser, tdFecha, tdHora);
+    tbDev.appendChild(tr);
+
+    function syncMotivoById(){
+      const id = (inIdMot.value||'').trim().toUpperCase();
+      const txt = mapMot[id] || '';
+      lblMot.textContent = txt;
+      inIdMot.title = txt || '';
+    }
+    function syncSubById(){
+      const id = (inIdSub.value||'').trim().toUpperCase();
+      const txt = mapSub[id] || '';
+      lblSub.textContent = txt;
+      inIdSub.title = txt || '';
+    }
+
+    inIdMot.addEventListener('input', syncMotivoById);
+    inIdSub.addEventListener('input', syncSubById);
+
+    // Lupas -> picker "código — texto"
+    iMot.addEventListener('click', ()=>{
+      const values = MOTIVOS.map(m=>`${m.code} — ${m.text}`);
+      buildPicker(wrapIdMot, values, (picked)=>{
+        const code = picked.split(' — ')[0];
+        inIdMot.value = code; 
+        syncMotivoById();
+      });
+    });
+    iSub.addEventListener('click', ()=>{
+      const values = SUBMOTIVOS.map(m=>`${m.code} — ${m.text}`);
+      buildPicker(wrapIdSub, values, (picked)=>{
+        const code = picked.split(' — ')[0];
+        inIdSub.value = code; 
+        syncSubById();
+      });
+    });
+
+    syncMotivoById(); 
+    syncSubById();
+  }
+
+  /* ====== Guardar ====== */
+  document.getElementById('btnGuardar').addEventListener('click', ()=>{
+    const selRows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.querySelector('.chk-select')?.checked);
+    if (!selRows.length){ alert('Selecciona al menos una factura para registrar la devolución.'); return; }
+
+    const devRow = tbDev.querySelector('tr');
+    if (!devRow || devRow.classList.contains('empty')){ alert('Completa los datos de la devolución.'); return; }
+
+    const inIdMot = devRow.querySelector('#tblDev .with-ico input');          // primer input (motivo)
+    const inIdSub = devRow.querySelectorAll('#tblDev .with-ico input')[1];    // segundo input (submotivo)
+    const idMot   = (inIdMot.value||'').trim().toUpperCase();
+    const idSub   = (inIdSub.value||'').trim().toUpperCase();
+    if (!idMot){ alert('Ingresa o selecciona el ID Motivo.'); return; }
+    if (!idSub){ alert('Ingresa o selecciona el ID Submotivo.'); return; }
+
+    const motText = mapMot[idMot] || '';
+    const subText = mapSub[idSub] || '';
+
+    const now   = new Date();
+    const fecha = now.toLocaleDateString('es-CO');
+    const hora  = now.toTimeString().slice(0,8);
+
+    // Nuevos índices: 8 = Fecha, 9 = Hora
+    devRow.children[8].textContent = fecha;
+    devRow.children[9].textContent = hora;
+
+    const ta = devRow.querySelector('textarea');
+    const usuario = devRow.children[7].textContent.trim() || (localStorage.getItem('session_user') || 'AGUAJO');
+    const nota    = ta?.value || '';
+
+    state = loadState();
+    const D = getDevoluciones();
+    const facturasMut = (state.facturas || []).slice();
+
+    selRows.forEach(row=>{
+      const rowId = row.dataset.id;
+      let f = facturasMut.find(x => String(x.id ?? x._id ?? '') === rowId);
+      if (!f){
+        const nro = row.children[4]?.textContent?.trim();
+        f = facturasMut.find(x => String(x.factura ?? x.nroFactura ?? x.numeroFactura ?? '') === nro);
+      }
+      if (!f) return;
+
+      f.idEstadoFactura = 'DEV';
+      f.estado = 'DEVUELTA';
+      f.updatedAt = new Date().toISOString();
+
+      D.items.push({
+        idFactura: (f.id ?? f._id ?? rowId),
+        pagador: f.resp ?? f.pagador ?? '',
+        numeroFactura: f.factura ?? f.nroFactura ?? f.numeroFactura ?? '',
+        valorFactura: Number(f.valor ?? f.valorFactura ?? 0),
+        radicadoInterno: f.radicadoInt ?? f.radicadoInterno ?? f.radInt ?? '',
+        radicadoExterno: f.radicadoExt ?? f.radicadoExterno ?? f.radExt ?? '',
+        idMotivo: idMot, motivo: motText,
+        idSubMotivo: idSub, subMotivo: subText,
+        fechaDevolucion: fecha, horaDevolucion: hora,
+        usuarioDevolucion: usuario, notaDevolucion: nota,
+        idEstadoFactura: 'DEV', estadoFactura: 'DEVUELTA'
+      });
+    });
+
+    saveBack(state, facturasMut);
+    saveDevoluciones(D);
+
+    // Nuevos índices: 5 = ID Estado, 6 = Estado
+    devRow.children[5].textContent = 'DEV';
+    devRow.children[6].textContent = 'DEVUELTA';
+
+    if (ta){ ta.readOnly = true; ta.disabled = true; }
+
+    alert('Devolución guardada correctamente ✔');
+    ejecutarBusqueda();
+  });
+
+  // Init
+  (function init(){
+    try{ document.getElementById('fRadExt').focus(); }catch{}
+  })();
+</script>
+</body>
+</html>

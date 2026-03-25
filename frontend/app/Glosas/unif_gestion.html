@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<title>Gestión unificada objeciones — mySiss</title>
+<style>
+  /* ===== Base ===== */
+  body{margin:0;font-family:Arial,sans-serif;background:#fff}
+  .container{display:flex}
+  .sidebar{width:180px;background:#eee6f8;padding:20px;height:100vh;position:fixed;top:0;left:0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto}
+  .sidebar h1{color:purple;font-weight:bold;font-size:50px;margin-bottom:30px}
+  .sidebar a{display:block;margin:10px 0;color:purple;text-decoration:none;font-weight:bold}
+  .logout{color:purple;text-decoration:none;font-weight:bold}
+  .main{margin-left:240px;flex:1;background:#fff;padding:20px 40px}
+  [hidden]{display:none !important}
+
+  .submenu-radicacion,.submenu-devolucion,.submenu-objecion,.submenu-gestion,.submenu-conciliacion{
+    display:flex;flex-direction:column;gap:4px;margin:4px 0 8px 12px
+  }
+  .submenu-radicacion a,.submenu-devolucion a,.submenu-objecion a,.submenu-gestion a,.submenu-conciliacion a{
+    margin:0;font-weight:normal;font-size:14px
+  }
+
+  .h2{font-size:24px;font-weight:400;margin:4px 0 10px}
+  .section{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px;margin-bottom:22px}
+  .title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .btn{background:purple;color:#fff;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;box-shadow:0 3px 0 #b9a8c6;font-weight:600}
+
+  /* Inputs con lupa */
+  .input-icon{position:relative;display:inline-block}
+  .input-icon input{padding:10px 36px 10px 12px;min-width:240px;border:1px solid #8b3b98;border-radius:10px;outline:none}
+  .input-icon button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;cursor:pointer}
+  .input-icon i{color:#7b1e85}
+  select,input[type="date"]{border:1px solid #8b3b98;border-radius:10px;padding:10px 12px;outline:none}
+
+  .picker{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #cbb6d7;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.12);padding:6px;z-index:10005;max-height:260px;overflow:auto}
+  .picker a{display:block;padding:6px 8px;color:#3d0a46;text-decoration:none;white-space:nowrap}
+  .picker a:hover{background:#f6f2fa}
+
+  /* Tablas */
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th, td{border:1px solid #e0d7ea;padding:10px;background:#fff;font-weight:400}
+  th{background:#f5f1f9;font-size:13px;text-align:center}
+  td .ico-btn{background:none;border:0;cursor:pointer}
+  .sem{width:20px;height:20px;border-radius:50%;border:3px solid #98a6ad;background:#f4f6f7;display:inline-block}
+  .sem.red{border-color:#cc1e1e;background:#ffefef}
+  .sem.green{border-color:#198754;background:#ecffef}
+  .sem.yellow{border-color:#c79500;background:#fff9e6}
+
+  /* Detalle con scroll horizontal */
+  #detalleWrap{overflow-x:auto}
+  #tblDetalle{min-width:1500px}
+
+  .cell-esp{position:relative;padding-right:26px}
+  .cell-esp .clip{-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
+  .cell-esp .btn-exp{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
+
+  /* Popover ayuda */
+  .pop-esp{position:fixed;z-index:10006;background:#fff;border:1px solid #cbb6d7;border-radius:10px;box-shadow:0 12px 28px rgba(0,0,0,.18);max-width:520px;width:min(520px,calc(100% - 24px))}
+  .pop-esp .hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid #eee}
+  .pop-esp .hd h5{margin:0;font-size:14px;font-weight:700}
+  .pop-esp .close{background:transparent;border:0;font-size:16px;cursor:pointer}
+  .pop-esp .bd{padding:10px;max-height:360px;overflow:auto;white-space:pre-wrap;line-height:1.35}
+
+  /* ===== Modales (OPTIMIZADO) ===== */
+  .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:10010;align-items:center;justify-content:center}
+  .modal{
+    background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+    width:calc(100% - 24px); max-width:820px;
+    padding:12px; position:relative;
+    max-height:88vh; overflow:auto;
+  }
+  .modal h4{margin:0 0 6px;font-weight:800;text-align:center}
+  .closeX{position:absolute;right:10px;top:10px;border:none;background:transparent;font-size:18px;cursor:pointer;color:#555}
+
+  /* Lista de iteraciones */
+  .iterList{display:flex;flex-direction:column;gap:6px}
+  .iterLine{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+  .iterBtn{border:1px solid #e0d7ea;border-radius:10px;padding:7px 10px;background:#fff;cursor:pointer;text-align:left;font-weight:700}
+  .chkBtn{width:28px;height:28px;border:1px solid #8b3b98;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .chkBtn.checked{background:#f0e6f7}
+
+  /* Campos / bloques del modal */
+  .kv{display:grid;grid-template-columns:160px 1fr;gap:6px;align-items:center}
+  .k{font-weight:800}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3c{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .input{border:1px solid #8b3b98;border-radius:10px;padding:8px 10px;outline:none}
+  .ro{background:#faf9fc}
+  .actionsRight{display:flex;justify-content:flex-end;margin-top:10px}
+  .block{border:1px solid #e0d7ea;border-radius:12px;padding:10px;margin-top:8px}
+  .block h5{margin:0 0 6px;font-size:13px;text-decoration:underline}
+  .legend{display:flex;align-items:center;gap:8px;margin:4px 0}
+  .muted{color:#6b6b6b;font-size:12px}
+  .pill{margin-left:8px;background:purple;color:#fff;border:none;border-radius:16px;padding:6px 12px;cursor:pointer;box-shadow:0 2px 0 #b9a8c6;font-weight:700;font-size:12px}
+
+  /* Toast + popup pequeño */
+  #toast{position:fixed;right:16px;bottom:16px;background:#3b7e3b;color:#fff;padding:9px 12px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);transition:.2s}
+  #toast.show{opacity:1;transform:none}
+  .modal.small{max-width:420px}
+</style>
+</head>
+<body>
+  <div class="container">
+    <!-- ===== Sidebar ===== -->
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <h1>mySiss</h1>
+        <a href="radicacion.html" id="radicacion-link">Radicación facturas</a>
+        <div class="submenu-radicacion" id="submenu-radicacion" hidden>
+          <a href="radicar_fact.html">Radicar facturas</a>
+          <a href="actualizar_rad.html">Actualizar radicación</a>
+          <a href="consultar_fact.html">Consultar facturas radicadas</a>
+        </div>
+
+        <a href="devolucion.html" id="devolucion-link">Devolución facturas</a>
+        <div class="submenu-devolucion" id="submenu-devolucion" hidden>
+          <a href="reg_dev.html">Registrar devoluciones</a>
+          <a href="con_dev.html">Consultar devoluciones</a>
+        </div>
+
+        <a href="objecion.html" id="objecion-link">Objeción facturas</a>
+        <div class="submenu-objecion" id="submenu-objecion" hidden>
+          <a href="carg_obj.html">Cargar objeción</a>
+          <a href="conr_obj.html" style="text-decoration: underline;">Consultar responsable objeción</a>
+          <a href="cam_obj.html">Cambiar responsable objeción</a>
+          <a href="conc_obj.html">Consultar objeción</a>
+        </div>
+
+        <a href="gestion.html" id="gestion-link">Gestión objeciones y glosas</a>
+        <div class="submenu-gestion" id="submenu-gestion">
+          <a href="uni_gestion.html" style="text-decoration: underline;">Gestionar objeciones</a>
+        </div>
+
+        <a href="conciliacion.html" id="conciliacion-link">Conciliación objeciones</a>
+        <div class="submenu-conciliacion" id="submenu-conciliacion" hidden>
+          <a href="con_glo.html">Conciliación glosa a conciliar</a>
+          <a href="con_glo.html">Conciliación glosa</a>
+          <a href="cons_glo.html">Consultar glosas conciliadas</a>
+        </div>
+      </div>
+      <a href="../login.html" class="logout">Cerrar sesión</a>
+    </div>
+
+    <div class="main">
+      <h2 class="h2">Gestión unificada de objeciones</h2>
+
+      <!-- ===== Criterios ===== -->
+      <div class="title-row"><h3 class="h2">Criterios de búsqueda</h3></div>
+      <div class="section" id="filtros">
+        <div class="row" style="display:grid;grid-template-columns:auto auto auto;gap:12px;align-items:end;">
+          <div style="display:grid;gap:6px;max-width:240px;">
+            <label for="fRadExt">No. Radicado Externo</label>
+            <div class="input-icon">
+              <input type="text" id="fRadExt" placeholder="Ej: 00000">
+              <button id="btnLupaRadExt" class="btn-ico" title="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <div style="display:grid;gap:6px;max-width:240px;">
+            <label for="fFactura">No. Factura</label>
+            <div class="input-icon">
+              <input type="text" id="fFactura" placeholder="Ej: 000000000">
+              <button id="btnLupaFactura" class="btn-ico" title="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <div style="display:grid;gap:6px;max-width:220px;">
+            <label for="fEstado">Estado Factura</label>
+            <select id="fEstado">
+              <option value=""></option>
+              <option value="objetada">Objetada</option>
+              <option value="radicada">Radicada</option>
+              <option value="generada">Generada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="display:grid;grid-template-columns:auto auto;gap:12px;align-items:end;margin-top:12px;">
+          <div style="display:grid;gap:6px;">
+            <label>Fecha Objeción</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="date" id="fIni" style="width:150px;">
+              <span style="font-weight:700">a</span>
+              <input type="date" id="fFin" style="width:150px;">
+            </div>
+          </div>
+          <button id="btnBuscar" class="btn" style="height:38px;white-space:nowrap;background:#f3e9f8;color:#3d0a46;border:1px solid #d9c7e6">Buscar</button>
+        </div>
+      </div>
+
+      <!-- ===== Facturas ===== -->
+      <div id="secFacturas" hidden>
+        <div class="title-row"><h3 class="h2">Facturas</h3></div>
+        <div class="section">
+          <table id="tblFacturas">
+            <thead>
+              <tr>
+                <th style="width:40px;"><input type="checkbox" disabled></th>
+                <th style="width:70px;">Detalle</th>
+                <th style="width:70px;">Semáforo</th>
+                <th>Pagador</th>
+                <th>No. Factura</th>
+                <th>No. Radicado Externo</th>
+                <th>Estado</th>
+                <th>Fecha Objeción</th>
+                <th>Responsable</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== Detalle ===== -->
+      <div id="secDetalle" hidden>
+        <div class="title-row"><h3 class="h2">Detalle</h3></div>
+        <div class="section" id="detalleWrap">
+          <table id="tblDetalle">
+            <thead>
+              <tr>
+                <th style="width:40px;"></th>
+                <th>Pos</th>
+                <th>Servicio</th>
+                <th>Descripción Servicio</th>
+                <th>Cant</th>
+                <th>Precio</th>
+                <th>Valor Servicio</th>
+                <th>Motivo Objeción</th>
+                <th>Motivo Específico</th>
+                <th>Valor Objetado</th>
+                <th>Nota Aseguradora</th>
+                <th>Responsable</th>
+                <th style="width:50px;">Iteración</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Popover nota / motivo ===== -->
+  <div id="popEsp" style="display:none"></div>
+
+  <!-- ===== Popup Iteracciones ===== -->
+  <div class="backdrop" id="popIters" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="closeX" id="xIters" title="Cerrar">✕</button>
+      <h4>Iteracciones</h4>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <strong id="labCod">Cod: -</strong>
+        <strong id="labEstado">Estado: ORA</strong>
+      </div>
+      <div id="iterList" class="iterList"></div>
+    </div>
+  </div>
+
+  <!-- ===== Popup Registro iteración ===== -->
+  <div class="backdrop" id="popReg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="closeX" id="xReg" title="Cerrar">✕</button>
+      <h4>Registro iteracción</h4>
+
+      <!-- Cabecera compacta (3 columnas) -->
+      <div class="grid3c">
+        <div class="kv"><div class="k">Cod. Servicio:</div><div id="vCod"></div></div>
+        <div class="kv"><div class="k">Descripción:</div><div id="vDesc"></div></div>
+        <div class="kv"><div class="k">Hora:</div><div id="vHora"></div></div>
+
+        <div class="kv"><div class="k">Fecha:</div><div id="vFecha"></div></div>
+        <div class="kv"><div class="k">Cantidad:</div><div id="vCant"></div></div>
+        <div class="kv"><div class="k">Vr Servicio:</div><div id="vVrServ" style="text-align:right"></div></div>
+
+        <div class="kv"><div class="k">Vr Total:</div><div id="vVrTotal" style="text-align:right"></div></div>
+        <div class="kv"><div class="k">Vr No Objetado:</div><div id="vVrNoObj" style="text-align:right"></div></div>
+        <div class="kv"><div class="k">Vr Objetado:</div><div id="vVrObj" style="text-align:right"></div></div>
+
+        <div class="kv" style="grid-column:1/4"><div class="k">Nota aseguradora:</div><div id="vNotaAseg"></div></div>
+      </div>
+
+      <!-- Historial de iteraciones previas -->
+      <div id="histPrev"></div>
+
+      <!-- Bloque Prestador (iteración actual) + botón Aseguradora -->
+      <div class="block" id="blkPrest">
+        <div class="legend" style="justify-content:space-between">
+          <h5 id="titPrest" style="margin:0">Valores Prestador</h5>
+          <button id="pillAseg" class="pill" hidden>Aseguradora</button>
+        </div>
+
+        <!-- inputs ocultos para aseguradora de la iteración actual -->
+        <input id="inpVrAseg" type="hidden">
+        <input id="inpNotaAseg" type="hidden">
+
+        <div class="grid2">
+          <div>
+            <div class="k" style="margin-bottom:6px">Vr Prestador</div>
+            <input id="inpVrPrest" class="input" inputmode="numeric" placeholder="Ej: 17000">
+          </div>
+          <div>
+            <div class="k" style="margin-bottom:6px">Vr no aceptado prestador</div>
+            <input id="inpVrNoAcept" class="input ro" readonly>
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="k" style="margin-bottom:6px">Nota Prestador</div>
+          <input id="inpNotaPrest" class="input" placeholder="Escriba la nota…">
+        </div>
+      </div>
+
+      <div class="actionsRight">
+        <button class="btn" id="btnGuardar">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Popup Aseguradora ===== -->
+  <div class="backdrop" id="popAseg" aria-hidden="true">
+    <div class="modal small" role="dialog" aria-modal="true">
+      <button class="closeX" id="xAseg">✕</button>
+      <h4>Valores Aseguradora</h4>
+      <div class="kv"><div class="k">Vr aceptado aseguradora:</div><input id="asegVr" class="input" inputmode="numeric" placeholder="Ej: 7000"></div>
+      <div class="kv" style="margin-top:8px"><div class="k">Nota aseguradora:</div><input id="asegNota" class="input" placeholder="Escriba la nota…"></div>
+      <div class="actionsRight"><button id="btnAsegSave" class="btn">Aplicar</button></div>
+    </div>
+  </div>
+
+  <!-- ===== Popup Mensaje Conciliación ===== -->
+  <div class="backdrop" id="popMsg" aria-hidden="true">
+    <div class="modal small" role="dialog" aria-modal="true">
+      <h4>Factura a conciliar con aseguradora</h4>
+      <div class="actionsRight"><button id="okMsg" class="btn">OK</button></div>
+    </div>
+  </div>
+
+  <div id="toast">Guardado correctamente.</div>
+
+<script>
+(function(){
+  const OBJ_KEY='objeciones_data';
+  const ITER_KEY='obj_iteraciones_v4';
+
+  const $=s=>document.querySelector(s);
+  function loadData(){ try{ return JSON.parse(localStorage.getItem(OBJ_KEY)||'[]') }catch{ return [] } }
+  function loadIters(){ try{ return JSON.parse(localStorage.getItem(ITER_KEY)||'{}') }catch{ return {} } }
+  function saveIters(d){ localStorage.setItem(ITER_KEY, JSON.stringify(d||{})); }
+  function now(){ const z=n=>String(n).padStart(2,'0'); const t=new Date(); return {f:`${z(t.getDate())}/${z(t.getMonth()+1)}/${t.getFullYear()}`, h:`${z(t.getHours())}:${z(t.getMinutes())}:${z(t.getSeconds())}`} }
+  const fmt=v=>v==null?'':String(v);
+  const pick=(o,...k)=>{ for(const x of k){ if(o && o[x]!=null && o[x]!=='') return o[x]; } return '' };
+  const toInt=s=>{ const n=parseInt(String(s).replace(/[^\d-]/g,''),10); return isNaN(n)?0:n; };
+
+  /* ===== LUPAS ===== */
+  function openPicker(btn, values, onPick){
+    const box = btn.closest('.input-icon');
+    box.querySelectorAll('.picker').forEach(n=>n.remove());
+    const menu=document.createElement('div'); menu.className='picker';
+    values.forEach(v=>{ const a=document.createElement('a'); a.href='#'; a.textContent=v; a.onclick=(e)=>{e.preventDefault(); onPick(v); menu.remove();}; menu.appendChild(a); });
+    box.appendChild(menu);
+    const close=(ev)=>{ if(!menu.contains(ev.target) && ev.target!==btn){ menu.remove(); document.removeEventListener('click',close); } };
+    setTimeout(()=>document.addEventListener('click',close),0);
+  }
+  $('#btnLupaRadExt').onclick=(e)=>{ const d=loadData(); const arr=[...new Set(d.map(x=>x.radicado_externo).filter(Boolean))].sort().reverse().slice(0,80); openPicker(e.currentTarget,arr,v=>$('#fRadExt').value=v); };
+  $('#btnLupaFactura').onclick=(e)=>{ const d=loadData(); const arr=[...new Set(d.map(x=>x.numero_factura).filter(Boolean))].sort().reverse().slice(0,80); openPicker(e.currentTarget,arr,v=>$('#fFactura').value=v); };
+
+  /* ===== Búsqueda ===== */
+  const secFact = $('#secFacturas');
+  const tFact   = $('#tblFacturas tbody');
+  const secDet  = $('#secDetalle');
+  const tDet    = $('#tblDetalle tbody');
+  let facturaSel=null;
+
+  function semHtml(est){ const s=(est||'').toLowerCase(); let c=''; if(s==='objetada') c='red'; else if(s==='generada') c='green'; else if(s==='radicada') c='yellow'; return `<span class="sem ${c}"></span>`; }
+
+  $('#btnBuscar').onclick=()=>{
+    const data=loadData();
+    const rad=($('#fRadExt').value||'').toLowerCase();
+    const fac=($('#fFactura').value||'').toLowerCase();
+    const est=($('#fEstado').value||'').toLowerCase();
+    const ini=$('#fIni').value||''; const fin=$('#fFin').value||'';
+    const rows=data.filter(r=>{
+      const okR=!rad || (String(r.radicado_externo||'').toLowerCase().includes(rad));
+      const okF=!fac || (String(r.numero_factura||'').toLowerCase().includes(fac));
+      const okE=!est || (String(r.estado||'').toLowerCase()===est);
+      let okD=true; const f=(r.fecha_objecion_iso||'').substring(0,10);
+      if(ini && f && f<ini) okD=false; if(fin && f && f>fin) okD=false;
+      return okR && okF && okE && okD;
+    });
+
+    secFact.hidden = !rows.length;
+    secDet.hidden=true;
+
+    tFact.innerHTML='';
+    rows.forEach(r=>{
+      const tr=document.createElement('tr');
+      tr.dataset.key=`${r.numero_factura}||${r.radicado_externo}`;
+      tr.innerHTML=`
+        <td style="text-align:center;"><input type="checkbox"></td>
+        <td style="text-align:center;">
+          <button class="ico-btn btn-detalle" title="Detalle"><i class="far fa-clipboard" style="color:#4b0055"></i></button>
+        </td>
+        <td style="text-align:center;">${semHtml(r.estado)}</td>
+        <td>${fmt(r.pagador)}</td>
+        <td>${fmt(r.numero_factura)}</td>
+        <td>${fmt(r.radicado_externo)}</td>
+        <td style="text-transform:capitalize">${fmt(r.estado)}</td>
+        <td>${fmt((r.fecha_objecion||'').replaceAll('.','/'))}</td>
+        <td>${fmt(r.responsable)}</td>`;
+      tFact.appendChild(tr);
+    });
+  };
+
+  // Abrir detalle
+  document.getElementById('tblFacturas').addEventListener('click',(e)=>{
+    const btn=e.target.closest('.btn-detalle'); if(!btn) return;
+    const [fact,rad]=btn.closest('tr').dataset.key.split('||');
+    const data=loadData(); facturaSel = data.find(x=>x.numero_factura==fact && x.radicado_externo==rad) || null;
+    renderDetalle(facturaSel);
+    secDet.hidden=false;
+    document.getElementById('detalleWrap').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  /* ===== Popover ayuda ===== */
+  let pop=null;
+  function closePop(){ if(pop){ pop.remove(); pop=null; document.removeEventListener('click',autoClose,true); } }
+  function autoClose(ev){ if(pop && !pop.contains(ev.target) && !ev.target.closest('.btn-exp') && !ev.target.closest('.btn-nota')) closePop(); }
+  function openPop(btn,title,text){
+    closePop();
+    pop=document.createElement('div'); pop.className='pop-esp';
+    pop.innerHTML=`<div class="hd"><h5>${title}</h5><button class="close">✕</button></div><div class="bd"></div>`;
+    pop.querySelector('.bd').textContent=text||'(sin texto)';
+    document.body.appendChild(pop);
+    const r=btn.getBoundingClientRect(), pw=pop.offsetWidth, ph=pop.offsetHeight;
+    let left=r.right-pw; if(left<8) left=8; if(left+pw>innerWidth-8) left=innerWidth-pw-8;
+    let top=r.bottom+6; if(top+ph>innerHeight-8) top=Math.max(8,r.top-ph-6);
+    pop.style.left=(scrollX+left)+'px'; pop.style.top=(scrollY+top)+'px';
+    pop.querySelector('.close').onclick=closePop;
+    setTimeout(()=>document.addEventListener('click',autoClose,true),0);
+  }
+
+  function renderDetalle(rec){
+    const tb=tDet; tb.innerHTML='';
+    if(!rec || !Array.isArray(rec.detalle) || !rec.detalle.length){ tb.innerHTML='<tr><td colspan="13" style="text-align:center;color:#777">El registro no tiene detalle.</td></tr>'; return; }
+    rec.detalle.forEach((d,i)=>{
+      const motObj = pick(d,'Motivo objeción','Motivo Objeción','motivo_objecion','motivo');
+      const motEsp = pick(d,'Motivo Específico','Motivo específico','motivo_especifico','motivo_esp');
+      const nota   = pick(d,'nota_pagador','nota_aseguradora','nota_aseg');
+      const tr=document.createElement('tr'); tr.dataset.idx=i;
+      tr.innerHTML=`
+        <td style="text-align:center;"><input type="radio" name="selDet"></td>
+        <td>${fmt(d.consecutivo||i+1)}</td>
+        <td>${fmt(pick(d,'codigo_servicio','cod_servicio'))}</td>
+        <td>${fmt(pick(d,'descripcion_servicio','desc_servicio'))}</td>
+        <td style="text-align:right">${fmt(pick(d,'cantidad','cantidad_servicio'))}</td>
+        <td style="text-align:right">${fmt(d.valor_servicio)}</td>
+        <td style="text-align:right">${fmt(d.valor_total)}</td>
+        <td>${fmt(motObj)}</td>
+        <td class="cell-esp">
+          <div class="clip">${fmt(motEsp)}</div>
+          ${ motEsp ? `<button class="btn-exp" title="Ver completo"><i class="fas fa-caret-down"></i></button>` : `` }
+        </td>
+        <td style="text-align:right">${fmt(d.valor_objetado)}</td>
+        <td style="text-align:center">${ nota ? `<button class="ico-btn btn-nota" title="Ver nota"><i class="fas fa-search"></i></button>` : ''}</td>
+        <td>${fmt(d.responsable)}</td>
+        <td style="text-align:center"><button class="ico-btn btn-plus" title="Iteracciones"><i class="fas fa-plus"></i></button></td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  // Nota aseguradora
+  document.getElementById('tblDetalle').addEventListener('click',(e)=>{
+    const b=e.target.closest('.btn-nota'); if(!b) return;
+    const row=b.closest('tr'); const idx=parseInt(row.dataset.idx,10);
+    const d=(facturaSel?.detalle||[])[idx]||{};
+    openPop(b,'Nota aseguradora',fmt(pick(d,'nota_pagador','nota_aseguradora','nota_aseg')));
+  });
+  // Motivo específico
+  document.getElementById('tblDetalle').addEventListener('click',(e)=>{
+    const b=e.target.closest('.btn-exp'); if(!b) return;
+    const row=b.closest('tr'); const idx=parseInt(row.dataset.idx,10);
+    const d=(facturaSel?.detalle||[])[idx]||{};
+    openPop(b,'Motivo específico',fmt(pick(d,'Motivo Específico','Motivo específico','motivo_especifico','motivo_esp')));
+  });
+
+  /* ===== Iteracciones ===== */
+  let idxDetActual=-1;
+
+  function detKey(rec, det){
+    return `${rec.numero_factura||''}||${rec.radicado_externo||''}||${pick(det,'codigo_servicio','cod_servicio')}||${det.consecutivo||''}`;
+  }
+  function estadoPorIter(n){
+    if(n>=4) return 'PCN';
+    if(n===0) return 'ORA';
+    return (n % 2 === 0) ? 'ROA' : 'OCO';
+  }
+
+  // abrir popup iteraciones
+  document.getElementById('tblDetalle').addEventListener('click',(e)=>{
+    const b=e.target.closest('.btn-plus'); if(!b) return;
+    const row=b.closest('tr'); idxDetActual=parseInt(row.dataset.idx,10);
+    const d=(facturaSel?.detalle||[])[idxDetActual];
+    $('#labCod').textContent='Cod: '+(pick(d,'codigo_servicio','cod_servicio')||'-');
+
+    const it=loadIters();
+    const key=detKey(facturaSel,d);
+    const lista=(it[key]||[]).slice().sort((a,b)=>a.iter-b.iter);
+    $('#labEstado').textContent='Estado: '+estadoPorIter(lista.length);
+
+    const cont=$('#iterList'); cont.innerHTML='';
+    const max = lista.length? lista[lista.length-1].iter : 0;
+    // existentes
+    lista.forEach(r=> cont.appendChild(lineaIter(r.iter,true)));
+    // siguiente disponible
+    if(max<4) cont.appendChild(lineaIter(max+1,false));
+
+    function lineaIter(n, guardada){
+      const wrap=document.createElement('div'); wrap.className='iterLine';
+      const b1=document.createElement('button'); b1.className='iterBtn'; b1.textContent=`Iteración #${n}`;
+      const b2=document.createElement('button'); b2.className='chkBtn'+(guardada?' checked':''); b2.innerHTML='<i class="fas fa-check"></i>';
+      b1.onclick=()=> abrirRegistro(n, /*soloLectura*/ guardada);
+      b2.onclick=()=>{ if(!guardada) abrirRegistro(n,false); };
+      wrap.appendChild(b1); wrap.appendChild(b2);
+      return wrap;
+    }
+
+    $('#popIters').style.display='flex'; $('#popIters').setAttribute('aria-hidden','false');
+  });
+
+  $('#xIters').onclick=()=>{ $('#popIters').style.display='none'; $('#popIters').setAttribute('aria-hidden','true'); };
+
+  /* ===== Registro de iteración ===== */
+  function abrirRegistro(n, soloLectura){
+    const d=(facturaSel?.detalle||[])[idxDetActual]||{};
+    const it=loadIters(); const key=detKey(facturaSel,d);
+    const prev=(it[key]||[]).find(x=>x.iter===n);
+    const listaPrev=(it[key]||[]).filter(x=>x.iter<n).sort((a,b)=>a.iter-b.iter);
+
+    const stamp=now();
+    // Cabecera compacta
+    $('#vCod').textContent   = fmt(pick(d,'codigo_servicio','cod_servicio'));
+    $('#vDesc').textContent  = fmt(pick(d,'descripcion_servicio','desc_servicio'));
+    $('#vFecha').textContent = prev?.fecha || stamp.f;
+    $('#vHora').textContent  = prev?.hora  || stamp.h;
+    $('#vCant').textContent  = fmt(pick(d,'cantidad','cantidad_servicio'));
+    $('#vVrServ').textContent= fmt(d.valor_servicio);
+    $('#vVrTotal').textContent=fmt(d.valor_total);
+    const vObj = toInt(pick(d,'valor_objetado','valorObjetado') || 0);
+    $('#vVrObj').textContent = String(vObj).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+    $('#vVrNoObj').textContent = fmt(d.valor_no_objetado||'');
+    $('#vNotaAseg').textContent = fmt(pick(d,'nota_pagador','nota_aseguradora','nota_aseg'));
+
+    // Historial previo (prestador + aseguradora solo si hubo)
+    const hist = $('#histPrev'); hist.innerHTML='';
+    listaPrev.forEach(x=>{
+      const bPrest = document.createElement('div');
+      bPrest.className='block';
+      bPrest.innerHTML = `
+        <h5>Valores Prestador - I${x.iter}</h5>
+        <div class="grid2">
+          <div><div class="k" style="margin-bottom:6px">Vr Prestador</div><input class="input ro" readonly value="${fmt(x.vr_prest||'')}"></div>
+          <div><div class="k" style="margin-bottom:6px">Vr no aceptado prestador</div><input class="input ro" readonly value="${fmt(x.vr_no_acept||'')}"></div>
+        </div>
+        ${x.nota_prest?`<div style="margin-top:8px"><div class="k" style="margin-bottom:6px">Nota Prestador</div><input class="input ro" readonly value="${fmt(x.nota_prest)}"></div>`:''}`;
+      hist.appendChild(bPrest);
+
+      if( (x.vr_aseg && String(x.vr_aseg).trim()!=='') || (x.nota_aseg && String(x.nota_aseg).trim()!=='') ){
+        const bAseg = document.createElement('div');
+        bAseg.className='block';
+        bAseg.innerHTML = `
+          <h5>Valores Aseguradora</h5>
+          <div class="grid2">
+            <div><div class="k" style="margin-bottom:6px">Vr Aceptado Aseguradora</div><input class="input ro" readonly value="${fmt(x.vr_aceptado_aseg||x.vr_aseg||'')}"></div>
+            <div><div class="k" style="margin-bottom:6px">Nota Aseguradora</div><input class="input ro" readonly value="${fmt(x.nota_aseg||'')}"></div>
+          </div>`;
+        hist.appendChild(bAseg);
+      }
+    });
+
+    // Iteración actual: título + botón pill (I>=2)
+    $('#titPrest').textContent = `Valores Prestador${n>1?` - I${n}`:''}`;
+    const showAseg = n>=2;
+    $('#pillAseg').hidden = !showAseg;
+
+    // Prellenar si existía
+    $('#inpVrPrest').value   = prev?.vr_prest || '';
+    $('#inpNotaPrest').value = prev?.nota_prest || '';
+    $('#inpVrNoAcept').value = prev?.vr_no_acept || '';
+    $('#inpVrAseg').value    = prev?.vr_aseg || prev?.vr_aceptado_aseg || '';
+    $('#inpNotaAseg').value  = prev?.nota_aseg || '';
+
+    // Cálculo: considera aseguradora actual (guardada en inputs ocultos) y previas
+    function sumaPrevios(arr, campo){ return arr.reduce((acc,x)=>acc+toInt(x[campo]||0),0); }
+    function recalc(){
+      const totalAsegPrev  = sumaPrevios(listaPrev,'vr_aseg');
+      const totalPrestPrev = sumaPrevios(listaPrev,'vr_prest');
+      const asegActual = showAseg ? toInt($('#inpVrAseg').value||0) : 0;
+      const prestActual= toInt($('#inpVrPrest').value||0);
+      const restante = Math.max(0, vObj - totalAsegPrev - totalPrestPrev - asegActual - prestActual);
+      $('#inpVrNoAcept').value = String(restante);
+    }
+    $('#inpVrPrest').oninput = recalc;
+    recalc();
+
+    // Popup aseguradora (desde pill)
+    const openAseg=()=>{
+      $('#asegVr').value   = $('#inpVrAseg').value;
+      $('#asegNota').value = $('#inpNotaAseg').value;
+      $('#popAseg').style.display='flex'; $('#popAseg').setAttribute('aria-hidden','false');
+    };
+    $('#pillAseg').onclick = openAseg;
+    $('#xAseg').onclick=()=>{ $('#popAseg').style.display='none'; $('#popAseg').setAttribute('aria-hidden','true'); };
+    $('#btnAsegSave').onclick=()=>{
+      $('#inpVrAseg').value   = $('#asegVr').value;
+      $('#inpNotaAseg').value = $('#asegNota').value;
+      $('#popAseg').style.display='none'; $('#popAseg').setAttribute('aria-hidden','true');
+      recalc();
+    };
+
+    // Edición/bloqueo
+    const lock = soloLectura || !!prev;
+    ['inpVrPrest','inpNotaPrest'].forEach(id=>{
+      const el=$('#'+id); if(!el) return; el.readOnly=lock; el.classList.toggle('ro',el.readOnly);
+    });
+    $('#pillAseg').style.display = (!lock && showAseg) ? 'inline-block' : 'none';
+    $('#btnGuardar').style.display = lock ? 'none' : 'inline-block';
+
+    $('#xReg').onclick=()=>{ $('#popReg').style.display='none'; $('#popReg').setAttribute('aria-hidden','true'); };
+
+    $('#btnGuardar').onclick=()=>{
+      const iters=loadIters(); const key2=detKey(facturaSel,d); iters[key2]=iters[key2]||[];
+      iters[key2]=iters[key2].filter(x=>x.iter!==n);
+
+      const t=now();
+      const rec={
+        iter:n,
+        fecha:t.f, hora:t.h,
+        vr_prest:$('#inpVrPrest').value,
+        nota_prest:$('#inpNotaPrest').value,
+        vr_no_acept:$('#inpVrNoAcept').value
+      };
+      if(showAseg){
+        rec.vr_aseg = $('#inpVrAseg').value;
+        rec.nota_aseg = $('#inpNotaAseg').value;
+        rec.vr_aceptado_aseg = rec.vr_aseg;
+      }
+      iters[key2].push(rec);
+      saveIters(iters);
+
+      const toast=$('#toast'); toast.textContent='Guardado correctamente.'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1200);
+      if(showAseg && (String(rec.vr_aseg||'').trim()!=='' || String(rec.nota_aseg||'').trim()!=='')){
+        $('#popMsg').style.display='flex'; $('#popMsg').setAttribute('aria-hidden','false');
+        $('#okMsg').onclick=()=>{
+          $('#popMsg').style.display='none'; $('#popMsg').setAttribute('aria-hidden','true');
+          $('#popReg').style.display='none'; $('#popReg').setAttribute('aria-hidden','true');
+          $('#popIters').style.display='none';
+          const plus=document.querySelector(`#tblDetalle tbody tr[data-idx="${idxDetActual}"] .btn-plus`);
+          if(plus) plus.click();
+        };
+      }else{
+        $('#popReg').style.display='none'; $('#popReg').setAttribute('aria-hidden','true');
+        $('#popIters').style.display='none';
+        const plus=document.querySelector(`#tblDetalle tbody tr[data-idx="${idxDetActual}"] .btn-plus`);
+        if(plus) plus.click();
+      }
+    };
+
+    $('#popReg').style.display='flex'; $('#popReg').setAttribute('aria-hidden','false');
+  }
+
+  // Cerrar con ESC
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape'){
+      ['popReg','popIters','popAseg','popMsg'].forEach(id=>{ const el=document.getElementById(id); if(el && el.style.display==='flex'){ el.style.display='none'; el.setAttribute('aria-hidden','true'); }});
+      const p=document.querySelector('.pop-esp'); if(p) p.remove();
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Z_Ingenier – Actualizar | Limpiar | Cargar Facturas</title>
+
+  <style>
+    :root{--p:#800080;--b:#e9e9ee;--txt:#1a1a1a;--mut:#666;--ok:#2e7d32;--warn:#e65100}
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f6f7fb;color:var(--txt)}
+    h1{margin:20px 16px 10px;color:var(--p);text-align:center}
+    .wrap{max-width:1300px;margin:0 auto;padding:0 16px 24px}
+    .grid{display:grid;gap:16px;grid-template-columns:1fr 1fr 1fr}
+    @media (max-width:1100px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid var(--b);border-radius:12px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card h2{margin:0 0 10px;font-size:18px}
+    .hint{font-size:12px;color:var(--mut)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .btn{background:var(--p);color:#fff}
+    .btn-alt{background:#f3ecf9;color:#1a1a1a;border:1px solid #e2d6f1}
+    .btn-warn{background:#ffe9d6;color:#8b3a00;border:1px solid #ffd1a6}
+    .status{margin-top:8px;font-size:13px}
+    .ok{color:var(--ok)} .warn{color:var(--warn)}
+    .kbd{font-family:ui-monospace,Menlo,monospace;background:#f6f6f6;border:1px solid #e2e2e2;border-radius:6px;padding:2px 6px;font-size:12px}
+    input[type="file"],select{padding:10px;border:1px solid var(--b);border-radius:10px;background:#fff}
+    table{width:100%;border-collapse:collapse;margin-top:10px;border:1px solid var(--b);border-radius:10px;overflow:hidden}
+    th,td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:left;font-size:13px}
+    th{background:#faf7fd;font-weight:700}
+    .scroll{overflow:auto;max-height:360px;border:1px solid var(--b);border-radius:10px;margin-top:10px}
+    ul.keys{list-style:none;margin:6px 0 0;padding:0;max-height:160px;overflow:auto;border:1px dashed #ddd;border-radius:8px}
+    ul.keys li{padding:6px 8px;border-bottom:1px dashed #eee;font-family:ui-monospace,Menlo,monospace}
+    ul.keys li:last-child{border-bottom:0}
+
+    /* ======= Modal bloqueo por clave ======= */
+    .lock-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(15,15,15,0.65);
+      z-index:99999;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .lock-card{
+      width:100%;
+      max-width:420px;
+      background:linear-gradient(180deg,#fff,#fbfbff);
+      border-radius:12px;
+      padding:20px;
+      box-shadow:0 10px 40px rgba(0,0,0,.35);
+      text-align:center;
+      border:1px solid #e6e0f0;
+    }
+    .lock-card h2{margin:0 0 8px;color:var(--p)}
+    .lock-card p{margin:0 0 12px;color:var(--mut);font-size:14px}
+    .lock-input{width:100%;padding:12px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;font-size:15px}
+    .lock-actions{display:flex;gap:8px;justify-content:center}
+    .small-muted{font-size:12px;color:#666;margin-top:8px}
+    .lock-info{font-size:13px;margin-top:8px;color:#444}
+    .lock-footer{margin-top:10px;font-size:12px;color:#888}
+    .lock-btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
+    .btn-lock{background:#2e7d32;color:#fff}
+    .btn-cancel{background:#f3ecf9;color:#000;border:1px solid #e2d6f1}
+  </style>
+
+  <!-- SheetJS para leer Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- ===================== BLOQUE: MODAL DE BLOQUEO (siempre arriba) ===================== -->
+  <div id="lockOverlay" class="lock-overlay" aria-hidden="true" style="display:none">
+    <div class="lock-card" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+      <h2 id="lockTitle">Acceso restringido</h2>
+      <p>Ingrese la clave para continuar. Si deja la página abierta, después de 10 minutos volverá a pedirla.</p>
+
+      <input id="lockPassword" class="lock-input" type="password" placeholder="Clave de acceso" autocomplete="off" />
+      <div class="lock-actions">
+        <button id="lockBtn" class="lock-btn btn-lock">Desbloquear</button>
+        <button id="lockNowBtn" class="lock-btn btn-cancel" style="display:none">Bloquear ahora</button>
+      </div>
+
+      <div class="lock-info" id="lockInfo" style="display:none"></div>
+      <div class="lock-footer">Soporte: editar <code>PASSWORD</code> en el script para cambiar la clave.</div>
+    </div>
+  </div>
+
+  <h1>Panel – Actualizar | Limpiar | Cargar Facturas</h1>
+
+  <div class="wrap">
+    <div class="grid">
+
+      <!-- ===================== BLOQUE 1: ACTUALIZAR / REFRESCAR ===================== -->
+      <section class="card" id="blk-refresh">
+        <h2>1) Actualizar / Refrescar toda la data</h2>
+        <div class="hint">
+          Rehidrata (vuelve a escribir) cada llave y garantiza estructuras mínimas.
+          Además emite <span class="kbd">mysiss_refresh_token</span> para que otras pestañas se actualicen.
+        </div>
+
+        <div class="row">
+          <button class="btn" id="btnTouchAll">Refrescar (rehidratar) todas las llaves</button>
+          <button class="btn-alt" id="btnRebuildBase">Reconstruir estructuras mínimas</button>
+          <button class="btn-alt" id="btnListKeys">Listar llaves</button>
+        </div>
+        <div class="status" id="stRefresh"></div>
+
+        <ul class="keys" id="keysList"></ul>
+      </section>
+
+      <!-- ===================== BLOQUE 2: LIMPIAR POR HTML / MÓDULO ===================== -->
+      <section class="card" id="blk-clean">
+        <h2>2) Limpiar data por HTML</h2>
+        <div class="hint">Elimina la data usada por cada pantalla. Incluye variantes de nombre. Tras limpiar, recarga esa página si no escucha cambios.</div>
+
+        <div class="row" id="btnsModules">
+          <button class="btn-alt mod" data-module="radicacion">Radicación</button>
+          <button class="btn-alt mod" data-module="radicar_fact">Radicar Fact</button>
+          <button class="btn-alt mod" data-module="actualizar_rad">Actualizar Rad</button>
+          <button class="btn-alt mod" data-module="consultar_fact">Consultar Fact</button>
+          <button class="btn-alt mod" data-module="resultados_rad">Resultados Rad</button>
+          <button class="btn-alt mod" data-module="configuracion">Configuración</button>
+          <button class="btn-alt mod" data-module="cargue">Cargue</button>
+          <button class="btn-alt mod" data-module="mysiss_state">mysiss_state</button>
+          <button class="btn-alt mod" data-module="mysissData">mysissData</button>
+        </div>
+
+        <div class="row">
+          <button class="btn-warn" id="btnClearAll">Borrar TODO localStorage</button>
+        </div>
+        <div class="status" id="stClean"></div>
+      </section>
+
+      <!-- ===================== BLOQUE 3: CARGAR FACTURAS DESDE EXCEL ===================== -->
+      <section class="card" id="blk-import">
+        <h2>3) Cargar data de facturas (Excel → <span class="kbd">mysiss_state.facturas</span> + <span class="kbd">radicar_fact_data.facturas</span>)</h2>
+        <div class="hint">Una sola hoja. Agrupa por Nº Factura y guarda igual en ambas llaves.</div>
+
+        <div class="row">
+          <input id="archivo" type="file" accept=".xlsx,.xls"/>
+          <button id="btnLeer" class="btn" disabled>Leer</button>
+          <button id="btnGuardar" class="btn" disabled>Guardar</button>
+          <button id="btnExport" class="btn-alt" disabled>Ver JSON</button>
+          <button id="btnVaciar" class="btn-alt">Vaciar facturas</button>
+        </div>
+        <div id="stImport" class="status"></div>
+
+        <div id="prevCard" style="display:none;margin-top:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Previsualización (máx. 200 filas)</strong>
+            <span class="kbd" id="countTag"></span>
+          </div>
+          <div class="scroll">
+            <table id="prevTable"></table>
+          </div>
+        </div>
+
+        <div id="resCard" style="display:none;margin-top:10px">
+          <strong>Resumen de construcción</strong>
+          <div id="resumen" class="hint"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+/* ===================== BLOQUE: LOGICA DE BLOQUEO POR CLAVE ===================== */
+/*
+  Configuración:
+  - Cambiar PASSWORD si quieres otra clave (ej: 'MiClaveProd!2025')
+  - Tiempo de desbloqueo: UNLOCK_PERIOD_MS (por defecto 10 minutos)
+*/
+(function(){
+  const PASSWORD = '0000'; // <-- Cambia aquí la clave si lo deseas
+  const UNLOCK_PERIOD_MS = 10 * 60 * 1000; // 10 minutos
+  const STORAGE_KEY = 'Z_Ingenier_unlocked_until';
+
+  const overlay = document.getElementById('lockOverlay');
+  const input = document.getElementById('lockPassword');
+  const btn = document.getElementById('lockBtn');
+  const lockNowBtn = document.getElementById('lockNowBtn');
+  const info = document.getElementById('lockInfo');
+
+  function showLock(msg){
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden','false');
+    input.value = '';
+    input.focus();
+    if(msg) { info.style.display='block'; info.textContent=msg; }
+    else { info.style.display='none'; info.textContent=''; }
+  }
+  function hideLock(){
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden','true');
+    info.style.display='none';
+    info.textContent='';
+  }
+
+  function isUnlockedNow(){
+    try{
+      const v = Number(localStorage.getItem(STORAGE_KEY) || '0');
+      return v && Date.now() < v;
+    }catch{ return false; }
+  }
+
+  function unlockNow(){
+    const until = Date.now() + UNLOCK_PERIOD_MS;
+    localStorage.setItem(STORAGE_KEY, String(until));
+    hideLock();
+  }
+
+  function lockNow(){
+    localStorage.removeItem(STORAGE_KEY);
+    showLock('Pantalla bloqueada.');
+  }
+
+  // Verificar al cargar
+  if(isUnlockedNow()){
+    hideLock();
+  } else {
+    showLock();
+  }
+
+  // Botón desbloquear
+  btn.addEventListener('click', ()=>{
+    const val = (input.value || '').trim();
+    if(!val){ showLock('Ingrese la clave.'); return; }
+    if(val === PASSWORD){
+      unlockNow();
+    } else {
+      showLock('Clave incorrecta. Intente de nuevo.');
+    }
+  });
+
+  // Permitir Enter en input
+  input.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); btn.click(); }
+  });
+
+  // Botón bloqueo inmediato (útil en desarrollo) - aparece solo si se activa desde consola
+  lockNowBtn.addEventListener('click', ()=>{ lockNow(); });
+
+  // Intervalo que revisa expiración cada 5s
+  setInterval(()=>{
+    if(!isUnlockedNow()){
+      // Si no está desbloqueado, aseguramos que el modal esté visible
+      if(overlay.style.display === 'none'){
+        showLock('Sesión expirada. Ingrese clave para continuar.');
+      }
+    } else {
+      // Si está desbloqueado pero el modal aparece accidentalmente, ocultar
+      if(overlay.style.display !== 'none'){
+        hideLock();
+      }
+    }
+  }, 5000);
+
+  // Escuchar cambios en localStorage (para multi-pestaña)
+  window.addEventListener('storage', (ev)=>{
+    if(ev.key === STORAGE_KEY){
+      if(isUnlockedNow()) hideLock();
+      else showLock('Sesión expirada en otra pestaña. Ingrese clave.');
+    }
+  });
+
+  // Seguridad UX: evitar copiar/pegar y ver clave (opcional)
+  input.setAttribute('autocomplete','off');
+})();
+</script>
+
+<script>
+/* ===================== UTIL COMÚN ===================== */
+const KEY_STATE = 'mysiss_state';
+const DEFAULTS = {
+  mysiss_state: { facturas: [] },
+  mysissData: { medicos:[], especialidades:[], tarifas:[], aseguradoras:[], sociedades:[] },
+  radicacion_data: {},
+  radicar_fact_data: {},
+  actualizar_rad_data: {},
+  consultar_fact_data: {},
+  resultados_rad_data: {},
+  configuracion_data: {},
+  cargue_data: {}
+};
+
+function listKeys(){ return Object.keys(localStorage).sort(); }
+function drawKeys(){
+  const ul = document.getElementById('keysList');
+  ul.innerHTML = '';
+  const ks = listKeys();
+  if(!ks.length){ ul.innerHTML = '<li>(sin llaves)</li>'; return; }
+  ks.forEach(k=>{ const li=document.createElement('li'); li.textContent=k; ul.appendChild(li); });
+}
+function touchKey(k){
+  const v = localStorage.getItem(k);
+  if(v===null) return;
+  localStorage.setItem(k, v); // “tocar” la llave para disparar 'storage' en otras pestañas
+}
+function rebuildMinimum(){
+  // mysiss_state
+  try{
+    const raw = localStorage.getItem('mysiss_state');
+    if(!raw){ localStorage.setItem('mysiss_state', JSON.stringify(DEFAULTS.mysiss_state)); }
+    else{
+      const cur = JSON.parse(raw);
+      if(!Array.isArray(cur.facturas)) cur.facturas = [];
+      localStorage.setItem('mysiss_state', JSON.stringify(cur));
+    }
+  }catch{ localStorage.setItem('mysiss_state', JSON.stringify(DEFAULTS.mysiss_state)); }
+
+  // mysissData
+  try{
+    const raw = localStorage.getItem('mysissData');
+    if(!raw){ localStorage.setItem('mysissData', JSON.stringify(DEFAULTS.mysissData)); }
+    else{
+      const cur = JSON.parse(raw);
+      ['medicos','especialidades','tarifas','aseguradoras','sociedades'].forEach(k=>{
+        if(!Array.isArray(cur[k])) cur[k] = [];
+      });
+      localStorage.setItem('mysissData', JSON.stringify(cur));
+    }
+  }catch{ localStorage.setItem('mysissData', JSON.stringify(DEFAULTS.mysissData)); }
+
+  // otras llaves mínimas si faltan
+  Object.entries(DEFAULTS).forEach(([k,v])=>{
+    if(localStorage.getItem(k)===null){
+      localStorage.setItem(k, JSON.stringify(v));
+    }
+  });
+}
+
+/* ===================== BLOQUE 1: ACTUALIZAR/REFRESCAR ===================== */
+const stRefresh = document.getElementById('stRefresh');
+
+document.getElementById('btnTouchAll').addEventListener('click', ()=>{
+  listKeys().forEach(touchKey);
+  localStorage.setItem('mysiss_refresh_token', String(Date.now())); // notificar
+  stRefresh.innerHTML = '<span class="ok">Se rehidrataron llaves y se emitió token de refresco.</span>';
+  drawKeys();
+});
+
+document.getElementById('btnRebuildBase').addEventListener('click', ()=>{
+  rebuildMinimum();
+  Object.keys(DEFAULTS).forEach(touchKey);
+  localStorage.setItem('mysiss_refresh_token', String(Date.now())); // notificar
+  stRefresh.innerHTML = '<span class="ok">Estructuras mínimas garantizadas y refrescadas.</span>';
+  drawKeys();
+});
+
+document.getElementById('btnListKeys').addEventListener('click', drawKeys);
+drawKeys();
+
+/* ===================== BLOQUE 2: LIMPIAR POR HTML / MÓDULO ===================== */
+const stClean = document.getElementById('stClean');
+
+// Mapa de módulo -> llaves candidatas a eliminar (y variantes)
+const MODULE_KEYS = {
+  radicacion:        ['radicacion_data'],
+  radicar_fact:      ['radicar_fact_data'],
+  actualizar_rad:    ['actualizar_rad_data'],
+  consultar_fact:    ['consultar_fact_data'],
+  resultados_rad:    ['resultados_rad_data'],
+  configuracion:     ['configuracion_data'],
+  cargue:            ['cargue_data'],
+  mysiss_state:      ['mysiss_state'],
+  mysissData:        ['mysissData']
+};
+
+function escapeReg(s){ return (s||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function clearModule(module){
+  const removed = [];
+  const targets = MODULE_KEYS[module] || [];
+  const keys = listKeys();
+
+  // Exactas
+  targets.forEach(k=>{
+    if(localStorage.getItem(k)!==null){ localStorage.removeItem(k); removed.push(k); }
+  });
+
+  // Variantes (por si quedaron prefijos/sufijos)
+  if (targets.length){
+    const like = new RegExp(`^(${targets.map(escapeReg).join('|')})($|[_-])|(${escapeReg(module)})`, 'i');
+    keys.forEach(k=>{
+      if(like.test(k) && localStorage.getItem(k)!==null){
+        localStorage.removeItem(k); removed.push(k);
+      }
+    });
+  }
+
+  localStorage.setItem('mysiss_refresh_token', String(Date.now())); // notificar
+  return [...new Set(removed)];
+}
+
+document.querySelectorAll('#btnsModules .mod').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const mod = btn.dataset.module;
+    const removed = clearModule(mod);
+    stClean.innerHTML = removed.length
+      ? `<span class="ok">Eliminado (${removed.length}): <b>${removed.join(', ')}</b></span>`
+      : `<span class="warn">No se encontraron llaves para “${mod}”.</span>`;
+    drawKeys();
+  });
+});
+
+document.getElementById('btnClearAll').addEventListener('click', ()=>{
+  if(!confirm('Esto borra TODO el localStorage de este origen. ¿Continuar?')) return;
+  localStorage.clear();
+  localStorage.setItem('mysiss_cleared_at', String(Date.now())); // marca de borrado global
+  stClean.innerHTML = '<span class="ok">localStorage vacío.</span>';
+  drawKeys();
+});
+
+/* ===================== BLOQUE 3: CARGAR FACTURAS ===================== */
+const $file = document.getElementById('archivo');
+const $btnLeer = document.getElementById('btnLeer');
+const $btnGuardar = document.getElementById('btnGuardar');
+const $btnExport = document.getElementById('btnExport');
+const $btnVaciar = document.getElementById('btnVaciar');
+const $stImport = document.getElementById('stImport');
+const $prevCard = document.getElementById('prevCard');
+const $prevTable = document.getElementById('prevTable');
+const $countTag = document.getElementById('countTag');
+const $resCard = document.getElementById('resCard');
+const $resumen = document.getElementById('resumen');
+
+let previewRows = [];
+let facturasBuild = [];
+
+$file.addEventListener('change', ()=>{
+  $btnLeer.disabled = !$file.files.length;
+  $btnExport.disabled = true;
+  $btnGuardar.disabled = true;
+  $prevCard.style.display = 'none';
+  $resCard.style.display = 'none';
+  $stImport.textContent = '';
+});
+
+$btnLeer.addEventListener('click', async ()=>{
+  const f = $file.files[0]; if(!f) return;
+  $stImport.textContent = 'Leyendo archivo...';
+  try{
+    const data = await f.arrayBuffer();
+    const wb = XLSX.read(data, {type:'array'});
+    const wsName = wb.SheetNames[0];
+    const ws = wb.Sheets[wsName];
+    const json = XLSX.utils.sheet_to_json(ws, {defval:'', raw:true}); // una sola hoja
+    previewRows = json.slice(0,200);
+    renderPreview(previewRows);
+
+    facturasBuild = construirFacturas(json);
+    $resumen.innerHTML = `Facturas: <b>${facturasBuild.length}</b> desde <b>${json.length}</b> filas de <span class="kbd">${wsName}</span>.`;
+    $resCard.style.display = 'block';
+    $stImport.textContent = 'Archivo leído correctamente.';
+    $btnGuardar.disabled = false;
+    $btnExport.disabled = false;
+  }catch(e){
+    console.error(e);
+    $stImport.innerHTML = '<span class="warn">Error leyendo el archivo. Ver consola.</span>';
+  }
+});
+
+$btnGuardar.addEventListener('click', ()=>{
+  if(!facturasBuild.length){
+    $stImport.innerHTML = '<span class="warn">No hay facturas para guardar.</span>'; return;
+  }
+
+  // 1) mysiss_state
+  const st = getState();
+  st.facturas = facturasBuild.map(f => ({ ...f, createdAt: f.createdAt ?? Date.now() }));
+  setState(st);
+
+  // 2) radicar_fact_data (usado por radicar_fact.html)
+  const rfRaw = JSON.parse(localStorage.getItem('radicar_fact_data') || '{}');
+  const last = typeof rfRaw.lastRadicado === 'number' ? rfRaw.lastRadicado : 10000;
+  localStorage.setItem('radicar_fact_data', JSON.stringify({
+    lastRadicado: last,
+    facturas: st.facturas
+  }));
+
+  // 3) notificar a otras páginas
+  localStorage.setItem('mysiss_refresh_token', String(Date.now()));
+  $stImport.innerHTML = '<span class="ok">Guardado en mysiss_state y radicar_fact_data.</span>';
+});
+
+$btnExport.addEventListener('click', ()=>{
+  const win = window.open();
+  win.document.write('<pre>'+JSON.stringify(facturasBuild,null,2)+'</pre>');
+  win.document.close();
+});
+
+$btnVaciar.addEventListener('click', ()=>{
+  // mysiss_state
+  const st = getState(); st.facturas = []; setState(st);
+  // radicar_fact_data
+  const rf = JSON.parse(localStorage.getItem('radicar_fact_data') || '{}');
+  rf.facturas = [];
+  rf.lastRadicado = typeof rf.lastRadicado==='number' ? rf.lastRadicado : 10000;
+  localStorage.setItem('radicar_fact_data', JSON.stringify(rf));
+
+  localStorage.setItem('mysiss_refresh_token', String(Date.now()));
+  $stImport.innerHTML = '<span class="ok">Colecciones vaciadas (mysiss_state.facturas y radicar_fact_data.facturas).</span>';
+});
+
+function getState(){
+  try{
+    const raw = localStorage.getItem(KEY_STATE);
+    const base = raw ? JSON.parse(raw) : {};
+    if(!Array.isArray(base.facturas)) base.facturas = [];
+    return base;
+  }catch{ return { facturas: [] }; }
+}
+function setState(state){
+  try{ localStorage.setItem(KEY_STATE, JSON.stringify(state)); return true; }
+  catch{ return false; }
+}
+function mapEstadoById(id){ const m={GE:'Generada',RA:'Radicada'}; return m[id] || id || 'Generada'; }
+function parseFecha(any){
+  if(any==null || any==='') return null;
+  if(typeof any==='number'){
+    const d = XLSX.SSF.parse_date_code(any);
+    if(!d) return null; const dt=new Date(Date.UTC(d.y,d.m-1,d.d));
+    return dt.toISOString().slice(0,10);
+  }
+  const s=String(any).trim();
+  let m=s.match(/^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})$/);
+  if(m){ const dd=m[1].padStart(2,'0'), mm=m[2].padStart(2,'0'), yy=m[3]; return `${yy}-${mm}-${dd}`; }
+  m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return s;
+  const t=Date.parse(s); if(!isNaN(t)){ const d=new Date(t); return d.toISOString().slice(0,10); }
+  return null;
+}
+function toNumber(n){ if(n===null||n===undefined||n==='')return 0; const x=Number(String(n).replace(/[^\d.-]/g,'')); return isNaN(x)?0:x; }
+function buildSoportes(){
+  return [
+    { nombre:"Factura de venta", ok:false, url:null },
+    { nombre:"Historia clínica", ok:false, url:null },
+    { nombre:"Registro Individual de Prestación de Servicios de Salud", ok:false, url:null }
+  ];
+}
+function construirFacturas(rows){
+  const idx={};
+  for(const r of rows){
+    const noFactura = r['Número de factura'] ?? r['Numero de factura'] ?? r['No. Factura'] ?? r['N° Factura'] ?? r['Factura'] ?? '';
+    if(!noFactura) continue;
+
+    const fecha = parseFecha(r['Fecha factura'] ?? r['Fecha Factura'] ?? r['Fecha']);
+    const valorFactura = toNumber(r['Valor factura'] ?? r['Valor Factura'] ?? r['Total Factura']);
+    const pagador = (r['Nombre pagador'] || r['Nombre razón social'] || r['Nombre razon social'] || '').toString().trim();
+    const idEstado = (r['ID Estado factura'] || '').toString().trim();
+    const estadoTxt = (r['Estado factura'] || '').toString().trim();
+    const estado = estadoTxt || mapEstadoById(idEstado) || 'Generada';
+
+    const codServ = (r['Código servicio facturado'] || r['Codigo servicio facturado'] || r['Código servicio'] || r['Codigo servicio'] || '').toString().trim();
+    const descServ = (r['Descripción servicio'] || r['Descripcion servicio'] || '').toString().trim();
+    const cantServ = toNumber(r['Cantidad servicio'] ?? r['Cantidad'] ?? 1);
+    const valServ = toNumber(r['Valor servicio'] ?? r['Valor unitario'] ?? r['Precio'] ?? 0);
+    const posServ = toNumber(r['Consecutivo Servicio'] ?? r['Posición'] ?? r['Pos'] ?? 0);
+    const totalServ = toNumber(r['Valor Total'] ?? (cantServ * valServ));
+
+    const key = String(noFactura);
+    if(!idx[key]){
+      idx[key] = {
+        base:{
+          id:0,
+          resp: pagador || 'SIN PAGADOR',
+          fecha: fecha || null,
+          factura: key,
+          estado: estado || 'Generada',
+          valor: valorFactura || 0,
+          moneda:'COP',
+          detalle:[],
+          soportes: buildSoportes(),
+          radicadoInt: null
+        },
+        cpos:1
+      };
+    }
+    const shouldAddLine = codServ || descServ || cantServ || valServ || totalServ;
+    if(shouldAddLine){
+      idx[key].base.detalle.push({
+        pos: posServ || idx[key].cpos++,
+        prest: codServ || '',
+        desc: descServ || '',
+        cant: cantServ || 1,
+        precio: valServ || 0,
+        total: totalServ || (cantServ * valServ) || 0
+      });
+    }
+  }
+  return Object.values(idx).map((it,i)=>{ it.base.id=i+1; return it.base; });
+}
+function renderPreview(rows){
+  $prevTable.innerHTML='';
+  if(!rows.length){ document.getElementById('prevCard').style.display='none'; return; }
+  const cols = Object.keys(rows[0]);
+  const thead = document.createElement('thead');
+  const trh = document.createElement('tr');
+  cols.forEach(c=>{ const th=document.createElement('th'); th.textContent=c; trh.appendChild(th); });
+  thead.appendChild(trh);
+  const tbody=document.createElement('tbody');
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    cols.forEach(c=>{ const td=document.createElement('td'); td.textContent=r[c]; tr.appendChild(td); });
+    tbody.appendChild(tr);
+  });
+  $prevTable.appendChild(thead); $prevTable.appendChild(tbody);
+  $countTag.textContent = `${rows.length} filas`;
+  document.getElementById('prevCard').style.display='block';
+}
+</script>
+</body>
+</html>
