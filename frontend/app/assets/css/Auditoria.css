@@ -1,0 +1,195 @@
+/* ===== RESET Y CONFIGURACIÓN GLOBAL ===== */
+				
+				* {
+					margin: 0;
+					padding: 0;
+					box-sizing: border-box;
+				}
+
+				body {
+					font-family: Arial, sans-serif;
+					background-color: #f9fafb;
+					min-height: 100vh;
+				}
+
+				/* ===== ESTILOS DEL HEADER ===== */
+				
+				.header {
+					background-color: white;
+					box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+					padding: 1rem 2rem;
+				}
+
+				.header-content {
+					max-width: 1200px; 
+					margin: 0 auto; 
+					display: flex; 
+					justify-content: space-between;
+					align-items: center;
+				}
+
+				/* ===== ESTILOS DEL LOGO ===== */
+				
+				.logo {
+					font-size: 2.5rem; 
+					font-weight: bold; 
+					color: purple;
+				}
+
+				/* ===== ESTILOS DEL BOTÓN DE CONFIGURACIÓN ===== */
+				
+				.config-btn {
+					background-color: purple;
+					color: white;
+					border: none;
+					padding: 0.75rem 1.5rem;
+					border-radius: 50px;
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+					cursor: pointer;
+					font-size: 1rem;
+					transition: background-color 0.3s;
+				}
+
+				.config-btn:hover {
+					background-color: #DFD1EE;
+				}
+
+				.config-icon {
+					width: 20px;
+					height: 20px;
+				}
+
+				/* ===== ESTILOS DEL CONTENIDO PRINCIPAL ===== */
+				
+				.main-content {
+					max-width: 1200px;
+					margin: 0 auto;
+					padding: 3rem 2rem;
+				}
+
+				/* ===== ESTILOS DEL TÍTULO PRINCIPAL ===== */
+				
+				.title {
+					text-align: center;
+					margin-bottom: 4rem;
+				}
+
+				.title h1 {
+					font-size: 4rem;
+					font-weight: bold;
+					color: purple; 
+					margin-bottom: 1rem;
+				}
+
+				/* ===== ESTILOS DE LA GRILLA DE MENÚ ===== */
+				
+				.menu-grid {
+					display: grid; 
+					grid-template-columns: repeat(3, 1fr);
+					gap: 2rem;
+					margin-bottom: 4rem;
+				}
+
+				/* ===== ESTILOS DE LAS TARJETAS DE MENÚ ===== */
+				
+				.menu-card {
+					background-color: white;
+					border-radius: 1.5rem;
+					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+					overflow: hidden;
+					cursor: pointer; 
+					transition: box-shadow 0.3s, transform 0.3s;
+				}
+
+				.menu-card:hover {
+					box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+					transform: translateY(-2px);
+				}
+
+				/* ===== ESTILOS DEL CONTENEDOR DE IMAGEN ===== */
+				
+				.card-image-container {
+					position: relative;
+					height: 200px;
+				}
+
+				.card-image {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
+
+				/* ===== ESTILOS DEL ÍCONO SOBRE LA IMAGEN ===== */
+				
+				.card-icon {
+					position: absolute;
+					bottom: 1rem;
+					left: 50%;
+					transform: translateX(-50%);
+					background-color: #ede9fe;
+					padding: 0.75rem;
+					border-radius: 50%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+
+				.icon {
+					width: 32px;
+					height: 32px;
+					color: purple;
+				}
+
+				/* ===== ESTILOS DEL CONTENIDO DE LA TARJETA ===== */
+				
+				.card-content {
+					padding: 2rem;
+					text-align: center;
+				}
+
+				.card-title {
+					font-size: 1.5rem;
+					font-weight: 600;
+					color: purple;
+					line-height: 1.3;
+				}
+
+				/* ===== ESTILOS DE LA DESCRIPCIÓN ===== */
+				
+				.description {
+					max-width: 1000px;
+					margin: 0 auto;
+					color: #374151;
+					font-size: 1.125rem;
+					line-height: 1.7;
+				}
+
+				.description p {
+					margin-bottom: 1.5rem;
+					text-align: justify;
+				}
+
+				/* ===== ESTILOS RESPONSIVOS ===== */
+				
+				@media (max-width: 768px) {
+				
+					/* Ajustes para pantallas pequeñas (tablets y móviles) */
+					.menu-grid {
+						grid-template-columns: 1fr;
+						gap: 1.5rem;
+					}
+					
+					.title h1 {
+						font-size: 2.5rem;
+					}
+					
+					.header-content {
+						padding: 0 1rem;
+					}
+					
+					.main-content {
+						padding: 2rem 1rem;
+					}
+				}

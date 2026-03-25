@@ -1,0 +1,68 @@
+:root {
+            --mysiss-purple: #800080;
+            --mysiss-light-purple: #EBE3F2;
+            --mysiss-hover-purple: #DFD1EE;
+            --mysiss-active-bg: #D0B8E6;
+        }
+        .custom-radio {
+            accent-color: var(--mysiss-purple);
+        }
+        .focus-outline:focus-visible {
+            outline: 2px solid var(--mysiss-purple);
+            outline-offset: 2px;
+        }
+        /* Estilos para el sidebar */
+        .submenu {
+            display: none;
+            padding-left: 1rem;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .nav-link.active {
+            background-color: var(--mysiss-active-bg);
+            font-weight: bold;
+            position: relative;
+        }
+        .nav-link.active::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--mysiss-purple);
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        /* Estilo para el contenedor del menú */
+        nav {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 80px); /* Ajustar según altura del logo */
+            position: relative;
+        }
+        /* Estilo para el enlace de cerrar sesión */
+        .logout-link {
+            margin-top: auto; /* Empuja el enlace hacia abajo */
+            position: sticky;
+            bottom: 0;
+            background-color: var(--mysiss-light-purple);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+		
+		/* Botón rojo fijo en esquina inferior derecha */
+		#devClearBtn {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background: transparent;
+			color: transparent;
+			border: none;
+			padding: 10px;
+			border-radius: 5px;
+			cursor: pointer;
+			z-index: 9999;
+		}
