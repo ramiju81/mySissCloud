@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+	<html lang="es">
+	    <head>
+		    <!-- Font Awesome para iconos - librería de iconos gratuita -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>mySiss - Auditoría</title>
+            <link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+		    <style>
+			    :root {
+					--mysiss-purple: #800080;
+					--mysiss-light-purple: #EBE3F2;
+					--mysiss-hover-purple: #DFD1EE;
+					--sidebar-width: 280px;
+			    }
+
+				* {
+					margin: 0;
+					padding: 0;
+					box-sizing: border-box;
+				}
+
+				body {
+					font-family: system-ui, -apple-system, sans-serif;
+					background: white;
+					min-height: 100vh;
+				}
+
+				/* ===== BARRA SUPERIOR (HEADER) ===== */
+				
+				.top-bar {
+					display: flex; /* Flexbox para alinear elementos */
+					justify-content: space-between; /* Espacio entre elementos */
+					align-items: center;
+					padding: 10px 30px;
+					background: white;
+					border-bottom: 0.5px;
+					position: sticky;
+					top: 0;
+					z-index: 1000;
+				}
+
+				/* ===== LOGO MYSISS ===== */
+				
+				.logo {
+					font-size: 3.5rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+				}
+
+				/* ===== CONTENEDOR DE BOTONES SUPERIORES ===== */
+				
+				.top-buttons {
+					display: flex;
+					gap: 15px; /* Espacio entre botones */
+					align-items: center;
+				}
+				
+
+				/* ===== BOTÓN ATRÁS ===== */
+				
+				.back-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px; 
+					border-radius: 8px; 
+					font-size: 16px; 
+					font-weight: 600; 
+					cursor: pointer; 
+					transition: all 0.3s ease; 
+					box-shadow: 0 4px 15px rgba(128, 0, 128, 0.2); 
+					display: inline-flex; /* Flex para alinear icono y texto */
+					align-items: center; 
+					gap: 8px;
+					text-decoration: none;
+				}
+
+				/* Efecto hover del botón atrás */
+				
+				.back-button:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(128, 0, 128, 0.3);
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* ===== BOTÓN MENÚ ===== */
+				
+				.menu-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					box-shadow: 0 4px 15px rgba(128, 0, 128, 0.2);
+					text-decoration: none;
+					display: inline-flex; /* Flex para alinear */
+					align-items: center;
+					gap: 10px;
+				}
+
+				/* Efecto hover del botón menú */
+				
+				.menu-button:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(128, 0, 128, 0.3); /* Sombra más pronunciada */
+					background: var(--mysiss-hover-purple);
+				}
+				
+				/* Botón de icono de sobre (mail) */
+				
+                .mail-button {
+					position: relative;
+					background: none;
+					border: none;
+					color: var(--mysiss-purple);
+					font-size: 30px;
+					cursor: pointer;
+					padding: 8px;
+					transition: color 0.3s ease;
+                }
+
+                .mail-button:hover {
+                 color: var(--mysiss-hover-purple);
+                }
+				
+				.mail-button::after{
+					content: attr(data-tooltip); /* Contenido del atributo data-tooltip */
+					position: absolute;
+					bottom: -35px;
+					left: 50%;
+					transform: translateX(-50%); 
+					background: #333;
+					color: white;
+					padding: 5px 10px;
+					border-radius: 5px;
+					font-size: 12px;
+					white-space: nowrap;
+					opacity: 0;
+					pointer-events: none;
+					transition: opacity 0.3s ease;
+					z-index: 1000;
+				}
+				
+				/* Mostrar tooltip al hacer hover */
+				
+				.mail-button:hover::after {
+					opacity: 1; /* Visible */
+				}
+				
+				/* Badge de notificación (círculo rojo con número) */
+				
+				.notification-badge {
+					position: absolute; 
+					top: 3px;
+					right: 2px;
+					background: #dc3545;
+					color: white;
+					border-radius: 50%;
+					width: 20px;
+					height: 20px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font-size: 12px;
+					font-weight: bold;
+					border: 2px solid white;
+				}
+				
+				/* ===== PANEL DE MENSAJES ===== */
+				
+				.messages-panel {
+					display: none; 
+					position: absolute; 
+					top: 60px;
+					right: 307px; 
+					width: 400px;
+					max-height: 500px;
+					background: white;
+					border: 1px solid var(--mysiss-purple); 
+					border-radius: 10px; 
+					box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+					z-index: 1500; 
+					overflow-y: auto;
+					animation: slideDown 0.3s ease;
+				}
+				
+				/* Encabezado del panel de mensajes */
+				.messages-header {
+					background: var(--mysiss-purple);
+					color: white;
+					padding: 15px;
+					font-size: 1.2rem;
+					font-weight: 700;
+					border-radius: 6px 6px 0 0;
+					display: flex;
+					justify-content: space-between; /* Espacio entre elementos */
+					align-items: center; /* Centrar verticalmente */
+				}
+				
+				/* Botón de cerrar en el encabezado */
+				.close-messages {
+					background: none;
+					border: none;
+					color: white;
+					font-size: 24px;
+					cursor: pointer;
+					padding: 0;
+					transition: transform 0.2s ease;
+				}
+				
+				.close-messages:hover {
+					transform: scale(1.2);
+				}
+				
+				/* Contenedor de la lista de mensajes */
+				.messages-list {
+					padding: 15px;
+				}
+				
+				/* Cada mensaje individual */
+				.message-item {
+					background: white;
+					padding: 15px;
+					margin-bottom: 10px;
+					border-radius: 8px;
+					border-left: 2px solid var(--mysiss-purple);
+				}
+				
+				/* Texto del mensaje */
+				.message-text {
+					color: #333;
+					font-size: 0.95rem;
+					margin-bottom: 8px;
+					line-height: 1.4; /* Altura de línea */
+				}
+				
+				/* Fecha del mensaje */
+				.message-date {
+					color: #666;
+					font-size: 0.85rem;
+					font-style: italic; /* Cursiva */
+				}
+				
+				/* Mensaje cuando no hay notificaciones */
+				.no-messages {
+					text-align: center; /* Centrar texto */
+					color: #666;
+					padding: 30px;
+					font-size: 1rem;
+				}
+				
+				/* ===== BOTÓN ACEPTAR MENSAJES ===== */
+				
+				.accept-messages {
+					display: none;
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 8px 8px;
+					border-radius: 6px;
+					font-size: 0.9rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					margin: 4px auto;
+					width: auto;
+				}
+
+				/* ===== CONTENEDOR PRINCIPAL ===== */
+				
+				.main-container {
+					padding: 10px 30px;
+				}
+				
+				/* ===== HEADER DE INFORMACIÓN DEL PACIENTE ===== */
+				
+				.patient-header {
+					background: white; 
+					border: 2px solid #e0e0e0; 
+					border-radius: 10px;
+					padding: 20px; 
+					margin-bottom: 12px; 
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+				}
+
+				/* Grid para organizar la información del paciente */
+				
+				.patient-info {
+					display: grid;
+					grid-template-columns: repeat(3, 1fr); /* 4 columnas iguales */
+					gap: 20px;
+					align-items: center;
+				}
+
+				/* Cada campo de información del paciente */
+				
+				.info-field {
+					display: flex;
+					flex-direction: row;
+					gap: 8px;
+					align-items: center;
+					
+				}
+
+				/* Etiqueta del campo */
+				
+				.info-label {
+					font-size: 0.85rem;
+					color: #666;
+					font-weight: 600;
+				}
+
+				/* Valor del campo */
+				
+				.info-value {
+					font-size: 1rem;
+					color: #333;
+					font-weight: 500;
+				}
+				
+				/* ===== BARRA OPCIONES ===== */
+				
+				.bar-findings {
+				
+					display: flex;
+					justify-content: space-between; /* Espacio entre elementos */
+					padding: 10px 10px;
+					background: white;
+					border-bottom: 0.5px;
+					position: sticky;
+					top: 0;
+					margin-bottom: 10px;
+				}
+				
+				.findings-section {
+					background: white;
+					border: 2px solid #e0e0e0;
+					border-radius: 10px;
+					padding: 10px 10px; /* Espaciado interno */
+					margin-bottom: 10px;
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+				}
+				
+				/* Título de la sección */
+				
+				.findings-title {
+					font-size: 1.5rem;
+					color: var(--mysiss-purple);
+					font-weight: 700;
+					text-align:left;
+				}
+				
+				.field-name-suffix {
+                  color: var(--mysiss-purple);
+                  font-weight: bold;
+                  font-size: 1.2rem;
+                  margin-left: 0;
+                }
+				
+				/* Contenedor de botones de acción de la tabla */
+				
+				.table-actions {
+					display: flex; /* Flexbox */
+					justify-content: flex-end; /* Alinear a la derecha */
+					gap: 10px; /* Espacio entre botones */
+				}
+
+				/* Botones de acción (iconos) */
+				
+				.action-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					width: 28px;
+					height: 28px;
+					border-radius: 8px;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font-size: 18px;
+					position: relative;
+				}
+
+				/* Efecto hover de botones de acción */
+				
+				.action-btn:hover {
+					background: var(--mysiss-hover-purple);
+					transform: translateY(-2px);
+					box-shadow: 0 4px 12px rgba(128, 0, 128, 0.3); 
+				}
+
+				/* Tooltip (texto que aparece al hacer hover) */
+				
+				.action-btn::after {
+					content: attr(data-tooltip); /* Contenido del atributo data-tooltip */
+					position: absolute;
+					bottom: -35px;
+					left: 50%;
+					transform: translateX(-50%);
+					background: #333;
+					color: white;
+					padding: 5px 10px;
+					border-radius: 5px;
+					font-size: 12px;
+					white-space: nowrap;
+					opacity: 0;
+					pointer-events: none;
+					transition: opacity 0.3s ease;
+					z-index: 1000;
+				}
+
+				/* Mostrar tooltip al hacer hover */
+				
+				.action-btn:hover::after {
+					opacity: 1; 
+				}
+				
+				/* ===== ESTILOS PARA LA TABLA DE AUDITORÍA ===== */
+
+				/* Contenedor de la tabla con scroll horizontal */
+				.table-container {
+					overflow-x: auto;
+					overflow-y: auto;
+					border: 1px solid #e0e0e0;
+					border-radius: 8px;
+					max-height: 500px;
+					min-height: 250px;
+				}
+
+				/* Tabla de hallazgos */
+				.findings-table {
+					width: 100%;
+					border-collapse: collapse;
+					min-width: 1200px; /* Ancho mínimo para evitar mucho scroll */
+					table-layout: fixed;
+				}
+
+				/* Encabezados de la tabla */
+				.findings-table th {
+					background: var(--mysiss-light-purple);
+					color: #333;
+					padding: 12px 8px;
+					text-align: center;
+					font-weight: 700;
+					font-size: 13px;
+					border: 1px solid #d0d0d0;
+				}
+
+				/* Celdas de la tabla */
+				.findings-table td {
+					padding: 8px 4px;
+					border: 1px solid #d0d0d0;
+					vertical-align: middle;
+					text-align: center;
+					font-size: 12px;
+					word-wrap: break-word;
+					overflow: hidden;
+				}
+
+				/* Select de cumplimiento */
+				.cumplimiento-select {
+					width: 100%;
+					padding: 6px;
+					border: 1px solid #ccc;
+					border-radius: 4px;
+					font-size: 12px;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				/* Input de nota de auditoría */
+				.nota-auditoria-input {
+					width: 100%;
+					padding: 6px;
+					border: 1px solid #ccc;
+					border-radius: 4px;
+					font-size: 12px;
+					min-height: 30px;
+					resize: vertical;
+				}
+
+				/* Ícono de archivo */
+				.file-icon {
+					color: var(--mysiss-purple);
+					font-size: 24px;
+					transition: transform 0.3s ease;
+				}
+
+				.file-icon:hover {
+					transform: scale(1.2);
+					color: var(--mysiss-hover-purple);
+				}
+
+				/* Texto cuando no hay soporte */
+				.no-soporte {
+					color: #999;
+					font-size: 12px;
+					font-style: italic;
+				}
+				
+				/* ===== MODAL (Pop-up) ===== */
+				
+				.modal {
+					display: none;
+					position: fixed; 
+					z-index: 2000; 
+					left: 0; 
+					top: 0; 
+					width: 100%; 
+					height: 100%;
+					background-color: rgba(0, 0, 0, 0.5); 
+					animation: fadeIn 0.3s ease; 
+				}
+
+				/* Contenido del modal */
+				
+				.modal-content {
+					background-color: white; 
+					margin: 15% auto; 
+					padding: 30px;
+					border-radius: 10px; 
+					width: 90%; 
+					max-width: 500px;
+					box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); 
+					animation: slideDown 0.3s ease; 
+				}
+				
+				/* Texto del modal */
+				
+                .modal-text {
+					color: #333;
+					font-size: 1.1rem;
+					margin-bottom: 25px;
+					text-align: center;
+                }
+				
+				/* Contenedor de botones del modal */
+				
+                .modal-buttons {
+					display: flex; 
+					justify-content: center; /* Centrar horizontalmente */
+					gap: 15px;
+                }
+
+                /* Botones del modal */
+				
+                .modal-btn {
+					padding: 10px 25px; 
+					border: none;
+					border-radius: 8px;
+					font-size: 1rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+                }
+
+				/* Botón confirmar */
+				
+				.modal-btn.confirm {
+					background: var(--mysiss-purple);
+					color: white;
+				}
+
+				/* Hover botón confirmar */
+				
+				.modal-btn.confirm:hover {
+					background: var(--mysiss-hover-purple);
+					transform: translateY(-2px);
+				}
+
+				/* Botón cancelar */
+				
+				.modal-btn.cancel {
+					background: #6c757d;
+					color: white;
+				}
+
+				/* Hover botón cancelar */
+				
+				.modal-btn.cancel:hover {
+					background: #5a6268;
+					transform: translateY(-2px);
+				}
+				
+				/* ===== ÍCONOS DE ESTADO ===== */
+
+				.estado-icon {
+					width: 20px;
+					height: 20px;
+					border-radius: 50%;
+					display: inline-block;
+					position: relative;
+					cursor: pointer;
+				}
+
+				.estado-icon.rojo {
+					background-color: #dc3545;
+				}
+
+				.estado-icon.amarillo {
+					background-color: #ffc107;
+				}
+
+				.estado-icon.verde {
+					background-color: #28a745;
+				}
+				
+				.estado-icon.naranja {
+					background-color: #FF8C00;
+				}
+
+				.estado-icon::after {
+					content: attr(data-tooltip);
+					position: fixed;
+					top: var(--tooltip-top);
+					left: var(--tooltip-left);
+					transform: translateX(-50%);
+					background: #333;
+					color: white;
+					padding: 5px 10px;
+					border-radius: 5px;
+					font-size: 12px;
+					white-space: nowrap;
+					opacity: 0;
+					pointer-events: none;
+					transition: opacity 0.3s ease;
+					z-index: 2000;
+				}
+
+				.estado-icon:hover::after {
+					opacity: 1;
+				}
+				
+				/* ===== ANIMACIONES ===== */
+				
+				/* Animación de aparición gradual */
+				.fade-in {
+					animation: fadeIn 0.5s ease-in; /* Animación 0.5 segundos */
+				}
+
+				@keyframes fadeIn {
+					from {
+						opacity: 0; /* Invisible */
+						transform: translateX(-20px); /* Desplazado abajo */
+					}
+					to {
+						opacity: 1; /* Visible */
+						transform: translateX(0); /* Posición original */
+					}
+				}
+			
+			</style>
+		</head>
+		<body>
+		    
+			<!-- ===== BARRA SUPERIOR ===== -->
+            <div class="top-bar">
+			
+                <!-- Logo de mySiss -->
+                <div class="logo">mySiss</div>
+                
+				<!-- Botones superiores derechos -->
+                <div class="top-buttons">
+                  	
+					<!-- Botón de icono de sobre -->
+                    <button class="mail-button" data-tooltip="Mensajería" onclick="toggleMessages()"aria-label="Mensajes">
+                     <i class="fas fa-envelope"></i> <!-- Icono de sobre -->
+					 <!-- Badge de notificación (se mostrará dinámicamente) -->
+					 <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                    </button>
+					
+					<!-- Botón atrás: regresa a gestión auditoría -->
+                    <a href="AcuentasM-Gestcorrec.html" class="back-button">
+					    <i class="fas fa-arrow-left"></i>
+						Atrás
+					</a>
+
+                    <!-- Botón Menú: lleva a Auditoria.html -->
+                    <a href="../Auditoria.html" class="menu-button">
+                     <i class="fas fa-bars"></i> <!-- Icono de menú hamburguesa -->
+                     Menú
+                    </a>
+                </div>
+            </div>
+			
+			<!-- ===== PANEL DE MENSAJES ===== -->
+			<div id="messagesPanel" class="messages-panel">
+				<!-- Encabezado del panel -->
+				<div class="messages-header">
+					<span>Centro de mensajes</span>
+					<button class="close-messages" onclick="toggleMessages()">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<!-- Lista de mensajes (se llenará dinámicamente) -->
+				<div id="messagesList" class="messages-list">
+					<div class="no-messages">No hay mensajes para mostrar</div>
+				</div>
+				<!-- Botón aceptar para limpiar las notificaciones -->
+				<button class="accept-messages" id="acceptMessagesBtn" onclick="acceptMessages()">Aceptar</button>
+				
+			</div>
+			
+			<!-- ===== CONTENEDOR PRINCIPAL ===== -->
+            <div class="main-container">
+
+                <!-- ===== HEADER DE INFORMACIÓN DEL PACIENTE ===== -->
+
+                <div class="patient-header fade-in">
+                    <div class="patient-info" id ="patient-info">
+                        <!-- Nombre del paciente -->
+                        <div class="info-field">
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Documento -->
+                        <div class="info-field">
+                         <span class="info-value"></span>
+                        </div>
+				
+                        <!-- Número de caso -->
+                        <div class="info-field">
+                         <span class="info-label">Número de caso:</span>
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Responsable de pago -->
+                        <div class="info-field">
+                         <span class="info-label">Responsable de pago:</span>
+                         <span class="info-value"></span>
+                        </div>
+						
+						<!-- Estado -->
+                        <div class="info-field">
+                         <span class="info-label">Estado:</span>
+                         <span class="info-value"></span>
+                        </div>
+						
+						<!-- Auditor -->
+                        <div class="info-field">
+                         <span class="info-label">Auditor:</span>
+                         <span class="info-value"></span>
+                        </div>
+		
+                    </div>
+                </div>
+				
+				<!-- ===== SECCIÓN DE CORRECCIONES ===== -->
+				<div class="findings-section fade-in">
+				
+				    <div class="bar-findings">
+					
+						<!-- Título de la sección -->
+						<div><h2 class="findings-title">Gestionar correcciones<span id="field-name-display" class="field-name-suffix"></span></h3></h2></div>
+
+					    <!-- Botones de acción de la tabla -->
+					    <div class="table-actions">
+
+							<!-- Botón Guardar -->
+						    <button class="action-btn" data-tooltip="Guardar" onclick="saveData()">
+							 <i class="fas fa-save"></i>
+						    </button>
+							
+							<!-- Botón Editar -->
+							<button class="action-btn" data-tooltip="Editar" onclick="editRow()">
+								<i class="fas fa-edit"></i>
+							</button>
+							
+							<!-- Botón notificar auditoría -->
+							<button class="action-btn" data-tooltip="Notificar" onclick="notifyAudit()">
+							 <i class="fas fa-paper-plane"></i>
+							</button>
+
+					    </div>
+					</div>
+					<!-- Contenedor de la tabla -->
+					<div class="table-container">
+						<table class="findings-table" id="findingsTable">
+							<thead>
+								<tr>
+									<th style="width: 70px;">ID Servicios</th>
+									<th style="width: 180px;">Descripción</th>
+									<th style="width: 90px;">Tarifa</th>
+									<th style="width: 90px;">Código de autorización</th>
+									<th style="width: 84px;">Diagnóstico</th>
+									<th style="width: 85px;">Fecha realización</th>
+									<th style="width: 70px;">Soporte</th>
+									<th style="width: 100px;">Cumplimiento</th>
+									<th style="width: 170px;">Nota de auditoría</th>
+									<th style="width: 140px;">Solución</th>
+									<th style="width: 70px;">Evidencia</th>
+									<th style="width: 100px;">Responsable</th>
+									<th style="width: 120px;">Fecha - Hora</th>
+									<th style="width: 110px;">Justificación</th>
+									<th style="width: 120px;">Fecha - Hora</th>
+									<th style="width: 60px;">Estado</th>
+								</tr>
+							</thead>
+							<tbody id="findingsTableBody">
+								<!-- Se llenará dinámicamente con JavaScript -->
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			
+			<!-- ===== MODAL PARA MENSAJES ===== -->
+			
+            <div id="modal" class="modal">
+                <div class="modal-content">
+                 <!-- Texto del modal (dinámico) -->
+                 <p class="modal-text" id="modalText"></p>
+            
+                 <!-- Botones del modal (se mostrarán según el caso) -->
+                 <div class="modal-buttons" id="modalButtons"></div>
+                </div>
+            </div>
+
+			<script>
+			
+			    //Variables globales
+				
+				let messages = [];
+
+				// Datos precargados de servicios
+				
+				const serviciosData = [
+					{id: '170001',descripcion: 'Apicectomía vía infracoclear',tarifa: "$1'100.000",codAutor: '',diagnostico: 'H610',fecha: '25/01/2025'},
+					{id: '199001',descripcion: 'Desfuncionalización de oído medio',tarifa: '$650.000',codAutor: '2025012525',diagnostico: 'H610',fecha: '30/01/2025'},
+					{id: '120045',descripcion: 'Consulta especializada otorrinolaringología',tarifa: '$180.000',codAutor: '2025012501',diagnostico: 'H610',fecha: '20/01/2025'},
+					{id: '890234',descripcion: 'Audiometría tonal y vocal',tarifa: '$120.000',codAutor: '2025012502',diagnostico: 'H610',fecha: '21/01/2025'},
+					{id: '345678',descripcion: 'Radiografía de torax',tarifa: '$95.000',codAutor: '2025012503',diagnostico: 'H610',fecha: '21/01/2025'}
+				];
+				
+
+				// Recupera los datos del paciente seleccionado
+				window.addEventListener('DOMContentLoaded', function() {
+				    const pacienteData = sessionStorage.getItem('pacienteSeleccionado');
+					
+					if (pacienteData) {
+					    
+						const paciente = JSON.parse(pacienteData);
+						
+						//Construir el Nombre
+						const nombreCompleto = `${paciente.nombre}${paciente.segundoNombre ? ' ' + paciente.segundoNombre : ''} ${paciente.apellido1} ${paciente.apellido2}`;
+		
+						// Determina el texto del estado
+						let estadoTexto = '';
+						switch(paciente.estado) {
+							case '02':
+							    estadoTexto = 'Asignada';
+							break;
+							case '03':
+								estadoTexto = 'Estado de cuenta con soporte';
+							break;
+							case '04':
+								estadoTexto = 'Estado de cuenta con hallazgo';
+							break;
+							case '05':
+								estadoTexto = 'Estado de cuenta gestionada';
+							break;
+							case '06':
+								estadoTexto= 'Estado de cuenta con correcciones';
+							break;
+							case '07':
+								estadoTexto = 'Finalizada';
+							break;
+							default:
+							    estadoTexto = 'Desconocido';
+						}
+						
+						// Obtener el contenedor donde se mostrarán los datos
+						const patientInfoContainer = document.getElementById('patient-info');
+					
+						// Verificar que el contenedor exista antes de manipularlo
+						if (!patientInfoContainer) {
+							console.error('Error: No se encontró el elemento con id="patientInfo"');
+							return;
+						}
+					
+						// Limpiar el contenido previo
+						patientInfoContainer.innerHTML = '';
+						
+						// Crear el HTML con todos los datos del paciente
+						patientInfoContainer.innerHTML = `
+						    <!-- Nombre del paciente -->
+							<div class="info-field">
+							    <span class="info-value">${nombreCompleto}</span>
+							</div>
+							<!-- Documento -->
+							<div class="info-field">
+							    <span class="info-value">${paciente.documento}</span>
+							</div>
+							<!-- Número de caso -->
+							<div class="info-field">
+							    <span class="info-label">Número de caso:</span>
+								<span class="info-value">${paciente.numeroCaso}</span>
+							</div>
+							<!-- Responsable de pago -->
+							<div class="info-field">
+							    <span class="info-label">Responsable de pago:</span>
+							    <span class="info-value">${paciente.responsablePago}</span>
+							</div>
+							<!-- Estado -->
+							<div class="info-field">
+							    <span class="info-label">Estado:</span>
+							    <span class="info-value">${estadoTexto}</span>
+							</div>
+							<!-- Auditor -->
+							<div class="info-field">
+							    <span class="info-label">Auditor:</span>
+							    <span class="info-value">${paciente.nombreAuditor || 'Sin asignar'}</span>
+							</div>
+
+						`;
+						
+						// Mostrar ID de auditoría en el título de la sección
+                        const fieldNameDisplay = document.getElementById('field-name-display');
+                        if (fieldNameDisplay && paciente.idAuditoria) {
+                            fieldNameDisplay.textContent = ` - ID auditoría: ${paciente.idAuditoria}`;
+                        }
+						
+					}else {
+					    console.error('No se encontró información del paciente');
+						alert('Error: No se pudo cargar la información del paciente');
+					}
+					
+					// Llama la función para cargar datos de auditoría
+                    cargarDatosAuditoria();
+					
+					//Carga mensajes
+					cargarMensajesDesdeSession();
+				});
+
+				function cargarDatosAuditoria() {
+				
+					// Obtiene datos del paciente seleccionado
+					const pacienteData = sessionStorage.getItem('pacienteSeleccionado');
+					const paciente = JSON.parse(pacienteData);
+					const idAuditoria = paciente.idAuditoria;
+					const estadoAuditoria = paciente.estado;
+					
+					// Obtiene datos de cuentas médicas del localStorage
+					const cuentasMedicasData = localStorage.getItem('ACuentasMedicas');
+					let tieneSoporte = false;
+					let posicionesGuardadas = null;
+					
+					if (cuentasMedicasData) {
+						const cuentasMedicas = JSON.parse(cuentasMedicasData);
+						// Busca la auditoría del paciente actual
+						const auditoria = cuentasMedicas.find(c => c.idAuditoria === idAuditoria);
+						if (auditoria){
+							if(auditoria.soporte === true) {
+								tieneSoporte = true;
+							}
+
+							// Obtiene posiciones en el array si existen
+							if (auditoria.posiciones && Array.isArray(auditoria.posiciones)) {
+								posicionesGuardadas = auditoria.posiciones;
+							}
+						}
+					}
+					
+					// Llena la tabla con los datos
+					const tableBody = document.getElementById('findingsTableBody');
+					tableBody.innerHTML = '';
+					serviciosData.forEach((servicio, index) => {
+						const row = document.createElement('tr');
+						// Determina contenido de la columna soporte
+						let soporteHTML = '';
+						if (index === 0) {
+							if (tieneSoporte) {
+								soporteHTML = `
+									<td rowspan="${serviciosData.length}" style="vertical-align: middle;">
+										<i class="fas fa-file file-icon"></i>
+									</td>
+								`;
+							} else {
+								soporteHTML = `
+									<td rowspan="${serviciosData.length}" style="vertical-align: middle;">
+										<span class="no-soporte">Sin adjuntar</span>
+									</td>
+								`;
+							}
+						}
+						
+						//Obtiene datos guardados 
+						let cumplimientoGuardado = '';
+						let notaGuardada = '';
+						let solucionGuardada = '';
+						let responsableGuardado = '';
+						let fechaHoraSolucionGuardada = '';
+						let evidenciaGuardada = false;
+						let justificacionGuardada = '';
+						let fechaHoraJustificacionGuardada = '';
+						let estadoHallazgoGuardado = '';
+						
+						if (posicionesGuardadas) {
+							const posicionEncontrada = posicionesGuardadas.find(p => p.idServicio === servicio.id);
+							if (posicionEncontrada) {
+								cumplimientoGuardado = posicionEncontrada.cumplimiento || '';
+								notaGuardada = posicionEncontrada.notaAuditoria || '';
+								solucionGuardada = posicionEncontrada.solucion || '';
+								responsableGuardado = posicionEncontrada.responsable || '';
+								fechaHoraSolucionGuardada  = posicionEncontrada.fechaHoraSolucion || '';
+								evidenciaGuardada = posicionEncontrada.evidencia || false;
+								justificacionGuardada = posicionEncontrada.justificacion || '';
+								fechaHoraJustificacionGuardada  = posicionEncontrada.fechaHoraJustificacion || '';
+								estadoHallazgoGuardado  = posicionEncontrada.estadoHallazgo || '';
+							}
+						}
+						
+						// Determina el texto a mostrar en cumplimiento
+						let cumplimientoTexto = '';
+						let colorCumplimiento = '';
+						if (cumplimientoGuardado === 'conformidad') {
+							cumplimientoTexto = 'Conformidad';
+							colorCumplimiento = '#D9F2D0';
+						} else if (cumplimientoGuardado === 'no-conformidad') {
+							cumplimientoTexto = 'No conformidad';
+							colorCumplimiento = '#FBE3D6';
+						} else if (cumplimientoGuardado === 'mejora') {
+							cumplimientoTexto = 'Opción de mejora';
+							colorCumplimiento = '#FFFE91';
+						}
+						
+						//Genera HTML según ESTADO
+						let solucionHTML = '';
+						let evidenciaHTML = '';
+						let responsableHTML = '';
+						let fechaHoraSolucionHTML = '';
+						let justificacionHTML = '';
+						let fechaHoraJustificacionHTML = '';
+						let estadoIconoHTML = '';
+						if(estadoAuditoria === '04'){
+							if(cumplimientoGuardado === 'conformidad'){
+								solucionHTML = '';
+								evidenciaHTML = '';
+								responsableHTML = '';
+								fechaHoraSolucionHTML = '';
+							}else {
+								solucionHTML = '---';
+								evidenciaHTML = '---';
+								responsableHTML = '---';
+								fechaHoraSolucionHTML = '---';
+							}
+						}else if (estadoAuditoria === '05') {
+							solucionHTML = solucionGuardada || '';
+							responsableHTML = responsableGuardado || '';
+							fechaHoraSolucionHTML = fechaHoraSolucionGuardada || '';
+							// Evidencia
+							if (evidenciaGuardada) {
+								evidenciaHTML = '<i class="fas fa-file file-icon"></i>';
+							}else {
+								evidenciaHTML = '';
+							}
+							// Verifica si hay alguna justificación guardada en alguna fila
+							let hayAlgunaJustificacionGuardada = false;
+							if (posicionesGuardadas) {
+								hayAlgunaJustificacionGuardada = posicionesGuardadas.some(p => p.justificacion && p.justificacion !== '');
+							}
+							//Valida escenarios justificación
+							if (cumplimientoGuardado !== 'conformidad' && cumplimientoGuardado !== '') {
+								// Escenario 1 sin datos guardados
+								if (!hayAlgunaJustificacionGuardada) {
+									justificacionHTML = `
+										<select class="justificacion-select" data-id-servicio="${servicio.id}">
+											<option value="">Seleccione...</option>
+											<option value="aceptada">Aceptada</option>
+											<option value="no-aceptada">No aceptada</option>
+										</select>
+                                    `;
+									fechaHoraJustificacionHTML = '';
+								//Escenario 2 datos guardados 
+								} else {
+									if (justificacionGuardada && justificacionGuardada !== '') {
+									
+										if (estadoHallazgoGuardado === '03') {
+											//Solo guardado sin correcciones ni notificación
+											const textoJustificacion = justificacionGuardada === 'aceptada' ? 'Aceptada' : justificacionGuardada === 'no-aceptada' ? 'No aceptada' : '';
+											justificacionHTML = `
+												<select class="justificacion-select" data-id-servicio="${servicio.id}" disabled>
+													<option value="${justificacionGuardada}" selected>${textoJustificacion}</option>
+												</select>
+											`;
+											fechaHoraJustificacionHTML = fechaHoraJustificacionGuardada || '---';
+										}else if (estadoHallazgoGuardado === '01' || estadoHallazgoGuardado === '06') {
+											justificacionHTML = justificacionGuardada === 'aceptada' ? 'Aceptada' : justificacionGuardada === 'no-aceptada' ? 'No aceptada' : '---';
+											fechaHoraJustificacionHTML = fechaHoraJustificacionGuardada || '---';
+										}else if (estadoHallazgoGuardado === '05') {
+											const textoJustificacion = justificacionGuardada === 'aceptada' ? 'Aceptada' : 'No aceptada';
+											justificacionHTML = `
+												<select class="justificacion-select" data-id-servicio="${servicio.id}">
+													<option value="">Seleccione...</option>
+													<option value="aceptada" ${justificacionGuardada === 'aceptada' ? 'selected' : ''}>Aceptada</option>
+													<option value="no-aceptada" ${justificacionGuardada === 'no-aceptada' ? 'selected' : ''}>No aceptada</option>
+												</select>
+											
+											`;
+											fechaHoraJustificacionHTML = fechaHoraJustificacionGuardada || '---';
+										}
+									}else {
+										justificacionHTML = `
+											<select class="justificacion-select" data-id-servicio="${servicio.id}" disabled>
+												<option value="">Seleccione...</option>
+												<option value="aceptada">Aceptada</option>
+												<option value="no-aceptada">No aceptada</option>
+											</select>
+										`;
+										fechaHoraJustificacionHTML = '---';
+									}
+								}
+							}else {
+								// Conformidad - campos vacíos
+								justificacionHTML = '';
+								fechaHoraJustificacionHTML = '';
+							}
+						}else if (estadoAuditoria === '06') {
+							solucionHTML = solucionGuardada || '';
+							responsableHTML = responsableGuardado || '';
+							fechaHoraSolucionHTML = fechaHoraSolucionGuardada || '';
+							if (evidenciaGuardada) {
+								evidenciaHTML = '<i class="fas fa-file file-icon"></i>';
+							}else {
+								evidenciaHTML = '';
+							}
+							// Inhabilita campo justificación
+							if (cumplimientoGuardado !== 'conformidad' && cumplimientoGuardado !== '' && justificacionGuardada) {
+								const textoJustificacion = justificacionGuardada === 'aceptada' ? 'Aceptada' : 'No aceptada';
+								justificacionHTML = `
+									<select class="justificacion-select" data-id-servicio="${servicio.id}" disabled>
+										<option value="${justificacionGuardada}" selected>${textoJustificacion}</option>
+									</select>
+								`;
+							}else {
+								justificacionHTML = '';
+							}
+							fechaHoraJustificacionHTML = fechaHoraJustificacionGuardada || '';
+						}else if (estadoAuditoria === '07') {
+							solucionHTML = solucionGuardada || '';
+							responsableHTML = responsableGuardado || '';
+							fechaHoraSolucionHTML = fechaHoraSolucionGuardada || '';
+							if (evidenciaGuardada) {
+								evidenciaHTML = '<i class="fas fa-file file-icon"></i>';
+							} else {
+								evidenciaHTML = '';
+							}
+							// Muestra todo en texto
+							justificacionHTML = justificacionGuardada === 'aceptada' ? 'Aceptada' : justificacionGuardada === 'no-aceptada' ? 'No aceptada' : '---';
+							fechaHoraJustificacionHTML = fechaHoraJustificacionGuardada || '';
+						}
+						
+						
+						// Determina el ícono de estado
+						if (estadoHallazgoGuardado === '01') {
+							estadoIconoHTML = '<span class="estado-icon verde" data-tooltip="Sin hallazgo"></span>';
+						} else if (estadoHallazgoGuardado === '02') {
+							estadoIconoHTML = '<span class="estado-icon rojo" data-tooltip="Hallazgo notificado"></span>';
+						} else if (estadoHallazgoGuardado === '03') {
+							estadoIconoHTML = '<span class="estado-icon amarillo" data-tooltip="Hallazgo gestionado"></span>';
+						} else if (estadoHallazgoGuardado === '04') {
+							estadoIconoHTML = '<span class="estado-icon naranja" data-tooltip="Hallazgo con correcciones"></span>';
+						} else if (estadoHallazgoGuardado === '05') {
+							estadoIconoHTML = '<span class="estado-icon amarillo" data-tooltip="Corrección gestionada"></span>';
+						} else if (estadoHallazgoGuardado === '06') {
+							estadoIconoHTML = '<span class="estado-icon verde" data-tooltip="Corrección aceptada"></span>';
+						}
+						
+						
+						row.innerHTML = `
+							<td>${servicio.id}</td>
+							<td style="text-align: left; padding-left: 8px;">${servicio.descripcion}</td>
+							<td>${servicio.tarifa}</td>
+							<td>${servicio.codAutor}</td>
+							<td>${servicio.diagnostico}</td>
+							<td>${servicio.fecha}</td>
+							${soporteHTML}
+							<td style="background-color: ${colorCumplimiento};">${cumplimientoTexto}</td>
+							<td style="text-align: left; padding-left: 8px;">${notaGuardada || ''}</td>
+							<td style="text-align: left; padding-left: 8px;">${solucionHTML}</td>
+							<td>${evidenciaHTML}</td>
+							<td>${responsableHTML}</td>
+							<td>${fechaHoraSolucionHTML}</td>
+							<td>${justificacionHTML}</td>
+							<td>${fechaHoraJustificacionHTML}</td>
+							<td>${estadoIconoHTML}</td>
+						`;
+						
+						tableBody.appendChild(row);
+					});
+				}
+				
+				//Sistema mensajería
+				
+				function toggleMessages() {
+					
+					const panel = document.getElementById('messagesPanel');
+					
+					// Si el panel está oculto, mostrarlo
+					if (panel.style.display === 'none' || panel.style.display === '') {
+						panel.style.display = 'block';
+					} else {
+						// Si está visible, ocultarlo
+						panel.style.display = 'none';
+					}
+				}
+				
+				function updateMessagesUI() {
+				 
+				    // Obtiene el badge
+				    const badge = document.getElementById('notificationBadge');
+					
+					//Guarda en sessionStorage
+					sessionStorage.setItem('centroMensajes', JSON.stringify({
+						messages: messages,
+						badgeState: messages.length > 0 ? 'withNumber' : 'empty'
+					}));
+					
+					// Actualiza badge de notificación
+					badge.style.display = 'flex';
+					badge.textContent = messages.length;
+					
+					// Actualiza lista de mensajes
+					actualizarListaMensajes();
+				}
+				
+				function acceptMessages() {
+				
+					// Cierra el panel de mensajes
+					const panel = document.getElementById('messagesPanel');
+					panel.style.display = 'none';
+		
+					// Obtiene el badge de notificación
+					const badge = document.getElementById('notificationBadge');
+		
+					// Mantiene el badge visible pero sin número
+					badge.style.display = 'flex';
+					badge.textContent = ''; // Deja solo el círculo rojo
+
+					// Actualiza estado session storage
+					sessionStorage.setItem('centroMensajes', JSON.stringify({
+						messages: messages,
+						badgeState: 'onlyCircle' // Solo círculo rojo sin número
+				    }));
+                }
+				
+				function cargarMensajesDesdeSession() {
+					
+					// Obtiene los datos del sessionStorage
+					const datosGuardados = sessionStorage.getItem('centroMensajes');
+					
+					if (datosGuardados) {
+						try {
+							const datos = JSON.parse(datosGuardados);
+							
+							// Restaura el array de mensajes
+							if (datos.messages && Array.isArray(datos.messages)) {
+								messages = datos.messages;
+							}
+							
+							// Restaura el estado del badge
+							const badge = document.getElementById('notificationBadge');
+							
+							if (datos.badgeState === 'withNumber') {
+								// Badge con número
+								badge.style.display = 'flex';
+								badge.textContent = messages.length;
+							} else if (datos.badgeState === 'onlyCircle') {
+								// Círculo rojo sin número
+								badge.style.display = 'flex';
+								badge.textContent = '';
+							} else {
+								// Oculta badge
+								badge.style.display = 'none';
+							}
+							
+							// Actualiza la lista de mensajes
+							actualizarListaMensajes();
+							
+						} catch (e) {
+							console.error('Error al cargar mensajes desde sessionStorage:', e);
+						}
+					}
+				}
+				
+				function actualizarListaMensajes() {
+					
+					const messagesList = document.getElementById('messagesList');
+					const acceptBtn = document.getElementById('acceptMessagesBtn');
+					
+					if (messages.length === 0) {
+						// Mensaje por defecto
+						messagesList.innerHTML = '<div class="no-messages">No hay mensajes para mostrar</div>';
+						acceptBtn.style.display = 'none';
+					} else {
+						// Construye HTML con todos los mensajes
+						let messagesHTML = '';
+						
+						// Recorre array de mensajes del más reciente al más antiguo
+						for (let i = messages.length - 1; i >= 0; i--) {
+							const message = messages[i];
+							messagesHTML += `
+								<div class="message-item">
+									<div class="message-text">${message.text}</div>
+									<div class="message-date">${message.date}</div>
+								</div>
+							`;
+						}
+						
+						// Inserta HTML en el contenedor
+						messagesList.innerHTML = messagesHTML;
+						
+						// Muestra botón aceptar cuando hay mensajes
+						acceptBtn.style.display = 'block';
+					}
+				}
+				
+				function cambiarColorCumplimiento(selectElement) {
+					const valor = selectElement.value;
+					
+					// Resetea color
+					selectElement.style.backgroundColor = '';
+					selectElement.style.color = '#333';
+					
+					// Aplica color según la opción seleccionada
+					switch(valor) {
+						case 'conformidad':
+							selectElement.style.backgroundColor = '#D9F2D0';
+							break;
+						case 'no-conformidad':
+							selectElement.style.backgroundColor = '#FBE3D6';
+							break;
+						case 'mejora':
+							selectElement.style.backgroundColor = '#FFFE91';
+							break;
+					}
+				}
+
+				function saveData(){
+					showModal('¿Desea guardar los datos?', 'confirm', function() {
+						//Datos de estado paciente
+						const pacienteData = sessionStorage.getItem('pacienteSeleccionado');
+						if (!pacienteData){
+							alert('Error: No se encontró información del paciente.');
+							return;
+						}
+						const paciente = JSON.parse(pacienteData);
+						
+						//Verifica que se pueda guardar auditoría estado = 05
+						if (paciente.estado !== '05') {
+							let estadoTexto = '';
+							switch(paciente.estado) {
+								case '04':
+									estadoTexto = 'Estado de cuenta con hallazgo';
+								break;
+								case '06':
+									estadoTexto= 'Estado de cuenta con correcciones';
+								break;
+								case '07':
+									estadoTexto = 'Finalizada';
+								break;
+								default:
+									estadoTexto = 'Desconocido';
+							}
+							showModal(`Auditoría en estado: <strong>${estadoTexto}</strong>, no es posible guardar`, 'ok');
+							return;
+						}
+						
+						//Verfica datos diligenciados
+						const tableBody = document.getElementById('findingsTableBody');
+						const filas = tableBody.getElementsByTagName('tr');
+						let hayJustificacionDiligenciadas = false;
+						for (let i = 0; i < filas.length; i++) {
+							const fila = filas[i];
+							const selectJustificacion = fila.querySelector('.justificacion-select');
+							// Verifica que el campo no esté inhabilitado y tenga contenido
+							if (selectJustificacion && !selectJustificacion.disabled && selectJustificacion.value.trim() !== '') {
+								hayJustificacionDiligenciadas = true;
+								break;
+							}
+						}
+						//Mensaje error
+						if (!hayJustificacionDiligenciadas) {
+							showModal('No hay datos que guardar. Complete al menos un campo de justificación', 'ok');
+							return;
+						}
+						
+						//Obtiene fecha-Hora
+						const fechaActual = new Date();
+						const dia = String(fechaActual.getDate()).padStart(2, '0');
+						const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
+						const anio = fechaActual.getFullYear();
+						const horas = String(fechaActual.getHours()).padStart(2, '0');
+						const minutos = String(fechaActual.getMinutes()).padStart(2, '0');
+						const fechaHoraFormateada = `${dia}/${mes}/${anio} - ${horas}:${minutos}`;
+						
+						//Obtiene datos actuales del localStorage
+						const cuentasMedicasData = localStorage.getItem('ACuentasMedicas');
+						const cuentasMedicas = JSON.parse(cuentasMedicasData);
+						const auditoria = cuentasMedicas.find(c => c.idAuditoria === paciente.idAuditoria);
+						
+						//Recopila datos de Justificación
+						const posicionesActualizadas = [];
+						for (let i = 0; i < filas.length; i++) {
+							const fila = filas[i];
+							const idServicio = serviciosData[i].id;
+							const selectJustificacion = fila.querySelector('.justificacion-select');
+							// Busca posición dentro del localStorage
+							const posicionExistente = auditoria.posiciones.find(p => p.idServicio === idServicio);
+							// Crea copia de la posición con todos sus datos
+							const posicionActualizada = { ...posicionExistente };
+							// Actualiza justificación 
+							if (selectJustificacion) {
+								const valorJustificacion = selectJustificacion.value;
+								posicionActualizada.justificacion = valorJustificacion;
+								if (!selectJustificacion.disabled && valorJustificacion !== '') {
+									posicionActualizada.fechaHoraJustificacion = fechaHoraFormateada;
+									const indiceFechaHora = i === 0 ? 14 : 13;
+									const celdaFechaHora = fila.cells[indiceFechaHora];
+									if (celdaFechaHora) {
+										celdaFechaHora.textContent = fechaHoraFormateada;
+									}
+								}
+								
+							}
+							// Agrega posición actualizada al array
+							posicionesActualizadas.push(posicionActualizada);
+						}
+						
+						//Inhabilita selects de justificación
+						for (let i = 0; i < filas.length; i++) {
+							const fila = filas[i];
+							const selectJustificacion = fila.querySelector('.justificacion-select');
+							if (selectJustificacion) {
+								selectJustificacion.disabled = true;
+							}
+						}
+						
+						//Actualiza localStorage
+						const indexAuditoria = cuentasMedicas.findIndex(c => c.idAuditoria === paciente.idAuditoria);
+						if (indexAuditoria !== -1) {
+							cuentasMedicas[indexAuditoria].posiciones = posicionesActualizadas;
+							localStorage.setItem('ACuentasMedicas', JSON.stringify(cuentasMedicas));
+						}
+
+						// Actualiza sistema mensajes
+						const mensaje = {
+							text: `Auditoría <strong>${paciente.idAuditoria}</strong> guardada `,
+							date: `${dia}/${mes}/${anio}`
+						}
+						messages.push(mensaje);
+						updateMessagesUI();
+						
+						// Muestra modal confirmación
+						showModal('Datos guardados correctamente', 'ok');
+					});
+				
+				}
+				
+				function editRow(){
+					//Datos de estado paciente
+					const pacienteData = sessionStorage.getItem('pacienteSeleccionado');
+					if (!pacienteData){
+						alert('Error: No se encontró información del paciente.');
+						return;
+					}
+					const paciente = JSON.parse(pacienteData);
+					//Verifica que se pueda guardar auditoría estado = 05
+					if (paciente.estado !== '05') {
+						let estadoTexto = '';
+						switch(paciente.estado) {
+							case '04':
+								estadoTexto = 'Estado de cuenta con hallazgo';
+							break;
+							case '06':
+								estadoTexto= 'Estado de cuenta con correcciones';
+							break;
+							case '07':
+								estadoTexto = 'Finalizada';
+							break;
+							default:
+								estadoTexto = 'Desconocido';
+						}
+						showModal(`Auditoría en estado: <strong>${estadoTexto}</strong>, no es posible editar`, 'ok');
+						return;
+					}
+					
+					//Obtiene campos para habilitar edición
+					const tableBody = document.getElementById('findingsTableBody');
+					const filas = tableBody.getElementsByTagName('tr');
+					
+					//Valida inhabilidad selects de justificación
+					let haySelectHabilitado = false;
+					for (let i = 0; i < filas.length; i++) {
+						const fila = filas[i];
+						const selectJustificacion = fila.querySelector('.justificacion-select');
+						
+						if (selectJustificacion && !selectJustificacion.disabled) {
+							haySelectHabilitado = true;
+							break;
+						}
+					}
+					//Mensaje de Error
+					if (haySelectHabilitado) {
+						showModal('No hay campos para su edición, guarde primero los cambios', 'ok');
+						return;
+					}
+					
+					//Habilita selects de justificación
+					let camposHabilitados = false;
+					for (let i = 0; i < filas.length; i++) {
+						const fila = filas[i];
+						const selectJustificacion = fila.querySelector('.justificacion-select');
+						if (selectJustificacion && selectJustificacion.disabled) {
+							const valorActual = selectJustificacion.value;
+							selectJustificacion.innerHTML = `
+								<option value="">Seleccione...</option>
+								<option value="aceptada" ${valorActual === 'aceptada' ? 'selected' : ''}>Aceptada</option>
+								<option value="no-aceptada" ${valorActual === 'no-aceptada' ? 'selected' : ''}>No aceptada</option>
+							`;
+							selectJustificacion.disabled = false;
+							camposHabilitados = true;
+						}
+					}
+					
+					//Mensaje confirmación
+					showModal('Modo edición habilitado', 'ok');
+				}
+				
+				function notifyAudit(){
+					const pacienteData = sessionStorage.getItem('pacienteSeleccionado');
+					if (!pacienteData){
+						alert('Error: No se encontró información del paciente.');
+						return;
+					}
+					const paciente = JSON.parse(pacienteData);
+					const tableBody = document.getElementById('findingsTableBody');
+                    const filas = tableBody.getElementsByTagName('tr');
+					
+					showModal(`¿Desea notificar la auditoría:<strong> ${paciente.idAuditoria}</strong> ?`, 'confirm', function() {
+						//Verifica que se pueda guardar auditoría estado = 05
+						if (paciente.estado !== '05') {
+							let estadoTexto = '';
+							switch(paciente.estado) {
+								case '04':
+									estadoTexto = 'Estado de cuenta con hallazgo';
+								break;
+								case '06':
+									estadoTexto= 'Estado de cuenta con correcciones';
+								break;
+								case '07':
+									estadoTexto = 'Finalizada';
+								break;
+								default:
+									estadoTexto = 'Desconocido';
+							}
+							showModal(`Auditoría en estado: <strong>${estadoTexto}</strong>, no es posible guardar`, 'ok');
+							return;
+						}
+						
+						//Verifica justificación inhabilitados
+						let hayJustificacionHabilitada = false;
+						for (let i = 0; i < filas.length; i++) {
+							const fila = filas[i];
+							const selectJustificacion = fila.querySelector('.justificacion-select');
+							if (selectJustificacion && !selectJustificacion.disabled) {
+								hayJustificacionHabilitada = true;
+								break;
+							}
+						}
+						//Mensaje Error
+						if (hayJustificacionHabilitada) {
+							showModal('Por favor guarde la auditoría antes de notificarla', 'ok');
+							return;
+						}
+						
+						//Verifica justificación diligenciados
+						let faltaJustificacion = false;
+						for (let i = 0; i < filas.length; i++) {
+							const fila = filas[i];
+							const selectJustificacion = fila.querySelector('.justificacion-select');
+							if (selectJustificacion) {
+								const valorJustificacion = selectJustificacion.value;
+								if (!valorJustificacion || valorJustificacion === '') {
+									faltaJustificacion = true;
+									break;
+								}
+							}
+						}
+						//Mensaje Error
+						if (faltaJustificacion) {
+							showModal('Por favor complete la auditoría antes de notificar su resultado', 'ok');
+							return;
+						}
+						
+						//Actualización estados
+						const cuentasMedicasData = localStorage.getItem('ACuentasMedicas');
+						const cuentasMedicas = JSON.parse(cuentasMedicasData);
+						const indexAuditoria = cuentasMedicas.findIndex(c => c.idAuditoria === paciente.idAuditoria);
+						if (indexAuditoria === -1) {
+							alert('Error: No se encontró la auditoría en localStorage');
+							return;
+						}
+						let hayAlgunaNoAceptada = false;
+						let todasAceptadas = true;
+						// Recorre filas y actualiza estados de hallazgos
+						for (let i = 0; i < filas.length; i++) {
+							const fila = filas[i];
+							const selectJustificacion = fila.querySelector('.justificacion-select');
+							if (selectJustificacion) {
+								const valorJustificacion = selectJustificacion.value;
+								const idServicio = selectJustificacion.getAttribute('data-id-servicio');
+								const indiceEstado = i === 0 ? 15 : 14;
+								// Busca posición en localStorage
+								const posicionIndex = cuentasMedicas[indexAuditoria].posiciones.findIndex(p => p.idServicio === idServicio);
+								if (posicionIndex !== -1) {
+									if (valorJustificacion === 'aceptada') {
+										// Actualiza estado a 06 - Corrección aceptada
+										cuentasMedicas[indexAuditoria].posiciones[posicionIndex].estadoHallazgo = '06';
+										fila.cells[indiceEstado].innerHTML = '<span class="estado-icon verde" data-tooltip="Corrección aceptada"></span>';
+									}else if (valorJustificacion === 'no-aceptada') {
+										// Actualiza estado a 04 - Hallazgo con correcciones
+										cuentasMedicas[indexAuditoria].posiciones[posicionIndex].estadoHallazgo = '04';
+										fila.cells[indiceEstado].innerHTML = '<span class="estado-icon naranja" data-tooltip="Hallazgo con correcciones"></span>';
+										hayAlgunaNoAceptada = true;
+										todasAceptadas = false;
+									}
+								}
+								// Verifica si hay justificaciones que no sean aceptadas
+								if (valorJustificacion !== 'aceptada') {
+									todasAceptadas = false;
+								}
+							}
+						}
+						
+						// Determina el estado final de la auditoría
+						let nuevoEstadoAuditoria = '';
+						let nuevoTextoEstado = '';
+						if (hayAlgunaNoAceptada) {
+							nuevoEstadoAuditoria = '06';
+							nuevoTextoEstado = 'Estado de cuenta con correcciones';
+						}else if (todasAceptadas) {
+							nuevoEstadoAuditoria = '07';
+							nuevoTextoEstado = 'Finalizada';
+						}
+						
+						// Actualiza localStorage y sessionStorage
+						if (nuevoEstadoAuditoria) {
+							cuentasMedicas[indexAuditoria].estado = nuevoEstadoAuditoria;
+							localStorage.setItem('ACuentasMedicas', JSON.stringify(cuentasMedicas));
+							paciente.estado = nuevoEstadoAuditoria;
+							sessionStorage.setItem('pacienteSeleccionado', JSON.stringify(paciente));
+							// Actualiza el HEADER - campo Estado
+							const patientInfoContainer = document.getElementById('patient-info');
+							const estadoField = patientInfoContainer.querySelector('.info-field:nth-child(5) .info-value');
+							if (estadoField) {
+								estadoField.textContent = nuevoTextoEstado;
+							}
+						}
+						
+						//Fecha Mensaje
+						const fechaActual = new Date();
+						const dia = String(fechaActual.getDate()).padStart(2, '0');
+						const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
+						const anio = fechaActual.getFullYear();
+						
+						//Mensaje
+						const mensaje = {
+							text: `Auditoría <strong>${paciente.idAuditoria}</strong> notificada<br>Estado: ${nuevoTextoEstado}`,
+							date: `${dia}/${mes}/${anio}`
+						};
+						messages.push(mensaje);
+						updateMessagesUI();
+						//Confirmación
+						showModal(`Auditoría <strong> ${paciente.idAuditoria} </strong> notificada correctamente<br>Estado: ${nuevoTextoEstado}`, 'ok');
+					});
+				
+				}
+
+				// Función para mostrar modal
+				
+				function showModal(message, type, callback) {
+				
+					// Obtener elementos del modal
+					const modal = document.getElementById('modal');
+					const modalText = document.getElementById('modalText');
+					const modalButtons = document.getElementById('modalButtons');
+					
+					// Establecer el texto del modal
+					modalText.innerHTML = message;
+					
+					// Limpiar botones previos
+					modalButtons.innerHTML = '';
+					
+					// Según el tipo de modal, crear los botones correspondientes
+					if (type === 'ok') {
+						// Solo botón OK
+						const okButton = document.createElement('button');
+						okButton.textContent = 'OK';
+						okButton.className = 'modal-btn confirm';
+						okButton.onclick = function() {
+							closeModal();
+						};
+						modalButtons.appendChild(okButton);
+					} else if (type === 'confirm') {
+						// Botones Confirmar y Cancelar
+						const confirmButton = document.createElement('button');
+						confirmButton.textContent = 'Confirmar';
+						confirmButton.className = 'modal-btn confirm';
+						confirmButton.onclick = function() {
+							closeModal();
+							// Ejecutar el callback si existe
+							if (callback) callback();
+						};
+						
+						const cancelButton = document.createElement('button');
+						cancelButton.textContent = 'Cancelar';
+						cancelButton.className = 'modal-btn cancel';
+						cancelButton.onclick = function() {
+							closeModal();
+						};
+						
+						modalButtons.appendChild(confirmButton);
+						modalButtons.appendChild(cancelButton);
+					}
+					
+					// Mostrar el modal
+					modal.style.display = 'block';
+				}
+
+				//Cerrar modal
+				
+				function closeModal() {
+					const modal = document.getElementById('modal');
+					modal.style.display = 'none';
+				}
+				
+				// Posicionar tooltips de estado dinámicamente
+				document.addEventListener('mouseover', function(e) {
+					if (e.target.classList.contains('estado-icon')) {
+						const rect = e.target.getBoundingClientRect();
+						const tooltip = window.getComputedStyle(e.target, '::after');
+						e.target.style.setProperty('--tooltip-top', `${rect.bottom + 10}px`);
+						e.target.style.setProperty('--tooltip-left', `${rect.left + rect.width / 2}px`);
+					}
+				});
+			
+			</script>
+		
+		</body>
+	</html>

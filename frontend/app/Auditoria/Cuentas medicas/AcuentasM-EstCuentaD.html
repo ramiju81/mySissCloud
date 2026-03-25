@@ -1,0 +1,448 @@
+	<html lang="es">
+	    <head>
+		    <!-- Font Awesome para iconos - librería de iconos gratuita -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>mySiss - Auditoría</title>
+            <link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+		    <style>
+			    :root {
+					--mysiss-purple: #800080;
+					--mysiss-light-purple: #EBE3F2;
+					--mysiss-hover-purple: #DFD1EE;
+					--sidebar-width: 280px;
+			    }
+
+				* {
+					margin: 0;
+					padding: 0;
+					box-sizing: border-box;
+				}
+
+				body {
+					font-family: system-ui, -apple-system, sans-serif;
+					background: white;
+					min-height: 100vh;
+				}
+
+				/* ===== BARRA SUPERIOR (HEADER) ===== */
+				
+				.top-bar {
+					display: flex; /* Flexbox para alinear elementos */
+					justify-content: space-between; /* Espacio entre elementos */
+					align-items: center;
+					padding: 10px 30px;
+					background: white;
+					border-bottom: 0.5px;
+					position: sticky;
+					top: 0;
+					z-index: 1000;
+				}
+
+				/* ===== LOGO MYSISS ===== */
+				
+				.logo {
+					font-size: 3.5rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+				}
+
+				/* ===== CONTENEDOR DE BOTONES SUPERIORES ===== */
+				
+				.top-buttons {
+					display: flex;
+					gap: 15px; /* Espacio entre botones */
+					align-items: center;
+				}
+				
+
+				/* ===== BOTÓN CERRAR ===== */
+				
+				.close-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px; 
+					border-radius: 8px; 
+					font-size: 16px; 
+					font-weight: 600; 
+					cursor: pointer; 
+					transition: all 0.3s ease; 
+					box-shadow: 0 4px 15px rgba(128, 0, 128, 0.2); 
+					display: inline-flex; /* Flex para alinear icono y texto */
+					align-items: center; 
+					gap: 8px;
+					text-decoration: none;
+				}
+
+				/* Efecto hover del botón atrás */
+				
+				.close-button:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(128, 0, 128, 0.3);
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* ===== BOTÓN MENÚ ===== */
+				
+				.menu-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					box-shadow: 0 4px 15px rgba(128, 0, 128, 0.2);
+					text-decoration: none;
+					display: inline-flex; /* Flex para alinear */
+					align-items: center;
+					gap: 10px;
+				}
+
+				/* Efecto hover del botón menú */
+				
+				.menu-button:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(128, 0, 128, 0.3); /* Sombra más pronunciada */
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* ===== CONTENEDOR PRINCIPAL ===== */
+				
+				.main-container {
+					padding: 10px 30px;
+				}
+				
+				/* ===== HEADER DE INFORMACIÓN DEL PACIENTE ===== */
+				
+				.patient-header {
+					background: white; 
+					border: 2px solid #e0e0e0; 
+					border-radius: 10px;
+					padding: 20px; 
+					margin-bottom: 20px; 
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+				}
+
+				/* Grid para organizar la información del paciente */
+				
+				.patient-info {
+					display: grid;
+					grid-template-columns: repeat(3, 1fr); /* 4 columnas iguales */
+					gap: 20px;
+					align-items: center;
+				}
+
+				/* Cada campo de información del paciente */
+				
+				.info-field {
+					display: flex;
+					flex-direction: row;
+					gap: 8px;
+					align-items: center;
+					
+				}
+
+				/* Etiqueta del campo */
+				
+				.info-label {
+					font-size: 0.85rem;
+					color: #666;
+					font-weight: 600;
+				}
+
+				/* Valor del campo */
+				
+				.info-value {
+					font-size: 1rem;
+					color: #333;
+					font-weight: 500;
+				}
+				
+				/* ===== CONTENEDOR DE TABLA DE SERVICIOS ===== */
+
+				.services-container {
+					background: white;
+					border: 2px solid #e0e0e0;
+					border-radius: 10px;
+					padding: 20px;
+					margin-top: 20px;
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+				}
+
+				.services-title {
+					font-size: 1.25rem;
+					color: var(--mysiss-purple);
+					font-weight: 600;
+					margin-bottom: 15px;
+				}
+
+				.services-table {
+					width: 100%;
+					border-collapse: collapse;
+					font-size: 0.9rem;
+				}
+
+				.services-table thead {
+					background: var(--mysiss-light-purple);
+				}
+
+				.services-table th {
+					padding: 12px;
+					text-align: left;
+					font-weight: 600;
+					color: var(--mysiss-purple);
+					border-bottom: 2px solid #e0e0e0;
+				}
+
+				.services-table td {
+					padding: 12px;
+					border-bottom: 1px solid #f0f0f0;
+					color: #333;
+				}
+
+				.services-table tbody tr:hover {
+					background: #f9f9f9;
+				}
+
+				.services-table tbody tr:last-child td {
+					border-bottom: none;
+				}
+				
+				/* Centrar columna de código de autorización */
+				.services-table td:nth-child(4),
+				.services-table th:nth-child(4) {
+					text-align: center;
+				}
+				
+				/* ===== ANIMACIONES ===== */
+				
+				/* Animación de aparición gradual */
+				.fade-in {
+					animation: fadeIn 0.5s ease-in; /* Animación 0.5 segundos */
+				}
+
+				@keyframes fadeIn {
+					from {
+						opacity: 0; /* Invisible */
+						transform: translateX(-20px); /* Desplazado abajo */
+					}
+					to {
+						opacity: 1; /* Visible */
+						transform: translateX(0); /* Posición original */
+					}
+				}
+			
+			</style>
+		</head>
+		<body>
+		    
+			<!-- ===== BARRA SUPERIOR ===== -->
+            <div class="top-bar">
+			
+                <!-- Logo de mySiss -->
+                <div class="logo">mySiss</div>
+                
+				<!-- Botones superiores derechos -->
+                <div class="top-buttons">
+                  	
+					<!-- Botón Cerrar: cierra la pestaña -->
+                    <button onclick="window.close()" class="close-button">
+                        <i class="fas fa-close"></i> <!-- Icono de cerrar -->
+                        Cerrar
+                    </button>
+
+                    <!-- Botón Menú: lleva a Auditoria.html -->
+                    <a href="../Auditoria.html" class="menu-button">
+                     <i class="fas fa-bars"></i> <!-- Icono de menú hamburguesa -->
+                     Menú
+                    </a>
+                </div>
+            </div>
+			<!-- ===== CONTENEDOR PRINCIPAL ===== -->
+            <div class="main-container">
+
+                <!-- ===== HEADER DE INFORMACIÓN DEL PACIENTE ===== -->
+
+                <div class="patient-header fade-in">
+                    <div class="patient-info" id ="patient-info">
+                        <!-- Nombre del paciente -->
+                        <div class="info-field">
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Documento -->
+                        <div class="info-field">
+                         <span class="info-value"></span>
+                        </div>
+				
+                        <!-- Número de caso -->
+                        <div class="info-field">
+                         <span class="info-label">Número de caso:</span>
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Responsable de pago -->
+                        <div class="info-field">
+                         <span class="info-label">Responsable de pago:</span>
+                         <span class="info-value"></span>
+                        </div>
+						
+						<!-- Estado -->
+                        <div class="info-field">
+                         <span class="info-label">Estado:</span>
+                         <span class="info-value"></span>
+                        </div>
+						
+						<!-- Auditor -->
+                        <div class="info-field">
+                         <span class="info-label">Auditor:</span>
+                         <span class="info-value"></span>
+                        </div>
+						
+						
+                    </div>
+                </div>
+				
+				<!-- ===== TABLA DE SERVICIOS ===== -->
+				<div class="services-container fade-in">
+					<h2 class="services-title">Detalle de Servicios</h2>
+					<table class="services-table">
+						<thead>
+							<tr>
+								<th>ID Servicios</th>
+								<th>Descripción</th>
+								<th>Tarifa</th>
+								<th>Código de autorización</th>
+								<th>Diagnóstico</th>
+								<th>Fecha realización</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>170001</td>
+								<td>Apicectomía vía infraoclear</td>
+								<td>$1'100.000 COP</td>
+								<td></td>
+								<td>H610 - Pericondritis del oído externo</td>
+								<td>25/01/2025</td>
+							</tr>
+							<tr>
+								<td>199001</td>
+								<td>Desfuncionalización de oído medio</td>
+								<td>$650.000 COP</td>
+								<td>2025012525</td>
+								<td>H610 - Pericondritis del oído externo</td>
+								<td>30/01/2025</td>
+							</tr>
+							<tr>
+								<td>120045</td>
+								<td>Consulta especializada otorrinolaringología</td>
+								<td>$180.000 COP</td>
+								<td>2025012501</td>
+								<td>H610 - Pericondritis del oído externo</td>
+								<td>20/01/2025</td>
+							</tr>
+							<tr>
+								<td>890234</td>
+								<td>Audiometría tonal y vocal</td>
+								<td>$120.000 COP</td>
+								<td>2025012502</td>
+								<td>H610 - Pericondritis del oído externo</td>
+								<td>21/01/2025</td>
+							</tr>
+							<tr>
+								<td>345678</td>
+								<td>Radiografía de torax</td>
+								<td>$95.000 COP</td>
+								<td>2025012503</td>
+								<td>H610 - Pericondritis del oído externo</td>
+								<td>21/01/2025</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<script>
+			
+			    // Recupera los datos del paciente seleccionado
+				window.addEventListener('DOMContentLoaded', function() {
+				    const pacienteData = sessionStorage.getItem('pacienteSeleccionado');
+					
+					if (pacienteData) {
+					    
+						const paciente = JSON.parse(pacienteData);
+						
+						//Construir el Nombre
+						const nombreCompleto = `${paciente.nombre}${paciente.segundoNombre ? ' ' + paciente.segundoNombre : ''} ${paciente.apellido1} ${paciente.apellido2}`;
+						
+						//Construir tipo y número Documento
+						const documentoCompleto = `${paciente.tipoDocumento} - ${paciente.numeroDocumento}`;
+						
+						// Obtener el contenedor donde se mostrarán los datos
+						const patientInfoContainer = document.getElementById('patient-info');
+					
+						// Verificar que el contenedor exista antes de manipularlo
+						if (!patientInfoContainer) {
+							console.error('Error: No se encontró el elemento con id="patientInfo"');
+							return;
+						}
+					
+						// Limpiar el contenido previo
+						patientInfoContainer.innerHTML = '';
+						
+						// Crear el HTML con todos los datos del paciente
+						patientInfoContainer.innerHTML = `
+						    <!-- Nombre del paciente -->
+							<div class="info-field">
+							    <span class="info-value">${nombreCompleto}</span>
+							</div>
+							<!-- Documento -->
+							<div class="info-field">
+							    <span class="info-value">${documentoCompleto}</span>
+							</div>
+							<!-- Número de caso -->
+							<div class="info-field">
+							    <span class="info-label">Número de caso:</span>
+								<span class="info-value">${paciente.numeroCaso}</span>
+							</div>
+							<!-- Responsable de pago -->
+							<div class="info-field">
+							    <span class="info-label">Responsable de pago:</span>
+							    <span class="info-value">${paciente.responsablePago}</span>
+							</div>
+							<!-- Estado -->
+							<div class="info-field">
+							    <span class="info-label">Estado:</span>
+							    <span class="info-value">${paciente.estado}</span>
+							</div>
+							<!-- Auditor -->
+							<div class="info-field">
+							    <span class="info-label">Auditor:</span>
+							    <span class="info-value">${paciente.nombreAuditor || 'Sin asignar'}</span>
+							</div>
+						
+						
+						`;
+
+					
+					
+					}else {
+					    console.error('No se encontró información del paciente');
+						alert('Error: No se pudo cargar la información del paciente');
+					}
+					
+					
+				
+				
+				});
+			
+			</script>
+		
+		</body>
+	</html>

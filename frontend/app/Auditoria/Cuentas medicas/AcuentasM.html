@@ -1,0 +1,186 @@
+    <!DOCTYPE html>
+    <html lang="es">
+        <head>
+         <!-- Font Awesome para iconos - librería de iconos gratuita -->
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title>mySiss - Auditoría</title>
+         <link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+            <style>
+			
+                :root {
+                 --mysiss-purple: #800080;
+                 --mysiss-light-purple: #EBE3F2;
+                 --mysiss-hover-purple: #DFD1EE;
+                }
+	
+				*{
+				 margin: 0;
+				 padding: 0;
+				 box-sizing: border-box;
+				}
+
+				body {
+				 font-family: system-ui, -apple-system, sans-serif;
+				 background: white;
+				 min-height: 100vh;
+				}
+
+				.focus-outline:focus {
+				 outline: 2px solid var(--mysiss-purple);
+				 outline-offset: 2px;
+				}
+
+				/* == Layout == */
+				.app-container {
+				 display: flex;
+				 min-height: 100vh;
+				}
+
+				/* == Sidebar == */
+				.sidebar {
+				 position:fixed;
+				 left:0;
+				 top:0;
+				 width: 252px;
+				 height: 100vh;
+				 overflow-y: auto;
+				 background: var(--mysiss-light-purple);
+				 padding: 0.8rem;
+				 z-index: 100;
+				 display: flex;
+				 flex-direction: column;
+				 justify-content: space-between; /* Distribuye el espacio entre logo/menú y cerrar sesión */
+				}
+				
+				.sidebar-top {
+				 flex-grow: 1; /* Ocupa el espacio disponible */
+				 display: flex;
+				 flex-direction: column;
+				}
+
+				/* == Contenedor para el botón de cerrar sesión que siempre estará al fondo == */
+				.sidebar-bottom {
+				 margin-top: auto; /* Empuja este elemento hacia abajo */
+				 padding-top: 0.4rem; /* Espacio superior */
+				}
+				
+				.logo {
+				 font-size: 3.4rem;
+				 font-weight: bold;
+				 color: var(--mysiss-purple);
+				 margin-bottom: 1.5rem;
+				 text-align: center;
+				}
+
+				.nav-link {
+				 display: block;
+				 padding: 14px 24px;
+				 color: var(--mysiss-purple);
+				 text-decoration: none;
+				 border-radius: 0.5rem;
+				 font-weight: 500;
+				 margin-bottom: 0.5rem;
+				 transition: all 0.3s ease; /* Transición suave para hover */
+				 /*border-left: 4px solid transparent;  Borde izquierdo invisible por defecto */
+				 cursor: pointer;
+				}
+				
+				.nav-link:hover {
+				 background: var(--mysiss-hover-purple);
+				}
+
+				/* ===== CONTENIDO PRINCIPAL ===== */
+				
+			    app-container {
+					display: flex; /* Layout flexbox para sidebar + contenido */
+					min-height: 100vh; /* Altura mínima de toda la ventana */
+					position: relative;
+				}
+
+				/* Botón Menú en la parte superior derecha */
+				.menu-button {
+				   position: fixed;
+				   top: 20px;
+				   right: 20px;
+				   background: var(--mysiss-purple);
+				   color: white;
+				   border: none;
+				   padding: 12px 30px;
+				   border-radius: 8px;
+				   font-size: 16px;
+				   font-weight: 600;
+				   cursor: pointer;
+				   transition: all 0.3s ease;
+				   box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
+				   text-decoration: none;
+				   display: inline-flex; /*alinear icono y texto*/
+				   align-items: center; /*Centra verticalmente el icono y texto*/
+				   gap: 10px; /*Espacio de 10px entre el icono y el texto*/
+				   z-index: 1000;
+				}
+				
+				.menu-button:hover {
+				  transform: translateY(-2px);
+				  box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+				  background: var(--mysiss-hover-purple);
+				}
+				
+				/* Estilo para el icono del menú hamburguesa */
+				.menu-button i {
+				  font-size: 18px; /* Tamaño del icono ligeramente más grande que el texto */
+				}
+
+				/* ===== DISEÑO RESPONSIVO ===== */
+				@media (max-width: 768px) {
+					/* En pantallas pequeñas, formulario en una sola columna */
+					.form-grid {
+						grid-template-columns: 1fr;
+						gap: 15px;
+					}
+					
+					/* Sidebar más pequeño */
+					.sidebar {
+						width: 200px;
+					}
+					
+					/* Ajustar margen del contenido principal */
+					.main-content {
+						margin-left: 200px;
+						padding: 20px;
+					}
+                }
+            </style>
+        </head>
+        <body>
+            <!-- Botón menú -->
+            <a href="../AuditoriaB.html" class="menu-button">
+	         <i class="fas fa-bars"></i><!-- Icono de menú hamburguesa (3 líneas horizontales) -->
+	         Menú
+	        </a>
+            <div class="app-container">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+				    <div class="sidebar-top">
+                        <div class="logo">mySiss</div> <!-- Logo mysiss -->
+				        <nav><!-- Menú -->
+						 <a href="AcuentasM-CarConvenios.html" class="nav-link" ><strong>Cargar convenio</strong></a>
+						 <a href="AcuentasM-ConfConvenios.html" class="nav-link"><strong>Configurar convenio</strong></a>
+						 <a href="AcuentasM-Validaciones.html" class="nav-link"><strong>Validaciones</strong></a>
+						 <a href="AcuentasM-EstCuenta.html" class="nav-link"><strong>Estados de cuenta</strong></a>
+						 <a href="AcuentasM-Gauditoria.html" class="nav-link"><strong>Gestionar auditoría</strong></a>
+						 <a href="AcuentasM-Gestcorrec.html" class="nav-link"><strong>Gestionar correcciones</strong></a>
+						 <a href="AcuentasM-Resultados.html" class="nav-link"><strong>Resultados</strong></a>
+                        </nav>
+					</div>
+					<div class ="sidebar-bottom">
+					 <!-- Sección de logout en la parte inferior -->
+					 <a href="../loginA.html" class="nav-link" data-section="logout"><strong>Cerrar sesión</strong></a>
+					</div>
+                </aside>
+	        </div>
+            <script>
+            </script>
+        </body>
+    </html>

@@ -1,0 +1,1143 @@
+ <!DOCTYPE html>
+    <html lang="es">
+        <head>
+         <!-- Font Awesome para iconos - librería de iconos gratuita -->
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title>mySiss - Auditoría</title>
+         <link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+            <style>
+			 
+				:root {
+				  --mysiss-purple: #800080;
+				  --mysiss-light-purple: #EBE3F2;
+				  --mysiss-hover-purple: #DFD1EE;
+				  --sidebar-width: 200px; /* Variable para el ancho del sidebar */
+			    }
+
+			    *{
+				  margin: 0;
+				  padding: 0;
+				  box-sizing: border-box;
+			    }
+
+
+				
+				body {
+					font-family: system-ui, -apple-system, sans-serif;
+					background: white;
+					min-height: 100vh;
+					position: relative;
+				}
+
+				/* ===== OUTLINE PARA ACCESIBILIDAD ===== */
+				
+				.focus-outline:focus {
+					outline: 2px solid var(--mysiss-purple);
+					outline-offset: 2px;
+				}
+
+				/* ===== CONTENEDOR PRINCIPAL ===== */
+				
+				.app-container {
+					display: flex;
+					min-height: 100vh;
+					position: relative;
+				}
+
+				/* ===== SIDEBAR (MENU LATERAL) ===== */
+				
+				.sidebar {
+					position: fixed;
+					left: 0;
+					top: 0;
+					width: var(--sidebar-width);
+					height: 100vh;
+					overflow-y: auto;
+					background: var(--mysiss-light-purple);
+					padding: 0.8rem;
+					z-index: 100;
+					display: flex;
+					flex-direction: column;
+					justify-content: space-between;
+				}
+
+				/* Parte superior del sidebar */
+				.sidebar-top {
+					flex-grow: 1;
+					display: flex;
+					flex-direction: column;
+				}
+
+				/* Parte inferior del sidebar para cerrar sesión */
+				.sidebar-bottom {
+					margin-top: auto;
+					padding-top: 1rem;
+				}
+
+				/* Logo de mySiss */
+				.logo {
+					font-size: 3.1rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+					margin-bottom: 2rem;
+					text-align: center;
+				}
+
+				/* Enlaces de navegación normales */
+				.nav-link {
+					display: block;
+					padding: 15px 25px;
+					color: var(--mysiss-purple);
+					text-decoration: none;
+					border-radius: 0.5rem;
+					font-weight: 500;
+					margin-bottom: 0.5rem;
+					transition: all 0.3s ease;
+					cursor: pointer;
+				}
+
+				/* Efecto hover en enlaces de navegación */
+				.nav-link:hover {
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* Enlace de navegación seleccionado */
+				.nav-linkG {
+					display: block;
+					padding: 15px 25px;
+					color: var(--mysiss-purple);
+					text-decoration: none;
+					border-radius: 0.5rem;
+					font-weight: 500;
+					margin-bottom: 0.5rem;
+					transition: all 0.3s ease;
+					cursor: pointer;
+					background: white;
+				}
+
+				/* ===== CONTENIDO PRINCIPAL ===== */
+				
+				.main-content {
+					margin-left: var(--sidebar-width); /* Espacio para el sidebar fijo */
+					padding: 2rem 1.5rem 1rem 1.5rem;
+					width: calc(100% - var(--sidebar-width)); /* Ancho completo menos el sidebar */
+				}
+
+				/* Título de la sección principal */
+				.section-title {
+					font-size: 1.875rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+					margin-bottom: 1.8rem;
+				}
+
+				/* Subtítulo h3 */
+				.h3-title {
+					font-size: 1.5rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+				}
+
+				/* ===== SECCIÓN DE FILTROS ===== */
+
+				/* Contenedor principal de los dos filtros de búsqueda */
+				.filters-container {
+					display: grid;
+					grid-template-columns: 1fr 1fr; /* Dos columnas iguales para los filtros */
+					gap: 2rem; /* Espacio entre las dos secciones de filtros */
+					margin-bottom: 0.75rem;
+				}
+
+				/* Contenedor de cada filtro individual */
+				.filter-section {
+					background: white;
+					padding: 0.75rem;
+					border-radius: 12px;
+					box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); /* Sombra sutil */
+				}
+
+				/* Título de cada sección de filtro */
+				.filter-title {
+					font-size: 0.95rem;
+					font-weight: 600;
+					color: #333;
+					margin-bottom: 0.5rem;
+				}
+
+				/* Contenedor de cada campo del formulario */
+				.form-field {
+					margin-bottom: 0.5rem;
+					display: flex;
+					flex-direction: row; /* Organiza los elementos en columna (uno debajo del otro) */
+					align-items: center;
+					gap: 0.5rem;
+				}
+
+				/* Etiqueta de cada campo */
+				.form-field label {
+					display: block;
+					color: #333;
+					font-weight: 500;
+					margin-bottom: 0;
+					font-size: 0.85rem;
+					min-width: 150px;
+				}
+
+				/* Contenedor para input con icono de búsqueda */
+				.input-with-icon {
+					display: flex;
+					align-items: center;
+					gap: 0.5rem; /* Espacio entre el input y el icono */
+				}
+
+				/* Estilos de los inputs de texto */
+				.form-field input {
+					flex: 1; /* El input ocupa todo el espacio disponible */
+					padding: 0.4rem 0.5rem;
+					border: 1px solid #d1d5db;
+					border-radius: 0.375rem;
+					font-size: 0.8rem;
+				}
+
+				/* Efecto al hacer foco en los inputs */
+				.form-field input:focus {
+					outline: none;
+					border-color: var(--mysiss-purple);
+					box-shadow: 0 0 0 3px rgba(128, 0, 128, 0.1);
+				}
+
+				/* Botón con icono de ayuda de búsqueda (lupa) para abrir modal */
+				.search-icon-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.4rem;
+					border-radius: 0.375rem;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 32px;
+					height: 32px;
+					font-size: 0.8rem;
+				}
+
+				/* Efecto hover del botón ayuda de búsqueda */
+				.search-icon-btn:hover {
+					background: var(--mysiss-hover-purple);
+					color: white;
+				}
+
+				/* Contenedor del botón de búsqueda principal */
+				.search-button-container {
+					text-align: right;
+					margin: 0.3rem 0.3rem;
+				}
+
+				/* Botón principal de búsqueda */
+				.search-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.5rem 2rem;
+					border-radius: 0.5rem;
+					font-size: 0.9rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				/* Efecto hover del botón principal */
+				.search-button:hover {
+					background: var(--mysiss-hover-purple);
+					color: white;;
+					transform: translateY(-2px);
+				}
+
+				/* ===== MODAL (POP-UP) ===== */
+
+				/* Fondo oscuro del modal que cubre toda la pantalla */
+				.modal-overlay {
+					display: none; /* Oculto por defecto */
+					position: fixed;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+					background: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+					z-index: 1001; /* Por encima de todo el contenido */
+					justify-content: center;
+					align-items: center;
+				}
+
+				/* Cuando el modal está activo */
+				.modal-overlay.active {
+					display: flex;
+				}
+
+				/* Contenedor del contenido del modal */
+				.modal-content {
+					background: white;
+					padding: 1.5rem;
+					border-radius: 0.5rem;
+					max-width: 400px;
+					width: 90%;
+					max-height: 400px;
+					overflow-y: auto; /* Scroll si el contenido es muy largo */
+					box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+				}
+
+				/* Encabezado del modal */
+				.modal-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 1rem;
+				}
+
+				/* Título del modal */
+				.modal-title {
+					font-size: 1.25rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+				}
+
+				/* Botón para cerrar el modal (X) */
+				.modal-close {
+					background: none;
+					border: none;
+					font-size: 1.5rem;
+					color: var(--mysiss-purple);
+					cursor: pointer;
+					padding: 0;
+					width: 30px;
+					height: 30px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+
+				/* Efecto hover del botón cerrar */
+				.modal-close:hover {
+					color: #600060;
+				}
+
+				/* Lista de opciones dentro del modal */
+				.modal-options {
+					list-style: none;
+					padding: 0;
+					margin: 0;
+				}
+
+				/* Cada opción dentro del modal */
+				.modal-option {
+					padding: 0.75rem;
+					border-bottom: 1px solid #e5e7eb;
+					cursor: pointer;
+					transition: background 0.2s ease;
+				}
+
+				/* Efecto hover de las opciones */
+				.modal-option:hover {
+					background: var(--mysiss-light-purple);
+				}
+
+				/* Última opción sin borde inferior */
+				.modal-option:last-child {
+					border-bottom: none;
+				}
+
+				/* ===== TABLA DE RESULTADOS ===== */
+
+				/* Título de la sección de resultados */
+				.results-title {
+					font-size: 1.125rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+					margin-bottom: 0.7rem;
+				}
+
+				/* Contenedor de la tabla con scroll horizontal si es necesario */
+				.table-container {
+					overflow-x: auto;
+					margin-bottom: 0.75rem;
+					display: none; /* Oculta la tabla inicialmente */
+				}
+
+				/* Cuando la búsqueda se ha realizado, mostrar la tabla */
+				.table-container.visible {
+					display: block;
+				}
+
+				/* Estilos de la tabla */
+				.results-table {
+					width: 100%;
+					border-collapse: collapse; /* Elimina espacios entre celdas */
+					background: white;
+					box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				}
+
+				/* Encabezados de la tabla */
+				.results-table thead {
+					background: #f8f9fa;
+				}
+
+				/* Celdas del encabezado */
+				.results-table th {
+					padding: 0.5rem;
+					text-align: center;
+					font-weight: 600;
+					color: #333;
+					border-bottom: 1px solid #f0f0f0;
+					font-size: 14px;
+				}
+
+				/* Celdas del cuerpo de la tabla */
+				.results-table td {
+					padding: 0.5rem;
+					border-bottom: 1px solid #e5e7eb;
+					font-size: 14px;
+					text-align: center;
+				}
+
+				/* Efecto hover en las filas */
+				.results-table tbody tr:hover {
+					background: #f8f9fa;
+				}
+
+				/* Checkbox en la columna de selección */
+				.results-table input[type="checkbox"] {
+					width: 16px;
+					height: 16px;
+					cursor: pointer;
+				}
+
+				/* ===== BOTONES INFERIORES ===== */
+
+				/* Contenedor de los botones inferiores */
+				.action-buttons {
+					display: none; /* Ocultos inicialmente */
+					gap: 0.75rem;
+					margin-top: 0.75rem;
+					justify-content: flex-end;
+				}
+
+				/* Mostrar botones */
+				.action-buttons.visible {
+					display: flex;
+				}
+
+				/* Estilos de los botones de acción */
+				.action-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.5rem 1.5rem;
+					border-radius: 0.5rem;
+					font-size: 0.9rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				/* Efecto hover de los botones */
+				.action-btn:hover {
+					background: var(--mysiss-hover-purple);
+					color: white;
+					transform: translateY(-2px);
+				}
+
+				/* ===== BOTÓN MENU en la parte superior derecha ===== */
+				.menu-button {
+					position: fixed;
+					top: 20px;
+					right: 20px;
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
+					text-decoration: none;
+					display: inline-flex;
+					align-items: center;
+					gap: 10px;
+					z-index: 1000;
+				}
+
+				.menu-button:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* Icono del menú hamburguesa */
+				.menu-button i {
+					font-size: 18px;
+				}
+
+				/* ===== ANIMACIONES ===== */
+				.fade-in {
+					animation: fadeIn 0.5s ease-in;
+				}
+
+				@keyframes fadeIn {
+					from {
+						opacity: 0;
+						transform: translateY(20px);
+					}
+					to {
+						opacity: 1;
+						transform: translateY(0);
+					}
+				}
+
+				@keyframes slideUp {
+					from {
+						opacity: 0;
+						transform: translateY(20px);
+					}
+					to {
+						opacity: 1;
+						transform: translateY(0);
+					}
+				}
+
+				/* ===== DISEÑO RESPONSIVO ===== */
+				@media (max-width: 768px) {
+					/* En pantallas pequeñas, los filtros se apilan verticalmente */
+					.filters-container {
+						grid-template-columns: 1fr;
+					}
+
+					.sidebar {
+						width: 200px;
+					}
+
+					.main-content {
+						margin-left: 200px;
+						padding: 20px;
+					}
+
+					/* Botones de acción en columna en móviles */
+					.action-buttons {
+						flex-direction: column;
+					}
+				}
+
+            </style>
+        </head>
+        <body>
+            <!-- Botón menú -->
+            <a href="Auditoria.html" class="menu-button">
+	         <i class="fas fa-bars"></i><!-- Icono de menú hamburguesa (3 líneas horizontales) -->
+	         Menú
+	        </a>
+            <div class="app-container">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+				    <div class="sidebar-top">
+                        <div class="logo">mySiss</div> <!-- Logo mysiss -->
+				        <nav><!-- Menú -->
+						 <a href="Aconcurrente-Validaciones.html" class="nav-link" ><strong>Validaciones</strong></a>
+						 <a href="#" class="nav-linkG"><strong>Hallazgos</strong></a>
+						 <a href="Aconcurrente-Placcion.html" class="nav-link"><strong>Planes de acción</strong></a>
+						 <a href="Aconcurrente-Informe.html" class="nav-link"><strong>Informe</strong></a>
+						 <a href="Aconcurrente-Resultados.html" class="nav-link"><strong>Resultados</strong></a>
+                        </nav>
+					</div>
+					<div class ="sidebar-bottom">
+					 <!-- Sección de logout en la parte inferior -->
+					 <a href="loginA.html" class="nav-link" data-section="logout"><strong>Cerrar sesión</strong></a>
+					</div>
+                </aside>
+				
+				<!-- ===== CONTENIDO PRINCIPAL ===== -->
+				
+                <main class="main-content">
+				
+                 <!-- Título de la sección -->
+                 <h1 class="section-title">Hallazgos</h1>
+
+                    <!-- ===== CONTENEDOR DE FILTROS ===== -->
+				 
+                    <div class="filters-container">
+					
+                        <!-- FILTRO 1: Búsqueda general -->
+                        <div class="filter-section">
+                            <h2 class="filter-title">Búsqueda general</h2>
+
+                            <!-- Campo: Sede -->
+                            <div class="form-field">
+                                <label for="sede">Sede:</label>
+                                <div class="input-with-icon">
+                                    <input type="text" id="sede" placeholder="Seleccione una sede">
+                                    <!-- Botón con icono de lupa para abrir modal -->
+                                    <button class="search-icon-btn" onclick="openModal('sede')" aria-label="Buscar sede">
+                                     <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Servicio -->
+                            <div class="form-field">
+                                <label for="servicio">Servicio:</label>
+                                <div class="input-with-icon">
+                                    <input type="text" id="servicio" placeholder="Seleccione un servicio">
+                                    <!-- Botón con icono de lupa para abrir modal -->
+                                    <button class="search-icon-btn" onclick="openModal('servicio')" aria-label="Buscar servicio">
+                                     <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Responsable de pago -->
+                            <div class="form-field">
+                                <label for="responsable">Responsable de pago:</label>
+                                <div class="input-with-icon">
+                                    <input type="text" id="responsable" placeholder="Seleccione un responsable">
+                                    <!-- Botón con icono de lupa para abrir modal -->
+                                    <button class="search-icon-btn" onclick="openModal('responsable')" aria-label="Buscar responsable">
+                                     <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FILTRO 2: Búsqueda por paciente -->
+                        <div class="filter-section">
+                            <h2 class="filter-title">Búsqueda por paciente</h2>
+
+                            <!-- Campo: Apellido 1 -->
+                            <div class="form-field">
+                             <label for="apellido1">Apellido 1:</label>
+                             <input type="text" id="apellido1" placeholder="Ingrese primer apellido">
+                            </div>
+
+                            <!-- Campo: Apellido 2 -->
+                            <div class="form-field">
+                             <label for="apellido2">Apellido 2:</label>
+                             <input type="text" id="apellido2" placeholder="Ingrese segundo apellido">
+                            </div>
+
+                            <!-- Campo: Nombre -->
+                            <div class="form-field">
+                             <label for="nombre">Nombre:</label>
+                             <input type="text" id="nombre" placeholder="Ingrese nombre">
+                            </div>
+
+                            <!-- Campo: Número de documento -->
+                            <div class="form-field">
+                             <label for="documento">Número de documento:</label>
+                             <input type="text" id="documento" placeholder="Ingrese número de documento">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== BOTÓN DE BÚSQUEDA ===== -->
+                    <div class="search-button-container">
+                     <button class="search-button" onclick="realizarBusqueda()">Buscar</button>
+                    </div>
+
+                    <!-- ===== SECCIÓN DE RESULTADOS ===== -->
+					
+                    <h2 class="results-title">Lista de aciertos</h2>
+
+                    <!-- Contenedor de la tabla (inicialmente oculto) -->
+                    <div class="table-container" id="tableContainer">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                 <th>Selección</th>
+                                 <th>Paciente</th>
+                                 <th>Tipo documento</th>
+                                 <th>Número documento</th>
+                                 <th>Responsable pago</th>
+                                 <th># Paciente</th>
+                                 <th># Caso</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                             <!-- Las filas se generan dinámicamente con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ===== BOTONES INFERIORES ===== -->
+					
+                    <div class="action-buttons" id="actionButtons">
+                     <button class="action-btn" onclick="accionHallazgos()">Hallazgos</button>
+                     <button class="action-btn" onclick="accionPaciente()">Paciente</button>
+                    </div>
+                </main>
+            </div>
+
+            <!-- ===== MODAL PARA SELECCIONAR OPCIONES ===== -->
+			
+            <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <!-- Encabezado del modal -->
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="modalTitle">Seleccione una opción</h3>
+                        <!-- Botón para cerrar el modal -->
+                        <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">
+                         <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- Lista de opciones del modal -->
+                    <ul class="modal-options" id="modalOptions">
+                     <!-- Las opciones se generan dinámicamente con JavaScript -->
+                    </ul>
+                </div>
+            </div>
+			<script>
+			
+			   // ===== CONFIGURACIÓN DE DATOS =====
+
+              // Opciones disponibles para cada campo de búsqueda general
+
+                const opcionesModal = {
+			   
+                    // Opciones para el campo "Sede"
+                    sede: [
+                     'Sede principal',
+                     'Sede ambulatoria',
+                     'Sede Simón Bolivar'
+                    ],
+					
+                    // Opciones para el campo "Servicio"
+                    servicio: [
+                     'Urgencias',
+                     'Hospitalización',
+                     'Consulta externa',
+                     'Cirugía',
+                     'UCI',
+                     'Laboratorio'
+                    ],
+					
+                    // Opciones para el campo "Responsable de pago"
+                    responsable: [
+                     'Seguros de vida S.A.',
+                     'Colvida',
+                     'Salud Corp',
+                     'Mediseguros',
+                     'Protección Total',
+                     'Salud Plus'
+                    ]
+                };
+
+               // Datos de pacientes con todos los campos necesarios para filtrar
+				
+				const todosPacientes = [
+					{
+						apellido1: 'Torres',
+						apellido2: 'Zapata',
+						nombre: 'Martin',
+						segundoNombre: 'Andrés',
+						tipoDocumento: 'CC',
+						numeroDocumento: '31244689',
+						responsablePago: 'Salud Plus',
+						numeroPaciente: '23222',
+						numeroCaso: '534',
+						sede: 'Sede principal',
+						servicio: 'Urgencias'
+					},
+					{
+						apellido1: 'Lopera',
+						apellido2: 'Mejía',
+						nombre: 'Ana',
+						segundoNombre: 'María',
+						tipoDocumento: 'CC',
+						numeroDocumento: '43788999',
+						responsablePago: 'Colvida',
+						numeroPaciente: '54655',
+						numeroCaso: '567',
+						sede: 'Sede ambulatoria',
+						servicio: 'Consulta externa'
+					},
+					{
+						apellido1: 'Arias',
+						apellido2: 'Borrero',
+						nombre: 'Julio',
+						segundoNombre: 'Alberto',
+						tipoDocumento: 'TI',
+						numeroDocumento: '1116243567',
+						responsablePago: 'Salud Corp',
+						numeroPaciente: '16788',
+						numeroCaso: '589',
+						sede: 'Sede simón bolivar',
+						servicio: 'Hospitalización'
+					},
+					{
+						apellido1: 'Perez',
+						apellido2: 'Roldán',
+						nombre: 'Jesús',
+						segundoNombre: 'Ignacio',
+						tipoDocumento: 'CC',
+						numeroDocumento: '31234521',
+						responsablePago: 'Mediseguros',
+						numeroPaciente: '56721',
+						numeroCaso: '525',
+						sede: 'Sede principal',
+						servicio: 'UCI'
+					},
+					{
+						apellido1: 'Perez',
+						apellido2: 'Mejía',
+						nombre: 'María del Carmen',
+						segundoNombre: '',
+						tipoDocumento: 'CC',
+						numeroDocumento: '43655432',
+						responsablePago: 'Salud Plus',
+						numeroPaciente: '54635',
+						numeroCaso: '768',
+						sede: 'Sede ambulatoria',
+						servicio: 'Cirugía'
+					},
+					{
+						apellido1: 'Perez',
+						apellido2: 'Londoño',
+						nombre: 'Lucila',
+						segundoNombre: '',
+						tipoDocumento: 'CC',
+						numeroDocumento: '1144060123',
+						responsablePago: 'Salud Corp',
+						numeroPaciente: '16768',
+						numeroCaso: '876',
+						sede: 'Sede principal',
+						servicio: 'Laboratorio'
+					},
+					{
+						apellido1: 'García',
+						apellido2: 'Martínez',
+						nombre: 'Carlos',
+						segundoNombre: 'Eduardo',
+						tipoDocumento: 'CC',
+						numeroDocumento: '94567123',
+						responsablePago: 'Protección Total',
+						numeroPaciente: '78934',
+						numeroCaso: '901',
+						sede: 'Sede simón bolivar',
+						servicio: 'Urgencias'
+					},
+					{
+						apellido1: 'Rodríguez',
+						apellido2: 'Silva',
+						nombre: 'Patricia',
+						segundoNombre: 'Isabel',
+						tipoDocumento: 'CC',
+						numeroDocumento: '52789345',
+						responsablePago: 'Seguros de vida S.A.',
+						numeroPaciente: '12456',
+						numeroCaso: '345',
+						sede: 'Sede ambulatoria',
+						servicio: 'UCI'
+					}
+				];
+
+                // ===== VARIABLES GLOBALES =====
+                let campoActual = ''; // Almacena qué campo está siendo editado
+
+                // ===== FUNCIONES PARA EL MODAL =====
+
+                // Abre el modal con las opciones correspondientes al campo seleccionado
+ 
+                function openModal(campo) {
+				
+                 campoActual = campo; // Guarda el campo actual
+                 const modal = document.getElementById('modalOverlay');
+                 const modalTitle = document.getElementById('modalTitle');
+                 const modalOptions = document.getElementById('modalOptions');
+
+                    // Cambia el título del modal según el campo
+                    const titulos = {
+                     sede: 'Seleccione una sede',
+                     servicio: 'Seleccione un servicio',
+                     responsable: 'Seleccione un responsable de pago'
+                    };
+                    modalTitle.textContent = titulos[campo];
+
+                    // Limpia las opciones anteriores
+                    modalOptions.innerHTML = '';
+
+                    // Genera las opciones del modal
+                    opcionesModal[campo].forEach(opcion => {
+                     const li = document.createElement('li');
+                     li.className = 'modal-option';
+                     li.textContent = opcion;
+                     // Al hacer clic en una opción, se selecciona
+                     li.onclick = () => seleccionarOpcion(opcion);
+                     modalOptions.appendChild(li);
+                    });
+
+                    // Muestra el modal añadiendo la clase 'active'
+                    modal.classList.add('active');
+                }
+
+                // Cierra el modal
+				
+                function closeModal() {
+				
+                 const modal = document.getElementById('modalOverlay');
+                 // Oculta el modal removiendo la clase 'active'
+                 modal.classList.remove('active');
+                }
+
+                //Cierra el modal solo si se hace clic en el fondo oscuro
+
+                function closeModalOnOverlay(event) {
+                    // Si el clic es directamente en el overlay (no en el contenido del modal)
+                    if (event.target.id === 'modalOverlay') {
+                     closeModal();
+                    }
+                }
+
+                //Selecciona una opción del modal y la coloca en el campo correspondiente
+		
+                function seleccionarOpcion(valor) {
+				
+                  // Coloca el valor en el campo de texto correspondiente
+                  document.getElementById(campoActual).value = valor;
+                  // Cierra el modal
+                  closeModal();
+                }
+
+				// ===== FUNCIÓN DE BÚSQUEDA =====
+
+				function realizarBusqueda() {				
+				
+					// Obtiene los valores de todos los campos
+					const sede = document.getElementById('sede').value.trim();
+					const servicio = document.getElementById('servicio').value.trim();
+					const responsable = document.getElementById('responsable').value.trim();
+					const apellido1 = document.getElementById('apellido1').value.trim();
+					const apellido2 = document.getElementById('apellido2').value.trim();
+					const nombre = document.getElementById('nombre').value.trim();
+					const documento = document.getElementById('documento').value.trim();
+
+					// Valida que al menos un campo esté diligenciado
+					if (!sede && !servicio && !responsable && !apellido1 && !apellido2 && !nombre && !documento) {
+						alert('Por favor complete al menos un campo de búsqueda.');
+						return;
+					}
+					
+					// Filtra los pacientes según los criterios ingresados
+					let resultados = todosPacientes.filter(paciente => {
+                        
+						let cumpleCriterios = true;
+
+                        // Filtros de búsqueda general (coincidencia exacta)
+                        if (sede && paciente.sede !== sede) {
+                         cumpleCriterios = false;
+                        }
+						if (servicio && paciente.servicio !== servicio) {
+						 cumpleCriterios = false;
+						}
+						if (responsable && paciente.responsablePago !== responsable) {
+						 cumpleCriterios = false;
+						}
+
+						// Filtros de búsqueda por paciente (coincidencia parcial, sin distinción de mayúsculas)
+						if (apellido1 && !paciente.apellido1.toLowerCase().includes(apellido1.toLowerCase())) {
+						 cumpleCriterios = false;
+						}
+						if (apellido2 && !paciente.apellido2.toLowerCase().includes(apellido2.toLowerCase())) {
+						 cumpleCriterios = false;
+						}
+						if (nombre && !paciente.nombre.toLowerCase().includes(nombre.toLowerCase())) {
+						 cumpleCriterios = false;
+						}
+						if (documento && !paciente.numeroDocumento.includes(documento)) {
+						 cumpleCriterios = false;
+						}
+					
+					    return cumpleCriterios;
+					});
+					
+					// Determina el tipo de búsqueda para mantener la funcionalidad existente
+                    let tipoBusqueda = 'general';
+					
+                    if (apellido1 || apellido2 || nombre || documento) {
+                     tipoBusqueda = 'paciente';
+                    }
+					
+					//Guarda los resultados en variable global ANTES de mostrarlos
+                    window.pacientesFiltrados = resultados;
+
+                    // Muestra los resultados filtrados
+                    mostrarResultados(tipoBusqueda, resultados);
+				}
+
+				// ===== FUNCIÓN MOSTRAR RESULTADOS =====
+				
+				function mostrarResultados(tipoBusqueda,pacientesFiltrados) {
+				    console.log('Tipo de búsqueda:', tipoBusqueda);
+					const tableBody = document.getElementById('tableBody');
+					const tableContainer = document.getElementById('tableContainer');
+					const actionButtons = document.getElementById('actionButtons');
+
+					// Limpia el contenido anterior de la tabla
+					tableBody.innerHTML = '';
+					
+					window.tipoBusquedaActual = tipoBusqueda;
+					
+					// Si no hay resultados, muestra un mensaje
+                    if (pacientesFiltrados.length === 0) {
+                        const row = document.createElement('tr');
+						
+                        row.innerHTML = `
+                            <td colspan="7" style="text-align: center; padding: 2rem; color: #666;">
+                             No se encontraron pacientes.
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                        tableContainer.classList.add('visible');
+                        actionButtons.classList.remove('visible');
+						
+						//Animación de aparición
+						tableContainer.classList.add('fade-in');
+                        actionButtons.classList.add('fade-in');
+                       return;
+                    }
+					
+					// Genera las filas de la tabla con los resultados filtrados
+                    pacientesFiltrados.forEach((paciente, index) => {
+                     
+					 // Concatena el nombre completo del paciente
+                     const nombreCompleto = `${paciente.apellido1} ${paciente.apellido2} ${paciente.nombre}${paciente.segundoNombre ? ' ' + paciente.segundoNombre : ''}`;
+        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                         <td><input type="checkbox" id="check${index}" aria-label="Seleccionar paciente ${nombreCompleto}"></td>
+                         <td>${nombreCompleto}</td>
+                         <td>${paciente.tipoDocumento}</td>
+                         <td>${paciente.numeroDocumento}</td>
+                         <td>${paciente.responsablePago}</td>
+                         <td>${paciente.numeroPaciente}</td>
+                         <td>${paciente.numeroCaso}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+					// Muestra la tabla y los botones añadiendo la clase 'visible'
+					tableContainer.classList.add('visible');
+					actionButtons.classList.add('visible');
+					
+					//Muestra la animación
+					tableContainer.classList.add('fade-in');
+					actionButtons.classList.add('fade-in');
+
+				}
+				
+				// ===== FUNCIÓN OBTENER FILA SELECCIONADA =====
+				
+				function obtenerFilaSeleccionada() {
+				
+				    // Obtiene todos los checkboxes de la tabla
+				    const checkboxes = document.querySelectorAll('.results-table input[type="checkbox"]');
+				    
+				    // Variable para almacenar el índice de la fila seleccionada
+				    let filaSeleccionada = -1;
+				    
+				    // Variable para contar cuántas filas están seleccionadas
+				    let contadorSeleccionadas = 0;
+				    
+				    // Recorre todos los checkboxes para encontrar cuál está marcado
+				    checkboxes.forEach((checkbox, index) => {
+				        if (checkbox.checked) {
+				            filaSeleccionada = index; // Guarda el índice de la fila seleccionada
+				            contadorSeleccionadas++; // Incrementa el contador
+				        }
+				    });
+				    
+				    // Validaciones
+					
+				    if (contadorSeleccionadas === 0) {
+				        alert('Por favor seleccione un paciente de la tabla.');
+				        return -1; // Retorna -1 si no hay selección
+				    }
+				    
+				    if (contadorSeleccionadas > 1) {
+				        alert('Por favor seleccione solo un paciente.');
+				        return -1; // Retorna -1 si hay múltiples selecciones
+				    }
+				    
+				    // Retorna el índice de la fila seleccionada
+				    return filaSeleccionada;
+				}
+
+				
+				// ===== FUNCIONES DE LOS BOTONES INFERIORES =====
+
+				function accionHallazgos() {
+				
+				    // Obtiene el índice de la fila seleccionada usando la función auxiliar
+				    const filaSeleccionada = obtenerFilaSeleccionada();
+				    
+				    // Si no hay fila válida seleccionada, termina la función
+				    if (filaSeleccionada === -1) return;
+					
+					// Validar que exista el array de pacientes filtrados
+                    if (!window.pacientesFiltrados || window.pacientesFiltrados.length === 0) {
+                      alert('Error: No hay datos de pacientes disponibles. Por favor, realice una búsqueda nuevamente.');
+                      return;
+                    }
+					
+					// Validar que el índice esté dentro del rango
+                    if (filaSeleccionada >= window.pacientesFiltrados.length) {
+                     alert('Error: Índice de paciente inválido.');
+                     return;
+                    }
+				    
+				    // Obtiene los datos del paciente seleccionado desde el array filtrado
+                    let pacienteSeleccionado = window.pacientesFiltrados[filaSeleccionada];
+				    
+				    // Construye la URL con parámetros
+				    const url = `Aconcurrente-HallazgosH.html?tipo=h&numeroPaciente=${pacienteSeleccionado.numeroPaciente}`;
+				    
+				    // Abre el archivo en la misma ventana
+				    window.open(url, '_self');
+
+				}
+
+				function accionPaciente() {
+				 
+				  // Obtiene el índice de la fila seleccionada usando la función auxiliar
+				    const filaSeleccionada = obtenerFilaSeleccionada();
+				    
+				    // Si no hay fila válida seleccionada, termina la función
+				    if (filaSeleccionada === -1) return;
+					
+					// Validar que exista el array de pacientes filtrados
+                    if (!window.pacientesFiltrados || window.pacientesFiltrados.length === 0) {
+                      alert('Error: No hay datos de pacientes disponibles. Por favor, realice una búsqueda nuevamente.');
+                      return;
+                    }
+					
+					// Validar que el índice esté dentro del rango
+                    if (filaSeleccionada >= window.pacientesFiltrados.length) {
+                     alert('Error: Índice de paciente inválido.');
+                     return;
+                    }
+				    
+				    // Obtiene los datos del paciente seleccionado desde el array filtrado
+                    let pacienteSeleccionado = window.pacientesFiltrados[filaSeleccionada];
+				    
+				    // Construye la URL con parámetros
+				    const url = `Aconcurrente-HallazgosP.html?tipo=p&numeroPaciente=${pacienteSeleccionado.numeroPaciente}`;
+				    
+				    // Abre el archivo en una nueva ventana/pestaña
+				    window.open(url, '_blank');
+
+				}
+				
+			</script>
+        </body>
+    </html>

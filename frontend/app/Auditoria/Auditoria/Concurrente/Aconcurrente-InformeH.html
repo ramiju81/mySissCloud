@@ -1,0 +1,1971 @@
+ <!DOCTYPE html>
+    <html lang="es">
+        <head>
+         <!-- Font Awesome para iconos - librería de iconos gratuita -->
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+		 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title>mySiss - Auditoría</title>
+         <link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+            <style>
+				
+				:root {
+					--mysiss-purple: #800080;
+					--mysiss-light-purple: #EBE3F2;
+					--mysiss-hover-purple: #DFD1EE;
+					--sidebar-width: 280px;
+			    }
+
+				* {
+					margin: 0;
+					padding: 0;
+					box-sizing: border-box;
+				}
+
+				body {
+					font-family: system-ui, -apple-system, sans-serif;
+					background: white;
+					min-height: 100vh;
+					overflow-y: auto;
+				}
+
+				/* ===== BARRA SUPERIOR (HEADER) ===== */
+				
+				.top-bar {
+					display: flex; /* Flexbox para alinear elementos */
+					justify-content: space-between; /* Espacio entre elementos */
+					align-items: center;
+					padding: 10px 30px;
+					background: white;
+					border-bottom: 0.5px;
+					position: sticky;
+					top: 0;
+					z-index: 1000;
+				}
+				
+				/* ===== BARRA HALLAZGOS ===== */
+				
+				.bar-findings {
+				
+					display: flex;
+					justify-content: space-between; /* Espacio entre elementos */
+					padding: 10px 10px;
+					background: white;
+					border-bottom: 0.5px;
+					position: sticky;
+					top: 0;
+					margin-bottom: 15px;
+				}
+
+				/* ===== LOGO MYSISS ===== */
+				
+				.logo {
+					font-size: 3.5rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+				}
+
+				/* ===== CONTENEDOR DE BOTONES SUPERIORES ===== */
+				
+				.top-buttons {
+					display: flex;
+					gap: 15px;
+					align-items: center;
+				}
+				
+				/* Botón de icono de sobre (mail) */
+				
+                .mail-button {
+                 background: none;
+                 border: none; 
+                 color: var(--mysiss-purple);
+                 font-size: 30px;
+                 cursor: pointer; 
+                 padding: 8px;
+                 transition: color 0.3s ease;
+                }
+
+                .mail-button:hover {
+                 color: var(--mysiss-hover-purple);
+                }
+				
+				.mail-button::after{
+				 content: attr(data-tooltip); /* Contenido del atributo data-tooltip */
+				 position: absolute; 
+				 bottom: -0.1px;  
+				 left: 73%;  
+				 transform: translateX(-50%); 
+				 background: #333; 
+				 color: white; 
+				 padding: 5px 10px; 
+				 border-radius: 5px; 
+				 font-size: 12px; 
+				 white-space: nowrap; /* Sin saltos de línea */
+				 opacity: 0; 
+				 pointer-events: none; 
+				 transition: opacity 0.3s ease; 
+				 z-index: 1000; /* Sobre otros elementos */
+				
+				}
+				
+				/* Mostrar tooltip al hacer hover */
+				
+				.mail-button:hover::after {
+					opacity: 1;
+				}
+				
+				/* Badge de notificación */
+				.notification-badge {
+					position: absolute; 
+					top: 25px; 
+					right: 325px; 
+					background: #dc3545; 
+					color: white; 
+					border-radius: 50%; 
+					width: 20px;
+					height: 20px;
+					display: flex; /* Flexbox para centrar */
+					align-items: center; /* Centrar verticalmente */
+					justify-content: center; /* Centrar horizontalmente */
+					font-size: 12px;
+					font-weight: bold;
+					border: 2px solid white;
+				}
+				
+				/* ===== PANEL DE MENSAJES ===== */
+				
+				.messages-panel {
+					display: none; 
+					position: fixed; /* Posición fija en la pantalla */
+					top: 70px; 
+					right: 300px; 
+					width: 400px; 
+					max-height: 500px; 
+					background: white;
+					border: 1px solid var(--mysiss-purple);
+					border-radius: 10px; 
+					box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+					z-index: 1500; /* Sobre otros elementos */
+					overflow-y: auto; /* Scroll vertical si es necesario */
+					animation: slideDown 0.3s ease;
+				}
+				
+				/* Encabezado del panel de mensajes */
+				.messages-header {
+					background: var(--mysiss-purple);
+					color: white; 
+					padding: 15px;
+					font-size: 1.2rem;
+					font-weight: 700; 
+					border-radius: 6px 6px 0 0; 
+					display: flex; /* Flexbox */
+					justify-content: space-between; /* Espacio entre elementos */
+					align-items: center; /* Centrar verticalmente */
+				}
+				
+				/* Botón de cerrar en el encabezado */
+				.close-messages {
+					background: none; 
+					border: none;
+					color: white; 
+					font-size: 24px; 
+					cursor: pointer; 
+					padding: 0;
+					transition: transform 0.2s ease;
+				}
+				
+				.close-messages:hover {
+					transform: scale(1.2); 
+				}
+				
+				/* Contenedor de la lista de mensajes */
+				.messages-list {
+					padding: 15px;
+				}
+				
+				/* Cada mensaje individual */
+				.message-item {
+					background: white;
+					padding: 15px;
+					margin-bottom: 10px;
+					border-radius: 8px; 
+					border-left: 2px solid var(--mysiss-purple);
+				}
+				
+				/* Texto del mensaje */
+				.message-text {
+					color: #333; 
+					font-size: 0.95rem; 
+					margin-bottom: 8px;
+					line-height: 1.4;
+				}
+				
+				/* Fecha del mensaje */
+				.message-date {
+					color: #666;
+					font-size: 0.85rem;
+					font-style: italic; /* Cursiva */
+				}
+				
+				/* Mensaje cuando no hay notificaciones */
+				.no-messages {
+					text-align: center;
+					color: #666;
+					padding: 30px;
+					font-size: 1rem;
+				}
+				
+				/* ===== BOTÓN ACEPTAR MENSAJES ===== */
+				
+				.accept-messages {
+					display: none;
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 8px 8px;
+					border-radius: 6px;
+					font-size: 0.9rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					margin: 10px auto;
+					width: auto;
+				}
+
+				/* ===== BOTÓN ATRÁS ===== */
+				
+				.back-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 25px; 
+					border-radius: 8px; 
+					font-size: 16px; 
+					font-weight: 600; 
+					cursor: pointer; 
+					transition: all 0.3s ease; 
+					box-shadow: 0 4px 15px rgba(128, 0, 128, 0.2); 
+					display: inline-flex; /* Flex para alinear icono y texto */
+					align-items: center; 
+					gap: 8px; /* Espacio entre icono y texto */
+					text-decoration: none;
+				}
+
+				/* Efecto hover del botón atrás */
+				
+				.back-button:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(128, 0, 128, 0.3);
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* ===== BOTÓN MENÚ ===== */
+				
+				.menu-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					box-shadow: 0 4px 15px rgba(128, 0, 128, 0.2);
+					text-decoration: none;
+					display: inline-flex; /* Flex para alinear */
+					align-items: center;
+					gap: 10px;
+				}
+
+				/* Efecto hover del botón menú */
+				
+				.menu-button:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(128, 0, 128, 0.3); /* Sombra más pronunciada */
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* ===== CONTENEDOR PRINCIPAL ===== */
+				
+				.main-container {
+					padding: 10px 30px;
+					min-height: auto;
+				}
+
+				/* ===== HEADER DE INFORMACIÓN DEL PACIENTE ===== */
+
+				.patient-header {
+					background: white; 
+					border: 2px solid #e0e0e0; 
+					border-radius: 10px;
+					padding: 20px; 
+					margin-bottom: 20px; 
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+				}
+
+				/* Grid para organizar la información del paciente */
+				
+				.patient-info {
+					display: grid;
+					grid-template-columns: repeat(4, 1fr); /* 4 columnas iguales */
+					gap: 15px;
+				}
+
+				/* Cada campo de información del paciente */
+				
+				.info-field {
+					display: flex;
+					flex-direction: row;
+					gap: 5px;
+				}
+
+				/* Etiqueta del campo */
+				
+				.info-label {
+					font-size: 0.85rem;
+					color: #666;
+					font-weight: 600;
+				}
+
+				/* Valor del campo */
+				
+				.info-value {
+					font-size: 1rem;
+					color: #333;
+					font-weight: 500;
+				}
+	
+			    /* ===== SECCIÓN DE REGISTRO DE HALLAZGOS ===== */
+				
+				.findings-section {
+					background: white;
+					border: 2px solid #e0e0e0;
+					border-radius: 10px;
+					padding: 13px 13px; /* Espaciado interno */
+					margin-bottom: 0px;
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+					min-height: 250px;
+				}
+
+				/* Título de la sección */
+				
+				.findings-title {
+					font-size: 1.5rem;
+					color: var(--mysiss-purple);
+					font-weight: 700;
+					text-align:left;
+				}
+				
+				.field-name-suffix {
+                  color: var(--mysiss-purple);
+                  font-weight: bold;
+                  font-size: 1.2rem;
+                  margin-left: 0;
+                }
+
+				/* Contenedor de botones de acción de la tabla */
+				
+				.table-actions {
+					display: flex; /* Flexbox */
+					justify-content: flex-end; /* Alinear a la derecha */
+					gap: 10px;
+				}
+
+				/* Botones de acción (iconos) */
+				
+				.action-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					width: 28px;
+					height: 28px;
+					border-radius: 8px;
+					cursor: pointer;
+					transition: all 0.3s ease; /* Transición suave */
+					display: flex; 
+					align-items: center;
+					justify-content: center;
+					font-size: 18px; /* Tamaño de icono */
+					position: relative;
+				}
+
+				/* Efecto hover de botones de acción */
+				
+				.action-btn:hover {
+					background: var(--mysiss-hover-purple);
+					transform: translateY(-2px); /* Elevar botón */
+					box-shadow: 0 4px 12px rgba(128, 0, 128, 0.3);
+				}
+
+				/* Tooltip (texto que aparece al hacer hover) */
+				
+				.action-btn::after {
+					content: attr(data-tooltip); /* Contenido del atributo data-tooltip */
+					position: absolute; /* Posición absoluta */
+					bottom: -35px;
+					left: 50%;
+					transform: translateX(-50%); /* Centrar exactamente */
+					background: #333;
+					color: white;
+					padding: 5px 10px;
+					border-radius: 5px;
+					font-size: 12px;
+					white-space: nowrap; /* Sin saltos de línea */
+					opacity: 0;
+					pointer-events: none; /* No interceptar eventos */
+					transition: opacity 0.3s ease;
+					z-index: 1000; /* Sobre otros elementos */
+				}
+
+				/* Mostrar tooltip al hacer hover */
+				
+				.action-btn:hover::after {
+					opacity: 1;
+				}
+
+				/* Contenedor de la tabla con scroll horizontal */
+				
+				.table-container {
+					overflow-x: auto; /* Scroll horizontal si es necesario */
+					overflow-y:auto;
+					border: 1px solid #e0e0e0;
+					border-radius: 8px;
+					max-height:500px;
+					min-height:250px;
+				}
+
+				/* Tabla de hallazgos */
+				
+				.findings-table {
+					width: 100%;
+					border-collapse: collapse; /* Colapsar bordes */
+					min-width: 1400px;
+					table-layout: auto;
+				}
+
+				/* Encabezados de la tabla */
+				
+				.findings-table th {
+					background: var(--mysiss-light-purple);
+					color: #333;
+					padding: 12px;
+					text-align: center;
+					font-weight: 700;
+					font-size: 14px;
+					border: 1px solid #d0d0d0;
+				}
+
+				/* Encabezados de sección (Hallazgo, Gestión, Cierre, Estado actual) */
+				
+				.findings-table .section-header {
+					background: var(--mysiss-purple);
+					color: white;
+					font-size: 14px;
+					font-weight: 700;
+				}
+
+				/* Celdas de la tabla */
+				
+				.findings-table td {
+					padding: 6px;
+					border: 1px solid #d0d0d0;
+					vertical-align: middle; /* Alinear verticalmente */
+					text-align: center;
+					font-size: 13px;
+					vertical-align: middle;
+				}
+
+				/* Checkbox de selección */
+				
+				.findings-table input[type="checkbox"] {
+					width: 16px;
+					height: 16px;
+					cursor: pointer;
+				}
+
+				/* Campos de solo lectura con fondo blanco */
+				
+				.readonly-white {
+					background: white;
+					/*border: 1px solid #e0e0e0;*/
+					padding: 8px;
+					min-height: 40px;
+					border-radius: 5px;
+				}
+
+				/* Campos de solo lectura con fondo gris */
+				
+				.readonly-gray {
+					/*background: #f8f9fa;*/
+					/*border: 1px solid #e0e0e0;*/
+					padding: 8px;
+					min-height: 40px;
+					text-align: center;
+					color: #999;
+					border-radius: 5px;
+				}
+
+				/* Icono de archivo en campo evidencia */
+				
+				.file-icon {
+					color: var(--mysiss-purple);
+					font-size: 24px;
+				}
+				
+				/* ===== ESTILO PARA EL ICONO DE SEMÁFORO ===== */
+
+				
+				.traffic-lightbtn{
+				 position: relative;
+				 cursor: pointer;
+				 padding: 0;
+				 border: none;
+				 background: none;
+				}
+				
+				/* Icono de semáforo que indica estado hallazgos */
+				
+				.traffic-light-icon.yellow {
+					color: #FFFD55;
+					font-size: 24px;
+					cursor: pointer;
+				}
+				.traffic-light-icon.green { 
+				    color: #4CAF50; 
+				    font-size: 24px;
+				    cursor: pointer;
+				}
+				.traffic-light-icon.red { 
+				    color: #dc3545; 
+				    font-size: 24px;
+				    cursor: pointer;
+				}
+				
+
+				/* Tooltip del semáforo */
+				
+				.traffic-lightbtn::after {
+					content: attr(data-tooltip);
+					position: absolute;
+					bottom: -35px;
+					left: 50%;
+					transform: translateX(-50%);
+					background: #333;
+					color: white;
+					padding: 5px 10px;
+					border-radius: 5px;
+					font-size: 12px;
+					white-space: nowrap; /* Sin saltos de línea */
+					opacity: 0;
+					pointer-events: none; /* No interceptar eventos */
+					transition: opacity 0.3s ease;
+					z-index: 1000; /* Sobre otros elementos */
+				}
+				
+
+				/* Mostrar tooltip al hacer hover sobre el semáforo */
+				.traffic-lightbtn:hover::after {
+					opacity: 1;
+				}
+
+
+				/* ===== MODAL (Pop-up) ===== */
+				
+				.modal {
+					display: none;
+					position: fixed; /* Posición fija */
+					z-index: 2000;
+					left: 0;
+					top: 0;
+					width: 100%;
+					height: 100%;
+					background-color: rgba(0, 0, 0, 0.5);
+					animation: fadeIn 0.3s ease;
+				}
+
+				/* Contenido del modal */
+				
+				.modal-content {
+					background-color: white; 
+					margin: 15% auto; 
+					padding: 30px;
+					border-radius: 10px; 
+					width: 90%; 
+					max-width: 500px;
+					box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); 
+					animation: slideDown 0.3s ease; 
+				}
+				
+				/* Texto del modal */
+				
+                .modal-text {
+                 color: #333;
+                 font-size: 1.1rem;
+                 margin-bottom: 25px;
+                 text-align: center;
+                }
+				
+				/* Contenedor de botones del modal */
+				
+                .modal-buttons {
+                 display: flex; /* Flexbox */
+                 justify-content: center;
+                 gap: 15px;
+                }
+
+                /* Botones del modal */
+				
+                .modal-btn {
+                 padding: 10px 25px;
+                 border: none;
+                 border-radius: 8px;
+                 font-size: 1rem;
+                 font-weight: 600;
+                 cursor: pointer;
+                 transition: all 0.3s ease;
+                }
+
+				/* Botón confirmar */
+				
+				.modal-btn.confirm {
+					background: var(--mysiss-purple);
+					color: white;
+				}
+
+				/* Hover botón confirmar */
+				
+				.modal-btn.confirm:hover {
+					background: var(--mysiss-hover-purple);
+					transform: translateY(-2px);
+				}
+
+				/* Botón cancelar */
+				
+				.modal-btn.cancel {
+					background: #6c757d;
+					color: white;
+				}
+
+				/* Hover botón cancelar */
+				
+				.modal-btn.cancel:hover {
+					background: #5a6268;
+					transform: translateY(-2px);
+				}
+
+				.audit-id {
+                 display: block;
+                 color: var(--mysiss-purple);
+                 font-size: 1rem;
+                 font-weight: 700;
+                 margin-top: 10px;
+                 margin-bottom: 15px;
+                }
+				
+				/* ===== ESTILOS PARA MODAL DE EXPORTACIÓN ===== */
+
+				/* Botones de selección de formato en el modal */
+				.export-option-btn {
+					background: white;
+					border: 2px solid var(--mysiss-purple);
+					color: var(--mysiss-purple);
+					padding: 15px 30px;
+					border-radius: 8px;
+					font-size: 1rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					display: flex;
+					align-items: center;
+					gap: 10px;
+					margin: 10px;
+				}
+
+				/* Hover para botones de exportación */
+				.export-option-btn:hover {
+					background: var(--mysiss-light-purple);
+					transform: translateY(-2px);
+					box-shadow: 0 4px 12px rgba(128, 0, 128, 0.3);
+				}
+
+				/* Contenedor de opciones de exportación */
+				.export-options {
+					display: flex;
+					justify-content: center;
+					flex-wrap: wrap;
+					margin-bottom: 20px;
+				}
+				
+				/* ===== ANIMACIONES ===== */
+				
+				/* Animación de aparición gradual */
+				.fade-in {
+					animation: fadeIn 0.5s ease-in; /* Animación 0.5 segundos */
+				}
+
+				@keyframes fadeIn {
+					from {
+						opacity: 0; /* Invisible */
+						transform: translateY(20px); /* Desplazado abajo */
+					}
+					to {
+						opacity: 1; /* Visible */
+						transform: translateY(0); /* Posición original */
+					}
+				}
+
+				/* ===== DISEÑO RESPONSIVO ===== */
+				
+				@media (max-width: 1024px) {
+					
+					.patient-info {
+						grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+					}
+				}
+
+				@media (max-width: 768px) {
+					/* En móviles, diseño vertical */
+					.content-wrapper {
+						flex-direction: column; /* Dirección vertical */
+					}
+
+					.sidebar {
+						width: 100%; /* Ancho completo */
+						position: static; /* Posición estática */
+					}
+
+					.patient-info {
+						grid-template-columns: 1fr; /* 1 columna */
+					}
+
+					.top-bar {
+						flex-direction: column; /* Dirección vertical */
+						gap: 15px; /* Espacio entre elementos */
+					}
+				}
+
+            </style>
+        </head>
+        <body>
+		
+		    <!-- ===== BARRA SUPERIOR ===== -->
+			
+            <div class="top-bar">
+			
+                <!-- Logo de mySiss -->
+                <div class="logo">mySiss</div>
+                
+				<!-- Botones superiores derechos -->
+                <div class="top-buttons">
+                  
+				    <!-- Botón de icono de sobre -->
+                    <button class="mail-button" data-tooltip="Mensajería" onclick="toggleMessages()"aria-label="Mensajes">
+                     <i class="fas fa-envelope"></i> <!-- Icono de sobre -->
+					 <!-- Badge de notificación (se mostrará dinámicamente) -->
+					 <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                    </button>
+					
+					<!-- Botón Atrás: lleva a Planes de acción -->
+                    <a href="Aconcurrente-Informe.html" class="back-button">
+                     <i class="fas fa-arrow-left"></i> <!-- Icono de flecha izquierda -->
+                     Atrás
+                    </a>
+				
+                    <!-- Botón Menú: lleva a Auditoria.html -->
+                    <a href="Auditoria.html" class="menu-button">
+                     <i class="fas fa-bars"></i> <!-- Icono de menú hamburguesa -->
+                     Menú
+                    </a>
+                </div>
+            </div>
+			
+			<!-- ===== PANEL DE MENSAJES ===== -->
+			<div id="messagesPanel" class="messages-panel">
+				<!-- Encabezado del panel -->
+				<div class="messages-header">
+					<span>Centro de Mensajes</span>
+					<button class="close-messages" onclick="toggleMessages()">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<!-- Lista de mensajes (se llenará dinámicamente) -->
+				<div id="messagesList" class="messages-list">
+					<div class="no-messages">No hay mensajes para mostrar</div>
+				</div>
+				<!-- Botón aceptar para limpiar las notificaciones -->
+				<button class="accept-messages" id="acceptMessagesBtn" onclick="acceptMessages()">Aceptar</button>
+				
+			</div>
+			
+			<!-- ===== CONTENEDOR PRINCIPAL ===== -->
+            <div class="main-container">
+
+                <!-- ===== HEADER DE INFORMACIÓN DEL PACIENTE ===== -->
+
+                <div class="patient-header fade-in">
+                    <div class="patient-info" id ="patient-info">
+                        <!-- Nombre del paciente -->
+                        <div class="info-field">
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Documento -->
+                        <div class="info-field">
+                         <span class="info-value"></span>
+                        </div>
+				
+                        <!-- Edad -->
+                        <div class="info-field">
+                         <span class="info-label">Edad:</span>
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Número de caso -->
+                        <div class="info-field">
+                         <span class="info-label">Número de caso:</span>
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Número de paciente -->
+                        <div class="info-field">
+                         <span class="info-label"># Paciente:</span>
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Fecha de admisión -->
+                        <div class="info-field">
+                         <span class="info-label">Fecha admisión:</span>
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Teléfono -->
+                        <div class="info-field">
+                         <span class="info-label">Teléfono:</span>
+                         <span class="info-value"></span>
+                        </div>
+
+                        <!-- Responsable de pago -->
+                        <div class="info-field">
+                         <span class="info-label">Responsable de pago:</span>
+                         <span class="info-value"></span>
+                        </div>
+                    </div>
+                </div>
+				
+				<!-- ===== SECCIÓN DE REGISTRO DE HALLAZGOS ===== -->
+				
+				<div class="findings-section fade-in">
+				
+				    <div class="bar-findings">
+					
+					 <!-- Título de la sección -->
+					 <div><h2 class="findings-title">Informe<span id="field-name-display" class="field-name-suffix"></span></h2></div>
+
+					    <!-- Botones de acción de la tabla -->
+					    <div class="table-actions">
+						    <!-- Botón Exportar -->
+						    <button class="action-btn" data-tooltip="Exportar" onclick="exportData()">
+							 <i class="fas fa-download"></i>
+						    </button>
+
+							<!-- Botón Editar -->
+							<button class="action-btn" data-tooltip="Imprimir" onclick="printData()">
+								<i class="fas fa-print"></i>
+							</button>
+
+					    </div>
+					</div>
+
+					<!-- Contenedor de la tabla con scroll -->
+					<div class="table-container">
+						<table class="findings-table" id="findingsTable">
+							<thead>
+								<tr>
+									<!-- Columna de selección -->
+									<th rowspan="2" colspan="1">Selección</th>
+									
+									<!-- Sección Hallazgo -->
+									<th colspan="4" class="section-header">Hallazgo</th>
+									
+									<!-- Sección Gestión -->
+									<th colspan="3" class="section-header">Gestión</th>
+									
+									<!-- Sección Cierre -->
+									<th colspan="2" class="section-header">Cierre</th>
+									
+									<!-- Sección Estado actual -->
+									<th colspan="3" class="section-header">Estado actual</th>
+								</tr>
+								<tr>
+									<!-- Columnas de Hallazgo -->
+									<th>Componente</th>
+									<th>Texto del auditor</th>
+									<th>Auditor</th>
+									<th>Evidencia</th>
+									
+									<!-- Columnas de Gestión -->
+									<th>Solución</th>
+									<th>Responsable</th>
+									<th>Evidencia</th>
+									
+									<!-- Columnas de Cierre -->
+									<th>Justificación</th>
+									<th>Usuario</th>
+									
+									<!-- Columnas de Estado actual -->
+									<th>Estado</th>
+									<th>Fecha</th>
+									<th>Hora</th>
+								</tr>
+							</thead>
+							<tbody id="findingsTableBody">
+								<!-- Tabla donde se va a poner la información -->
+							</tbody>
+						</table>
+				    </div>
+
+			    </div>
+	
+            </div>
+
+            <!-- ===== MODAL PARA MENSAJES ===== -->
+			
+            <div id="modal" class="modal">
+                <div class="modal-content">
+                 <!-- Texto del modal (dinámico) -->
+                 <p class="modal-text" id="modalText"></p>
+            
+                 <!-- Botones del modal (se mostrarán según el caso) -->
+                 <div class="modal-buttons" id="modalButtons"></div>
+                </div>
+            </div>
+
+            <script>
+			    
+				// ===== DATOS DE PACIENTES =====
+        
+				const datosPacientes = [
+					{
+						paciente: 'Martin Andrés Torres Zapata',
+						documento: 'CC.31244689',
+						edad: '66',
+						numeroCaso: '534',
+						numeroPaciente: '23222',
+						fechaAdm: '20/10/2025',
+						telefono: '33124567',
+						responsablePago: 'Salud Plus',
+						estado: 'Finalizado'
+					},
+					{
+						paciente: 'Ana María Lopera Mejía',
+						documento: 'CC.43788999',
+						edad: '40',
+						numeroCaso: '567',
+						numeroPaciente: '54655',
+						fechaAdm: '15/10/2025',
+						telefono: '3395575',
+						responsablePago: 'Colvida',
+						estado: 'Correcciones'
+						
+					},
+					{
+						paciente: 'Julio Alberto Arias Borrero',
+						documento: 'TI.1116243567',
+						edad: '15',
+						numeroCaso: '589',				
+						numeroPaciente: '16788',
+						fechaAdm:'01/10/2025',
+						telefono:'2346778',
+						responsablePago: 'Salud Corp.',
+						estado: 'Correcciones'
+
+					}
+				];
+		
+				// ===== VARIABLES GLOBALES =====
+				
+				let currentAuditId = null; //Almacena el ID de auditoría actual
+				let currentAction = null; // Acción actual del modal
+				let auditIdCounter; //Contador de número de auditoría, empieza en 234 para DEMO.
+				let messageState; // Estado del sistema de mensajes (0: sin mensajes, 1: mensaje nuevo, 2: NO hay mensajes nuevos)
+				let messages = []; // Array para almacenar los mensajes
+				
+				
+				// ===== FUNCIÓN: OBTENER PARÁMETROS DE LA URL =====
+                // Lee los parámetros index, id auditoría y estado mensaje de la URL
+        
+                function obtenerParametrosURL() {
+                 // Crea un objeto URLSearchParams con los parámetros de la URL actual
+                 const params = new URLSearchParams(window.location.search);
+            
+                    return {
+                     index: parseInt(params.get('index')), //Fila seleccionada
+					 id: parseInt(params.get('id')), //Número de auditoría
+					 m: parseInt(params.get('m')) //Estado del sistema mensajes
+                    };
+                }
+				
+				// ===== INICIALIZACIÓN AL CARGAR LA PÁGINA =====
+
+				if (document.readyState === 'loading') {
+					// Si el DOM aún está cargando, esperar al evento DOMContentLoaded
+					document.addEventListener('DOMContentLoaded', function() {
+						cargarDatosMensajes();
+						cargarDatosPaciente();
+						cargarDatosTabla();
+					});
+				} else {
+					// Si el DOM ya está cargado, ejecutar inmediatamente
+					cargarDatosMensajes();
+					cargarDatosPaciente();
+					cargarDatosTabla();
+				}
+
+			
+				// Esta función carga los datos del mensaje
+				function cargarDatosMensajes() {
+				    
+					auditIdCounter = obtenerParametrosURL().id;
+				
+					// Crear mensaje de auditoría estado 1
+				    const saveMessage = {
+						text: 'Auditoría guardada, número de auditoría: ' + auditIdCounter,
+						date: getCurrentDate()
+					};
+					
+					// Crear mensaje de auditoría estado 2
+					const notifyMessage = {
+						text: 'Auditoría ' + auditIdCounter + ' notificada al líder del proceso',
+						date: getCurrentDate()
+					};
+					
+					//Crear mensaje de auditoría estado 3
+					const handleMessage = {
+						text: 'Auditoría ' + auditIdCounter + ' gestionada por el servicio correspondiente.',
+						date: getCurrentDate()
+					};
+					
+					//Crear mensaje de auditoría estado 5
+					const closeMessage = { 
+					 text: 'Auditoría ' + auditIdCounter + ' guardada, sin correcciones',
+					 date: getCurrentDate()
+					};
+						
+					// Crear mensaje de auditoría estado 7
+					const closeMessageNotify = { 
+					 text: 'Auditoría ' + auditIdCounter + ' finalizada,notificada al líder del proceso.',
+					 date: getCurrentDate()
+				    };
+					
+					messages.push(saveMessage);
+					messages.unshift(notifyMessage);
+					messages.unshift(handleMessage);
+					messages.unshift(closeMessage);
+					messages.unshift(closeMessageNotify);
+				
+					// Actualizar la interfaz de mensajes
+					updateMessagesUI();
+				}
+				
+				// ===== FUNCIÓN: CARGAR DATOS DEL PACIENTE =====
+				// Esta función carga los datos del paciente según los parámetros de la URL
+				
+				function cargarDatosPaciente() {
+					// Obtener los parámetros de la URL
+					const parametros = obtenerParametrosURL();
+					
+					// Variable para almacenar los datos del paciente seleccionado
+					let pacienteSeleccionado = null;
+					
+					// Determinar de qué array obtener los datos
+				
+					// Si es búsqueda general, usar datosPacientes
+					// Verificar que el índice exista en el array
+					if (parametros.index >= 0 && parametros.index < datosPacientes.length) {
+						pacienteSeleccionado = datosPacientes[parametros.index];
+					}
+					
+					
+					// Si se encontró un paciente, mostrar sus datos
+					if (pacienteSeleccionado) {
+						mostrarDatosPaciente(pacienteSeleccionado);
+					} else {
+						// Si no se encontró, mostrar mensaje de error
+						console.error('No se encontraron datos del paciente con los parámetros proporcionados');
+					}
+				}
+
+				// ===== FUNCIÓN: MOSTRAR DATOS DEL PACIENTE =====
+
+				function mostrarDatosPaciente(datos) {
+				
+					// Obtener el contenedor donde se mostrarán los datos
+					const patientInfoContainer = document.getElementById('patient-info');
+					
+					// Verificar que el contenedor exista antes de manipularlo
+					if (!patientInfoContainer) {
+						console.error('Error: No se encontró el elemento con id="patientInfo"');
+						return;
+					}
+					
+					// Limpiar el contenido previo
+					patientInfoContainer.innerHTML = '';
+					
+					// Crear HTML con los datos del paciente usando la estructura original
+					patientInfoContainer.innerHTML = `
+						<!-- Nombre del paciente -->
+						<div class="info-field">
+							<span class="info-value">${datos.paciente}</span>
+						</div>
+
+						<!-- Documento -->
+						<div class="info-field">
+							<span class="info-value">${datos.documento}</span>
+						</div>
+				
+						<!-- Edad -->
+						<div class="info-field">
+							<span class="info-label">Edad:</span>
+							<span class="info-value">${datos.edad}</span>
+						</div>
+
+						<!-- Número de caso -->
+						<div class="info-field">
+							<span class="info-label">Número de caso:</span>
+							<span class="info-value">${datos.numeroCaso}</span>
+						</div>
+
+						<!-- Número de paciente -->
+						<div class="info-field">
+							<span class="info-label"># Paciente:</span>
+							<span class="info-value">${datos.numeroPaciente}</span>
+						</div>
+
+						<!-- Fecha admisión -->
+						<div class="info-field">
+							<span class="info-label">Fecha admisión:</span>
+							<span class="info-value">${datos.fechaAdm}</span>
+						</div>
+
+						<!-- Teléfono -->
+						<div class="info-field">
+							<span class="info-label">Teléfono:</span>
+							<span class="info-value">${datos.telefono}</span>
+						</div>
+
+						<!-- Responsable de pago -->
+						<div class="info-field">
+							<span class="info-label">Responsable de pago:</span>
+							<span class="info-value">${datos.responsablePago}</span>
+						</div>
+					`;
+				}
+				
+				// =====  FUNCIÓN QUE CARGA LOS DATOS PREDETERMINADOS DE LA TABLA =====
+				
+				function cargarDatosTabla(){
+				
+				    // Obtener el tbody de la tabla
+				    const tbody = document.getElementById('findingsTableBody');
+					// Obtener el span del id
+					const fieldNameDisplay = document.getElementById('field-name-display');
+					//Obtener parametros
+					const parametros = obtenerParametrosURL();
+					//Obtener estado PACIENTE
+					const estado = datosPacientes[parametros.index].estado;
+					
+					//Actualizar Titulo
+					fieldNameDisplay.textContent = ' - ID auditoría: ' + auditIdCounter;
+					
+					// Limpiar todo el contenido actual de la tabla
+					tbody.innerHTML = '';
+				
+					// ===== CREAR PRIMERA FILA: Documentos =====
+					const row1 = document.createElement('tr');
+					row1.innerHTML = `
+						<td style="text-align: center;">
+							<input type="checkbox" class="row-checkbox">
+						</td>
+						<td>
+						 Documentos
+						</td>
+						<td>
+						 No se evidencia documento de consentimiento informado para prestación 877901.
+						</td>
+						<td>
+						 MAGR
+						</td>
+						<td>
+							<div class="readonly-white evidence-field"></div>
+						</td>
+						<td>
+							Se creó documento de consentimiento
+						</td>
+						<td>
+							JABT
+						</td>
+						<td>
+						    <div class="readonly-white evidence-field "></div>
+						</td>
+						<td>
+							${
+							    estado === 'Notificado' ? '<div class="readonly-gray">---</div>': 
+							    estado === 'Correcciones' ? '<div class="readonly-gray">---</div>':
+								estado === 'Finalizado' ? 'Aceptada':
+								'Contenido por defecto'
+							}
+						</td>
+						<td>
+							${
+							    estado === 'Notificado' ? '<div class="readonly-gray">---</div>': 
+							    estado === 'Correcciones' ? '<div class="readonly-gray">---</div>':
+								estado === 'Finalizado' ? 'MAGR':
+								'Contenido por defecto'
+							}
+						</td>
+						<td>
+							<div class="readonly-white status-field">
+							    ${
+							     estado === 'Notificado' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría notificada"><i class="fas fa-circle traffic-light-icon red"></i></button>': 
+							     estado === 'Correcciones' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría gestionada"><i class="fas fa-circle traffic-light-icon yellow"></i></button>':
+								 estado === 'Finalizado' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría finalizada"><i class="fas fa-circle traffic-light-icon green"></i></button>':
+								 'Contenido por defecto'
+								}
+							</div>
+						</td>
+						<td>
+							<div class="readonly-white date-field">${getCurrentDate()}</div>
+						</td>
+						<td>
+							<div class="readonly-white time-field">${getCurrentTime()}</div>
+						</td>
+					`;
+					
+					// ===== CREAR SEGUNDA FILA: Procedimientos =====
+					const row2 = document.createElement('tr');
+					row2.innerHTML = `
+						<td style="text-align: center;">
+							<input type="checkbox" class="row-checkbox">
+						</td>
+						<td>
+						 Procedimientos
+						</td>
+						<td>
+						 No se evidencia número de autorización para el procedimiento 11788.
+						</td>
+						<td>
+						    MAGR
+						</td>
+						<td>
+							<div class="readonly-white evidence-field"></div>
+						</td>
+						<td>
+							Se relaciona número de autorización.
+						</td>
+						<td>
+							JABT
+						</td>
+						<td>
+						    <div class="readonly-white evidence-field "></div>
+						</td>
+						<td>
+							${
+							    estado === 'Notificado' ? '<div class="readonly-gray">---</div>': 
+							    estado === 'Correcciones' ? '<div class="readonly-gray">---</div>':
+								estado === 'Finalizado' ? 'Aceptada':
+								'Contenido por defecto'
+							}
+						</td>
+						<td>
+							${
+							    estado === 'Notificado' ? '<div class="readonly-gray">---</div>': 
+							    estado === 'Correcciones' ? '<div class="readonly-gray">---</div>':
+								estado === 'Finalizado' ? 'MAGR':
+								'Contenido por defecto'
+							}
+						</td>
+						<td>
+							<div class="readonly-white status-field">
+							    ${
+							     estado === 'Notificado' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría notificada"><i class="fas fa-circle traffic-light-icon red"></i></button>': 
+							     estado === 'Correcciones' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría gestionada"><i class="fas fa-circle traffic-light-icon yellow"></i></button>':
+								 estado === 'Finalizado' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría finalizada"><i class="fas fa-circle traffic-light-icon green"></i></button>':
+								 'Contenido por defecto'
+								}
+							</div>
+						</td>
+						<td>
+							<div class="readonly-white date-field">${getCurrentDate()}</div>
+						</td>
+						<td>
+							<div class="readonly-white time-field">${getCurrentTime()}</div>
+					    </td>
+					`;
+					
+					// ===== CREAR TERCERA FILA: Medicamentos =====
+					
+					const row3 = document.createElement('tr');
+					row3.innerHTML = `
+					  
+					    <td style="text-align: center;">
+							<input type="checkbox" class="row-checkbox">
+						</td>
+						<td>
+						 Medicamentos
+						</td>
+						<td>
+						 Se evidencia medicamentos pendientes por administrar o devolver.
+						</td>
+						<td>
+						 MAGR
+						</td>
+						<td>
+							<div class="readonly-white evidence-field"></div>
+						</td>
+						<td>
+							Se gestionan medicamentos.
+						</td>
+						<td>
+							JABT
+						</td>
+						<td>
+						    <div class="readonly-white evidence-field "></div>
+						</td>
+						<td>
+							${
+							    estado === 'Notificado' ? '<div class="readonly-gray">---</div>': 
+							    estado === 'Correcciones' ? '<div class="readonly-gray">---</div>':
+								estado === 'Finalizado' ? 'Aceptada':
+								'Contenido por defecto'
+							}
+						</td>
+						<td>
+							<div class="readonly-white responsible-field">MAGR</div>
+						</td>
+						<td>
+							<div class="readonly-white status-field">
+							    ${
+							     estado === 'Notificado' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría notificada"><i class="fas fa-circle traffic-light-icon red"></i></button>': 
+							     estado === 'Correcciones' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría gestionada"><i class="fas fa-circle traffic-light-icon yellow"></i></button>':
+								 estado === 'Finalizado' ? '<button class="traffic-lightbtn" data-tooltip="Auditoría finalizada"><i class="fas fa-circle traffic-light-icon green"></i></button>':
+								 'Contenido por defecto'
+								}
+							</div>
+						</td>
+						<td>
+							<div class="readonly-white date-field">${getCurrentDate()}</div>
+						</td>
+						<td>
+							<div class="readonly-white time-field">${getCurrentTime()}</div>
+					    </td>
+					`;
+					
+					// Agregar ambas filas al tbody
+					tbody.appendChild(row1);
+					tbody.appendChild(row2);
+					tbody.appendChild(row3);
+				}
+				
+				// ===== FUNCIÓN PARA OBTENER FECHA Y HORA ACTUAL =====
+
+				function getCurrentDate() {
+				
+					const now = new Date(); // Crear objeto Date
+					const day = String(now.getDate()).padStart(2, '0'); // Día con 2 dígitos
+					const month = String(now.getMonth() + 1).padStart(2, '0'); // Mes con 2 dígitos 
+					const year = now.getFullYear(); // Año completo
+					return `${day}/${month}/${year}`; // Retornar formato DD/MM/YYYY
+				}
+
+				function getCurrentTime() {
+				
+					const now = new Date(); // Crear objeto Date
+					const hours = String(now.getHours()).padStart(2, '0'); // Horas con 2 dígitos
+					const minutes = String(now.getMinutes()).padStart(2, '0'); // Minutos con 2 dígitos
+					const seconds = String(now.getSeconds()).padStart(2, '0'); // Segundos con 2 dígitos
+					return `${hours}:${minutes}:${seconds}`; // Retornar formato HH:MM:SS
+				}
+				
+				// ===== FUNCIÓN PARA MOSTRAR MODAL =====
+				
+				function showModal(message, type, callback) {
+				
+					// Obtener elementos del modal
+					const modal = document.getElementById('modal');
+					const modalText = document.getElementById('modalText');
+					const modalButtons = document.getElementById('modalButtons');
+					
+					// Establecer el texto del modal
+					modalText.innerHTML = message;
+					
+					// Limpiar botones previos
+					modalButtons.innerHTML = '';
+					
+					// Según el tipo de modal, crear los botones correspondientes
+					if (type === 'ok') {
+						// Solo botón OK
+						const okButton = document.createElement('button');
+						okButton.textContent = 'OK';
+						okButton.className = 'modal-btn confirm';
+						okButton.onclick = function() {
+							closeModal();
+						};
+						modalButtons.appendChild(okButton);
+					} else if (type === 'confirm') {
+						// Botones Confirmar y Cancelar
+						const confirmButton = document.createElement('button');
+						confirmButton.textContent = 'Confirmar';
+						confirmButton.className = 'modal-btn confirm';
+						confirmButton.onclick = function() {
+							closeModal();
+							// Ejecutar el callback si existe
+							if (callback) callback();
+						};
+						
+						const cancelButton = document.createElement('button');
+						cancelButton.textContent = 'Cancelar';
+						cancelButton.className = 'modal-btn cancel';
+						cancelButton.onclick = function() {
+							closeModal();
+						};
+						
+						modalButtons.appendChild(confirmButton);
+						modalButtons.appendChild(cancelButton);
+					}
+					
+					// Mostrar el modal
+					modal.style.display = 'block';
+				}
+
+				// ===== FUNCIÓN PARA CERRAR MODAL =====
+				
+				function closeModal() {
+					const modal = document.getElementById('modal');
+					modal.style.display = 'none';
+				}
+
+				// ===== CERRAR MODAL AL HACER CLICK FUERA DEL CONTENIDO =====
+				
+				window.onclick = function(event) {
+					const modal = document.getElementById('modal');
+					if (event.target === modal) {
+						closeModal();
+					}
+				}
+
+				// ===== SISTEMA DE MENSAJERÍA =====
+				
+				function toggleMessages() {
+					const panel = document.getElementById('messagesPanel');
+					
+					// Si el panel está oculto, mostrarlo
+					if (panel.style.display === 'none' || panel.style.display === '') {
+						panel.style.display = 'block';
+					} else {
+						// Si está visible, ocultarlo
+						panel.style.display = 'none';
+					}
+				}
+				
+				function updateMessagesUI() {
+
+				    // Obtener elementos
+				    const badge = document.getElementById('notificationBadge');
+				    const messagesList = document.getElementById('messagesList');
+				    const acceptBtn = document.getElementById('acceptMessagesBtn'); // Obtener el botón aceptar
+					messageState = obtenerParametrosURL().m;
+				
+					// ===== ACTUALIZAR BADGE DE NOTIFICACIÓN =====
+					
+					if (messageState === 0) {
+					
+						// Estado 0: Sin mensajes
+						badge.style.display = 'none'; // Ocultar badge
+						
+					} else if (messageState === 1) {
+					
+						// Estado 1 Hay mensajes nuevos
+						badge.style.display = 'flex'; // Mostrar badge
+						badge.textContent = messages.length; // Mostrar cantidad de mensajes
+						
+					} else{
+					
+					  // Estado diferente de 0 y 1 No hay mensajes nuevos
+					  badge.style.display = 'flex'; // Mostrar badge
+					  badge.textContent = ''; // No mostrar número
+			
+					}
+					
+				    // ===== ACTUALIZAR LISTA DE MENSAJES =====
+				
+				    if (messages.length === 0) {
+					
+					   // No hay mensajes: mostrar mensaje por defecto
+					   messagesList.innerHTML = '<div class="no-messages">No hay mensajes para mostrar</div>';
+					   // Ocultar botón aceptar cuando no hay mensajes
+					   acceptBtn.style.display = 'none';
+				    } else {
+					
+					    // Hay mensajes: construir HTML con todos los mensajes
+					    let messagesHTML = '';
+					
+					    // Recorrer array de mensajes y crear HTML para cada uno
+					    messages.forEach(function(message) {
+						    messagesHTML += `
+							    <div class="message-item">
+								 <div class="message-text">${message.text}</div>
+								 <div class="message-date">${message.date}</div>
+							    </div>
+						    `;
+					    });
+						
+						// Insertar HTML en el contenedor
+					    messagesList.innerHTML = messagesHTML;
+					
+					    // Mostrar botón aceptar cuando hay mensajes
+					    acceptBtn.style.display = 'block';
+					}
+
+				}
+				
+				function acceptMessages() {
+				
+                  // Cerrar el panel de mensajes
+                  const panel = document.getElementById('messagesPanel');
+                  panel.style.display = 'none';
+    
+                  // Obtener el badge de notificación
+                  const badge = document.getElementById('notificationBadge');
+    
+                  // Mantener el badge visible pero sin número
+                  badge.style.display = 'flex';
+                  badge.textContent = ''; // Eliminar el número, dejar solo el círculo rojo
+				  messageState= 2;
+                }
+				
+				// ===== Cerrar el panel de mensajes al hacer clic fuera de él ====
+				
+				document.addEventListener('click', function(event) {
+					const panel = document.getElementById('messagesPanel');
+					const mailButton = document.querySelector('.mail-button');
+					
+					// Si el panel está visible y el clic no fue en el panel ni en el botón
+					if (panel.style.display === 'block' && 
+						!panel.contains(event.target) && 
+						!mailButton.contains(event.target)) {
+						// Cerrar el panel
+						panel.style.display = 'none';
+					}
+				});
+				
+				// ===== FUNCIÓN PARA EXPORTAR DATOS =====
+
+				function exportData() {
+					// Variable para almacenar el formato seleccionado
+					let selectedFormat = null;
+					
+					// Crear el HTML del modal con las opciones de exportación
+					const modalContent = `
+						<div style="text-align: center;">
+							<h3 style="color: var(--mysiss-purple); margin-bottom: 20px;">Seleccione el formato de exportación</h3>
+							<div class="export-options">
+								<!-- Botón para exportar a Excel -->
+								<button class="export-option-btn" onclick="selectExportFormat('excel')">
+									<i class="fas fa-file-excel" style="font-size: 24px; color: #1D6F42;"></i>
+									Exportar a Excel
+								</button>
+								<!-- Botón para exportar a PDF -->
+								<button class="export-option-btn" onclick="selectExportFormat('pdf')">
+									<i class="fas fa-file-pdf" style="font-size: 24px; color: #DC3545;"></i>
+									Exportar a PDF
+								</button>
+							</div>
+						</div>
+					`;
+					
+					// Mostrar el modal con las opciones (sin botones de confirmación aún)
+					const modal = document.getElementById('modal');
+					const modalText = document.getElementById('modalText');
+					const modalButtons = document.getElementById('modalButtons');
+					
+					// Establecer el contenido del modal
+					modalText.innerHTML = modalContent;
+					modalButtons.innerHTML = ''; // Limpiar botones
+					
+					// Mostrar el modal
+					modal.style.display = 'block';
+				}
+
+				// ===== FUNCIÓN PARA SELECCIONAR FORMATO DE EXPORTACIÓN =====
+
+				function selectExportFormat(format) {
+					// Almacenar el formato seleccionado
+					const selectedFormat = format;
+					
+					// Cerrar el modal actual
+					closeModal();
+					
+					// Mostrar modal de confirmación según el formato seleccionado
+					const formatText = format === 'excel' ? 'Excel' : 'PDF';
+					showModal(
+						`¿Está seguro de exportar el informe en formato ${formatText}?`,
+						'confirm',
+						function() {
+							// Callback que se ejecuta al confirmar
+							if (format === 'excel') {
+								exportToExcel(); // Llamar función para exportar a Excel
+							} else if (format === 'pdf') {
+								exportToPDF(); // Llamar función para exportar a PDF
+							}
+						}
+					);
+				}
+
+				// ===== FUNCIÓN PARA EXPORTAR A EXCEL =====
+
+				function exportToExcel() {
+					try {
+						// Obtener los parámetros de la URL
+						const parametros = obtenerParametrosURL();
+						const paciente = datosPacientes[parametros.index];
+						
+						// Crear datos del encabezado (información del paciente)
+						const headerData = [
+							['INFORME DE AUDITORÍA - ID: ' + auditIdCounter],
+							[], // Línea vacía
+							['Información del Paciente'],
+							['Nombre:', paciente.paciente],
+							['Documento:', paciente.documento],
+							['Edad:', paciente.edad],
+							['Número de caso:', paciente.numeroCaso],
+							['# Paciente:', paciente.numeroPaciente],
+							['Fecha admisión:', paciente.fechaAdm],
+							['Teléfono:', paciente.telefono],
+							['Responsable de pago:', paciente.responsablePago],
+							[], // Línea vacía
+							['Hallazgos y Gestión']
+						];
+						
+						// Obtener la tabla HTML
+						const table = document.getElementById('findingsTable');
+						
+						// Crear array para los datos de la tabla
+						const tableData = [];
+						
+						// Extraer encabezados de la tabla (segunda fila del thead)
+						const headers = [];
+						const headerRow = table.querySelector('thead tr:last-child');
+						headerRow.querySelectorAll('th').forEach(th => {
+							headers.push(th.textContent.trim());
+						});
+						tableData.push(headers);
+						
+						// Extraer datos de cada fila del tbody
+						const rows = table.querySelectorAll('tbody tr');
+						rows.forEach(row => {
+							const rowData = [];
+							const cells = row.querySelectorAll('td');
+							
+							cells.forEach((cell, index) => {
+								// Manejar checkbox (primera columna)
+								if (index === 0) {
+									const checkbox = cell.querySelector('input[type="checkbox"]');
+									rowData.push(checkbox && checkbox.checked ? 'Sí' : 'No');
+								}
+								// Manejar campos especiales (estado con semáforo)
+								else if (cell.querySelector('.traffic-light-icon')) {
+									const icon = cell.querySelector('.traffic-light-icon');
+									if (icon.classList.contains('red')) rowData.push('Notificado');
+									else if (icon.classList.contains('yellow')) rowData.push('Gestionado');
+									else if (icon.classList.contains('green')) rowData.push('Finalizado');
+									else rowData.push('');
+								}
+								// Otros campos de texto
+								else {
+									rowData.push(cell.textContent.trim());
+								}
+							});
+							
+							tableData.push(rowData);
+						});
+						
+						// Combinar datos del encabezado y la tabla
+						const fullData = [...headerData, ...tableData];
+						
+						// Crear un libro de trabajo (workbook)
+						const wb = XLSX.utils.book_new();
+						
+						// Crear hoja de cálculo (worksheet) con los datos
+						const ws = XLSX.utils.aoa_to_sheet(fullData);
+						
+						// Configurar anchos de columna
+						ws['!cols'] = [
+							{ wch: 12 },  // Selección
+							{ wch: 20 },  // Componente
+							{ wch: 40 },  // Texto del auditor
+							{ wch: 15 },  // Auditor
+							{ wch: 15 },  // Evidencia
+							{ wch: 40 },  // Solución
+							{ wch: 15 },  // Responsable
+							{ wch: 30 },  // Justificación cierre
+							{ wch: 15 },  // Usuario cierre
+							{ wch: 15 },  // Estado
+							{ wch: 12 },  // Fecha
+							{ wch: 10 }   // Hora
+						];
+						
+						// Agregar la hoja al libro
+						XLSX.utils.book_append_sheet(wb, ws, 'Informe');
+						
+						// Generar nombre de archivo con fecha y hora actual
+						const fileName = `Informe_Auditoria_${auditIdCounter}_${getCurrentDate().replace(/\//g, '-')}.xlsx`;
+						
+						// Descargar el archivo
+						XLSX.writeFile(wb, fileName);
+						
+						// Mostrar mensaje de éxito
+						showModal('El archivo Excel se ha descargado exitosamente.', 'ok');
+						
+					} catch (error) {
+						// Mostrar mensaje de error si algo falla
+						console.error('Error al exportar a Excel:', error);
+						showModal('Error al exportar a Excel. Por favor, intente nuevamente.', 'ok');
+					}
+				}
+
+				// ===== FUNCIÓN PARA EXPORTAR A PDF =====
+				
+				function exportToPDF() {
+					try {
+						// Crear instancia de jsPDF
+						const { jsPDF } = window.jspdf;
+						const doc = new jsPDF('l', 'mm', 'a4'); // 'l' = landscape (horizontal)
+						
+						// Obtener los parámetros de la URL
+						const parametros = obtenerParametrosURL();
+						const paciente = datosPacientes[parametros.index];
+						
+						// ===== ENCABEZADO DEL DOCUMENTO =====
+						
+						// Título principal
+						doc.setFontSize(18);
+						doc.setTextColor(128, 0, 128); // Color morado
+						doc.text('INFORME DE AUDITORÍA', 148, 15, { align: 'center' });
+						
+						// ID de auditoría
+						doc.setFontSize(12);
+						doc.text(`ID: ${auditIdCounter}`, 148, 22, { align: 'center' });
+						
+						// ===== INFORMACIÓN DEL PACIENTE =====
+						
+						doc.setFontSize(10);
+						doc.setTextColor(0, 0, 0); // Color negro
+						
+						let yPos = 30; // Posición Y inicial
+						
+						// Crear tabla de información del paciente
+						const patientInfo = [
+							['Nombre:', paciente.paciente, 'Documento:', paciente.documento],
+							['Edad:', paciente.edad, 'Número de caso:', paciente.numeroCaso],
+							['# Paciente:', paciente.numeroPaciente, 'Fecha admisión:', paciente.fechaAdm],
+							['Teléfono:', paciente.telefono, 'Responsable de pago:', paciente.responsablePago]
+						];
+						
+						doc.autoTable({
+							startY: yPos,
+							head: [[{
+							 content: 'Información del paciente',
+							 colSpan: 4,
+							    styles:{
+							      fillColor: [128, 0, 128], // Color morado
+								  textColor: [255, 255, 255],
+								  fontSize: 11,
+								  fontStyle: 'bold',
+								  halign: 'center'
+							    }
+							}]],
+							body: patientInfo,
+							theme: 'grid',
+							bodyStyles: {
+		                     fontSize: 10
+	                        },
+							columnStyles: {
+								0: { fontStyle: 'bold', cellWidth: 43 },
+								1: { cellWidth: 53 },
+								2: { fontStyle: 'bold', cellWidth: 43 },
+								3: { cellWidth: 53 }
+							},
+							margin: { left: 47, right: 47 },
+							didDrawCell: function(data) {
+		                     // Esto asegura que las celdas se dibujen correctamente
+	                        }
+						});
+						
+						// ===== Tabla de hallazgos con encabezados =====
+						
+						// Obtener la tabla HTML
+						const table = document.getElementById('findingsTable');
+						
+						// Extraer PRIMERA FILA de encabezados
+						const sectionHeaders = [];
+						const firstHeaderRow = table.querySelector('thead tr:first-child');
+						firstHeaderRow.querySelectorAll('th').forEach(th => {
+							sectionHeaders.push({
+								content: th.textContent.trim(),
+								colSpan: parseInt(th.getAttribute('colspan')) || 1,
+								rowSpan: parseInt(th.getAttribute('rowspan')) || 1
+							});
+						});
+						
+						// Extraer SEGUNDA FILA de encabezados
+						const detailHeaders = [];
+						const secondHeaderRow = table.querySelector('thead tr:last-child');
+						secondHeaderRow.querySelectorAll('th').forEach(th => {
+							detailHeaders.push(th.textContent.trim());
+						});
+						
+						// Extraer datos de las filas
+						const rows = [];
+						const tableRows = table.querySelectorAll('tbody tr');
+						
+						tableRows.forEach(row => {
+							const rowData = [];
+							const cells = row.querySelectorAll('td');
+							
+							cells.forEach((cell, index) => {
+								// Manejar checkbox (primera columna)
+								if (index === 0) {
+									<!-- const checkbox = cell.querySelector('input[type="checkbox"]'); -->
+									<!-- rowData.push(checkbox && checkbox.checked ? 'Sí' : 'No'); -->
+								}
+								// Manejar campos de evidencia (buscar icono de archivo)
+								else if (cell.querySelector('.evidence-field')) {
+									const hasFileIcon = cell.querySelector('.fa-file');
+									rowData.push(hasFileIcon ? 'Sí' : 'No');
+								}
+								// Manejar estado con semáforo
+								else if (cell.querySelector('.traffic-light-icon')) {
+									const icon = cell.querySelector('.traffic-light-icon');
+									if (icon.classList.contains('red')) rowData.push('Notificado');
+									else if (icon.classList.contains('yellow')) rowData.push('Gestionado');
+									else if (icon.classList.contains('green')) rowData.push('Finalizado');
+									else rowData.push('');
+								}
+								// Otros campos
+								else {
+									const text = cell.textContent.trim();
+									rowData.push(text === '---' ? '' : text);
+								}
+							});
+							
+							rows.push(rowData);
+						});
+						
+						// Crear la tabla con encabezados de sección
+						doc.autoTable({
+							startY: doc.lastAutoTable.finalY + 10,
+							head: [
+								// Primera fila: encabezados de sección
+								[
+									<!-- { content: 'Selección', rowSpan: 2, styles: { halign: 'center', valign: 'middle', fillColor: [235, 227, 242], textColor: [0, 0, 0] } }, -->
+									{ content: 'Hallazgo', colSpan: 4, styles: { halign: 'center', fillColor: [128, 0, 128], textColor: [255, 255, 255] } },
+									{ content: 'Gestión', colSpan: 3, styles: { halign: 'center', fillColor: [128, 0, 128], textColor: [255, 255, 255] } },
+									{ content: 'Cierre', colSpan: 2, styles: { halign: 'center', fillColor: [128, 0, 128], textColor: [255, 255, 255] } },
+									{ content: 'Estado actual', colSpan: 3, styles: { halign: 'center', fillColor: [128, 0, 128], textColor: [255, 255, 255] } }
+								],
+								// Segunda fila: encabezados de columnas específicas
+								detailHeaders.slice(0).map(header => ({ 
+									content: header, 
+									styles: { halign: 'center', fillColor: [235, 227, 242], textColor: [0, 0, 0] } 
+								}))
+							],
+							body: rows,
+							theme: 'grid',
+							headStyles: {
+								fontSize: 8,
+								fontStyle: 'bold',
+								halign: 'center',
+								valign: 'middle'
+							},
+							bodyStyles: {
+								fontSize: 7,
+								halign: 'center',
+								valign: 'middle'
+							},
+							columnStyles: {
+								<!-- 0: { cellWidth: 14 },  // Selección -->
+								0: { cellWidth: 23 },  // Componente
+								1: { cellWidth: 40 },  // Texto del auditor
+								2: { cellWidth: 15 },  // Auditor
+								3: { cellWidth: 18 },  // Evidencia
+								4: { cellWidth: 36 },  // Solución
+								5: { cellWidth: 22 },  // Responsable
+								6: { cellWidth: 18 },  // Evidencia
+								7: { cellWidth: 28 },  // Justificación cierre
+								8: { cellWidth: 15 },  // Usuario cierre
+								9: { cellWidth: 16 }, // Estado
+								10: { cellWidth: 18 }, // Fecha
+								11: { cellWidth: 15 }  // Hora
+							},
+							margin: { left: 20, right: 20 },
+							tableWidth: 'auto'
+						});
+						
+						// ===== PIE DE PÁGINA =====
+						
+						// Agregar fecha y hora de generación en el pie
+						const pageCount = doc.internal.getNumberOfPages();
+						for (let i = 1; i <= pageCount; i++) {
+							doc.setPage(i);
+							doc.setFontSize(8);
+							doc.setTextColor(100);
+							doc.text(
+								`Generado el ${getCurrentDate()} a las ${getCurrentTime()} - Página ${i} de ${pageCount}`,
+								148,
+								205,
+								{ align: 'center' }
+							);
+						}
+						
+						// ===== GUARDAR EL ARCHIVO PDF =====
+						
+						const fileName = `Informe_Auditoria_${auditIdCounter}_${getCurrentDate().replace(/\//g, '-')}.pdf`;
+						doc.save(fileName);
+						
+						// Mostrar mensaje de éxito
+						showModal('El archivo PDF se ha descargado exitosamente.', 'ok');
+						
+					} catch (error) {
+						// Mostrar mensaje de error si algo falla
+						console.error('Error al exportar a PDF:', error);
+						showModal('Error al exportar a PDF. Por favor, intente nuevamente.', 'ok');
+					}
+				}
+				
+				function printData(){
+				 window.print();
+				
+				}
+				
+				// ===== ASEGURAR QUE SOLO UN CHECKBOX ESTÉ SELECCIONADO A LA VEZ =====
+				
+				document.addEventListener('change', function(e) {
+					if (e.target.classList.contains('row-checkbox')) {
+						// Si se selecciona un checkbox, desmarcar todos los demás
+						if (e.target.checked) {
+							const allCheckboxes = document.querySelectorAll('.row-checkbox');
+							allCheckboxes.forEach(cb => {
+								if (cb !== e.target) {
+									cb.checked = false;
+								}
+							});
+						}
+					}
+				});
+            </script>
+        </body>
+    </html>

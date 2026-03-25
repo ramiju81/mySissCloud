@@ -1,0 +1,1854 @@
+ <!DOCTYPE html>
+    <html lang="es">
+        <head>
+			<!-- Font Awesome para iconos - librería de iconos gratuita -->
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>mySiss - Auditoría</title>
+			<link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+            <style>
+			
+                :root {
+					--mysiss-purple: #800080;
+					--mysiss-light-purple: #EBE3F2;
+					--mysiss-hover-purple: #DFD1EE;
+                }
+				
+				/* ===== RESET Y ESTILOS GLOBALES ===== */
+				
+				*{
+					margin: 0;
+					padding: 0;
+					box-sizing: border-box;
+				}
+
+				body {
+				    font-family: system-ui, -apple-system, sans-serif;
+					background: white;
+					min-height: 100vh;
+				}
+
+				.focus-outline:focus {
+					outline: 2px solid var(--mysiss-purple);
+					outline-offset: 2px;
+				}
+
+				/* == Layout == */
+				.app-container {
+				    display: flex;
+					min-height: 100vh;
+				}
+
+				/* == Sidebar == */
+				.sidebar {
+					position:fixed;
+					left:0;
+					top:0;
+					width: 252px;
+					height: 100vh;
+					overflow-y: auto;
+					background: var(--mysiss-light-purple);
+					padding: 0.8rem;
+					z-index: 100;
+					display: flex;
+					flex-direction: column;
+					justify-content: space-between; /* Distribuye el espacio entre logo/menú y cerrar sesión */
+				}
+				
+				.sidebar-top {
+				    flex-grow: 1; /* Ocupa el espacio disponible */
+				    display: flex;
+				    flex-direction: column;
+				}
+
+				/* == Contenedor para el botón de cerrar sesión que siempre estará al fondo == */
+				
+				.sidebar-bottom {
+				    margin-top: auto; /* Empuja este elemento hacia abajo */
+				    padding-top: 0.4rem; /* Espacio superior */
+				}
+				
+				.logo {
+					font-size: 3.4rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+					margin-bottom: 1.5rem;
+					text-align: center;
+				}
+
+				.nav-link {
+					display: block;
+					padding: 14px 24px;
+					color: var(--mysiss-purple);
+					text-decoration: none;
+					border-radius: 0.5rem;
+					font-weight: 500;
+					margin-bottom: 0.5rem;
+					transition: all 0.3s ease; /* Transición suave para hover */
+					/*border-left: 4px solid transparent;  Borde izquierdo invisible por defecto */
+					cursor: pointer;
+				}
+				
+				.nav-link:hover {
+					background: var(--mysiss-hover-purple);
+				}
+				
+				.nav-link.active {
+					background: white;
+				}
+				
+				/* ===== CONTENEDOR DE BOTONES SUPERIORES ===== */
+				
+				.topButtons {
+					position: absolute; /* Posición fija en la pantalla */
+					top: 20px;
+					right: 20px;
+					display: flex;
+					gap: 15px; /* Espacio entre botones */
+					align-items: center;
+					z-index: 1000;
+				}
+
+				/* ===== BOTÓN MENU ===== */
+
+				.menu-button {
+				    background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
+					text-decoration: none;
+					display: inline-flex;
+					align-items: center;
+					gap: 10px;
+					z-index: 1000;
+				}
+				
+				.menu-button:hover {
+				    transform: translateY(-2px);
+				    box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+				    background: var(--mysiss-hover-purple);
+				}
+				
+				/* Estilo para el icono del menú hamburguesa */
+				
+				.menu-button i {
+				    font-size: 18px; /* Tamaño del icono ligeramente más grande que el texto */
+				}
+				
+				/* Botón de icono de sobre (mail) */
+				
+                .mail-button {
+					position: relative;
+					background: none;
+					border: none;
+					color: var(--mysiss-purple);
+					font-size: 30px;
+					cursor: pointer;
+					padding: 8px;
+					transition: color 0.3s ease;
+                }
+
+                .mail-button:hover {
+                    color: var(--mysiss-hover-purple);
+                }
+				
+				.mail-button::after{
+					content: attr(data-tooltip); /* Contenido del atributo data-tooltip */
+					position: absolute;
+					bottom: -35px;
+					left: 50%;
+					transform: translateX(-50%); 
+					background: #333;
+					color: white;
+					padding: 5px 10px;
+					border-radius: 5px;
+					font-size: 12px;
+					white-space: nowrap;
+					opacity: 0;
+					pointer-events: none;
+					transition: opacity 0.3s ease;
+					z-index: 1000;	
+				}
+				
+				/* Mostrar tooltip al hacer hover */
+				
+				.mail-button:hover::after {
+					opacity: 1; /* Visible */
+				}
+				
+				/* Badge de notificación (círculo rojo con número) */
+				
+				.notification-badge {
+					position: absolute; 
+					top: 3px;
+					right: 2px;
+					background: #dc3545;
+					color: white;
+					border-radius: 50%;
+					width: 20px;
+					height: 20px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font-size: 12px;
+					font-weight: bold;
+					border: 2px solid white;
+				}
+				
+				/* ===== PANEL DE MENSAJES ===== */
+				
+				.messages-panel {
+					display: none; 
+					position: absolute; 
+					top: 60px;
+					right: 180px; 
+					width: 400px;
+					max-height: 500px;
+					background: white;
+					border: 1px solid var(--mysiss-purple); 
+					border-radius: 10px; 
+					box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+					z-index: 1500; 
+					overflow-y: auto;
+					animation: slideDown 0.3s ease;
+				}
+				
+				/* Encabezado del panel de mensajes */
+				.messages-header {
+					background: var(--mysiss-purple);
+					color: white;
+					padding: 15px;
+					font-size: 1.2rem;
+					font-weight: 700;
+					border-radius: 6px 6px 0 0;
+					display: flex;
+					justify-content: space-between; /* Espacio entre elementos */
+					align-items: center; /* Centrar verticalmente */
+				}
+				
+				/* Botón de cerrar en el encabezado */
+				.close-messages {
+					background: none;
+					border: none;
+					color: white;
+					font-size: 24px;
+					cursor: pointer;
+					padding: 0;
+					transition: transform 0.2s ease;
+				}
+				
+				.close-messages:hover {
+					transform: scale(1.2);
+				}
+				
+				/* Contenedor de la lista de mensajes */
+				.messages-list {
+					padding: 15px;
+				}
+				
+				/* Cada mensaje individual */
+				.message-item {
+					background: white;
+					padding: 15px;
+					margin-bottom: 10px;
+					border-radius: 8px;
+					border-left: 2px solid var(--mysiss-purple);
+				}
+				
+				/* Texto del mensaje */
+				.message-text {
+					color: #333;
+					font-size: 0.95rem;
+					margin-bottom: 8px;
+					line-height: 1.4; /* Altura de línea */
+				}
+				
+				/* Fecha del mensaje */
+				.message-date {
+					color: #666;
+					font-size: 0.85rem;
+					font-style: italic; /* Cursiva */
+				}
+				
+				/* Mensaje cuando no hay notificaciones */
+				.no-messages {
+					text-align: center; /* Centrar texto */
+					color: #666;
+					padding: 30px;
+					font-size: 1rem;
+				}
+				
+				/* ===== BOTÓN ACEPTAR MENSAJES ===== */
+				
+				.accept-messages {
+					display: none;
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 8px 8px;
+					border-radius: 6px;
+					font-size: 0.9rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					margin: 4px auto;
+					width: auto;
+				}
+				
+				
+				/* ===== CONTENIDO PRINCIPAL ===== */
+				
+			    .main-content {
+                  margin-left: 252px;
+                  padding: 1rem 1.5rem;
+                  width: calc(100% - 252px);
+                  min-height: 100vh;
+                }
+
+                /* Título principal de la sección */
+                .section-title {
+                    font-size: 2rem;
+                    font-weight: bold;
+                    color: var(--mysiss-purple);
+				    margin-top: 1rem;
+                    margin-bottom: 1rem;
+                }
+				
+				/* ===== SECCIÓN DE FILTROS ===== */
+				
+				/* Contenedor de filtro individual */
+				.filterSection {
+					display:grid;
+					background: white;
+					grid-template-columns: 1fr 1fr;
+					gap: 0.5rem; /* Espacio entre las dos secciones de filtros */
+					padding: 0.75rem;
+					border-radius: 12px;
+					box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+					margin-bottom: 1.5rem;
+				}
+				
+				/* Título de cada sección de filtro */
+				.filterTitle {
+					font-size: 0.95rem;
+					font-weight: 600;
+					color: #333;
+					margin-bottom: 0.5rem;
+				}
+				
+				/* Contenedor de cada campo del formulario */
+				.form-field {
+					margin-bottom: 0.3rem;
+					display: flex;
+					flex-direction: row;
+					align-items: center;
+					gap: 0.5rem;
+				}
+				
+				/* Etiqueta de cada campo */
+				.form-field label {
+					display: block;
+					color: #333;
+					font-weight: 500;
+					margin-bottom: 0;
+					font-size: 0.85rem;
+					min-width: 128px;
+				}
+				
+				/* Contenedor para input con icono de búsqueda */
+				.input-with-icon {
+					display: flex;
+					align-items: center;
+					gap: 0.5rem; /* Espacio entre el input y el icono */
+					width: 55%;
+				}
+				
+				.input-with-icon input {
+					flex: 1;
+					min-width: 0;
+				}
+				
+				/* Estilos de los inputs de texto */
+				.form-field input {
+					flex: 1; /* El input ocupa todo el espacio disponible */
+					padding: 0.4rem 0.5rem;
+					border: 1px solid #d1d5db;
+					border-radius: 0.375rem;
+					font-size: 0.8rem;
+				}
+				
+				.filterSection > .form-field:nth-child(odd) input {
+					max-width: 280px; /* Limita el ancho de inputs en columna izquierda */
+                }
+				
+				.filterSection > .form-field:nth-child(even) .input-with-icon {
+					width: 100%; /* Ocupa todo el ancho disponible en la columna */
+                }
+				
+				.filterSection > .form-field:nth-child(even) .input-with-icon input {
+				    flex: 1;
+					max-width: none;
+				}
+				
+				/* Efecto al hacer foco en los inputs */
+				.form-field input:focus {
+					outline: none;
+					border-color: var(--mysiss-purple);
+					box-shadow: 0 0 0 3px rgba(128, 0, 128, 0.1);
+				}
+				
+				/* Botón con icono de ayuda de búsqueda (lupa) para abrir modal */
+				.search-icon-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.4rem;
+					border-radius: 0.375rem;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 32px;
+					height: 32px;
+					font-size: 0.8rem;
+				}
+				
+				/* Efecto hover del botón ayuda de búsqueda */
+				.search-icon-btn:hover {
+					background: var(--mysiss-hover-purple);
+					color: white;
+				}
+				
+				/* Contenedor del botón de búsqueda principal */
+				.search-button-container {
+					text-align: right;
+					margin: 0.3rem 0.3rem;
+				}
+				
+				/* Botón principal de búsqueda */
+				.search-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.5rem 2rem;
+					border-radius: 0.5rem;
+					font-size: 0.9rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+				
+				/* Efecto hover del botón principal */
+				.search-button:hover {
+					background: var(--mysiss-hover-purple);
+					color: white;;
+					transform: translateY(-2px);
+				}
+				
+				/* ===== TABLA DE RESULTADOS ===== */
+
+				/* Título de la sección de resultados */
+				.results-title {
+					font-size: 1.125rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+					margin-bottom: 0.7rem;
+				}
+				
+				/* Contenedor de la tabla con scroll horizontal si es necesario */
+				.table-container {
+					overflow-x: auto;
+					margin-bottom: 0.75rem;
+					display: none; /* Oculta la tabla inicialmente */
+					opacity: 0;
+                    transform: translateY(20px);
+                    transition: opacity 0.5s ease, transform 0.5s ease;
+				}
+
+				/* Cuando la búsqueda se ha realizado, mostrar la tabla */
+				.table-container.visible {
+					display: block;
+					animation: fadeInTable 0.6s ease-out forwards;
+				}
+				
+				/* Estilos de la tabla */
+				.results-table {
+					width: 100%;
+					border-collapse: collapse; /* Elimina espacios entre celdas */
+					background: white;
+					box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				}
+
+				/* Encabezados de la tabla */
+				.results-table thead {
+					background: #f8f9fa;
+				}
+
+				/* Celdas del encabezado */
+				.results-table th {
+					padding: 0.5rem;
+					text-align: center;
+					font-weight: 600;
+					color: #333;
+					border-bottom: 1px solid #f0f0f0;
+					font-size: 14px;
+				}
+
+				/* Celdas del cuerpo de la tabla */
+				.results-table td {
+					padding: 0.5rem;
+					border-bottom: 1px solid #e5e7eb;
+					font-size: 14px;
+					text-align: center;
+				}
+
+				/* Efecto hover en las filas */
+				.results-table tbody tr:hover {
+					background: #f8f9fa;
+				}
+
+				/* Checkbox en la columna de selección */
+				.results-table input[type="checkbox"] {
+					width: 16px;
+					height: 16px;
+					cursor: pointer;
+				}
+
+				/* ===== BOTONES INFERIORES ===== */
+
+				/* Contenedor de los botones inferiores */
+				.action-buttons {
+					display: none; /* Ocultos inicialmente */
+					gap: 0.75rem;
+					margin-top: 0.95rem;
+					justify-content: flex-end;
+					opacity: 0;
+					transform: translateY(20px);
+				}
+
+				/* Mostrar botones */
+				.action-buttons.visible {
+					display: flex;
+					animation: fadeInButtons 0.6s ease-out 0.3s forwards;
+				}
+
+				/* Estilos de los botones de acción */
+				.action-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.5rem 1.5rem;
+					border-radius: 0.5rem;
+					font-size: 0.9rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				/* Efecto hover de los botones */
+				.action-btn:hover {
+					background: var(--mysiss-hover-purple);
+					color: white;
+					transform: translateY(-2px);
+				}
+				
+				/* ===== MODAL (POP-UP) ===== */
+
+				/* Fondo oscuro del modal que cubre toda la pantalla */
+				
+				.modal-overlay {
+					display: none; /* Oculto por defecto */
+					position: fixed;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+					background: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+					z-index: 1001; /* Por encima de todo el contenido */
+					justify-content: center;
+					align-items: center;
+				}
+
+				/* Cuando el modal está activo */
+				.modal-overlay.active {
+					display: flex;
+				}
+
+				/* Contenedor del contenido del modal */
+				.modal-content {
+					background: white;
+					padding: 1.5rem;
+					border-radius: 0.5rem;
+					max-width: 400px;
+					width: 90%;
+					max-height: 400px;
+					overflow-y: auto; /* Scroll si el contenido es muy largo */
+					box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+				}
+
+				/* Encabezado del modal */
+				.modal-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 1rem;
+				}
+
+				/* Título del modal */
+				.modal-title {
+					font-size: 1.25rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+					margin-bottom: 5px;
+				}
+
+				/* Botón para cerrar el modal (X) */
+				.modal-close {
+					background: none;
+					border: none;
+					font-size: 1.5rem;
+					color: var(--mysiss-purple);
+					cursor: pointer;
+					padding: 0;
+					width: 30px;
+					height: 30px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+
+				/* Efecto hover del botón cerrar */
+				.modal-close:hover {
+					color: #600060;
+				}
+
+				/* Lista de opciones dentro del modal */
+				.modal-options {
+					list-style: none;
+					padding: 0;
+					margin: 0;
+				}
+
+				/* Cada opción dentro del modal */
+				.modal-option {
+					padding: 0.75rem;
+					border-bottom: 1px solid #e5e7eb;
+					cursor: pointer;
+					transition: background 0.2s ease;
+				}
+
+				/* Efecto hover de las opciones */
+				.modal-option:hover {
+					background: var(--mysiss-light-purple);
+				}
+
+				/* Última opción sin borde inferior */
+				.modal-option:last-child {
+					border-bottom: none;
+				}
+				
+				/* ===== ESTILOS PARA MODAL DE CALENDARIO ===== */
+				
+				/* Contenedor del calendario */
+				.calendar-container {
+					width: 100%;
+					margin-top: 0.5rem;
+				}
+
+				/* Encabezado del calendario (mes y año con botones de navegación) */
+				.calendar-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 1rem;
+					padding: 0.5rem;
+					background: var(--mysiss-light-purple);
+					border-radius: 0.375rem;
+				}
+
+				/* Botones de navegación del calendario (anterior/siguiente) */
+				.calendar-nav-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.4rem 0.7rem;
+					border-radius: 0.375rem;
+					cursor: pointer;
+					font-size: 0.9rem;
+					transition: all 0.3s ease;
+				}
+
+				.calendar-nav-btn:hover {
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* Texto del mes y año actual */
+				.calendar-month-year {
+					font-weight: 600;
+					color: var(--mysiss-purple);
+					font-size: 1rem;
+				}
+
+				/* Grilla del calendario (7 columnas para los días de la semana) */
+				.calendar-grid {
+					display: grid;
+					grid-template-columns: repeat(7, 1fr);
+					gap: 0.3rem;
+				}
+
+				/* Encabezados de los días de la semana (L, M, M, J, V, S, D) */
+				.calendar-day-header {
+					text-align: center;
+					font-weight: 600;
+					color: var(--mysiss-purple);
+					padding: 0.5rem;
+					font-size: 0.8rem;
+				}
+
+				/* Cada celda del día en el calendario */
+				.calendar-day {
+					text-align: center;
+					padding: 0.6rem;
+					border: 1px solid #e5e7eb;
+					border-radius: 0.375rem;
+					cursor: pointer;
+					transition: all 0.2s ease;
+					font-size: 0.85rem;
+					background: white;
+				}
+
+				/* Efecto hover en los días */
+				.calendar-day:hover {
+					background: var(--mysiss-light-purple);
+					border-color: var(--mysiss-purple);
+				}
+
+				/* Día seleccionado */
+				.calendar-day.selected {
+					background: var(--mysiss-purple);
+					color: white;
+					font-weight: bold;
+				}
+
+				/* Días que no pertenecen al mes actual (deshabilitados) */
+				.calendar-day.disabled {
+					color: #d1d5db;
+					cursor: not-allowed;
+					background: #f9fafb;
+				}
+
+				.calendar-day.disabled:hover {
+					background: #f9fafb;
+					border-color: #e5e7eb;
+				}
+
+				/* Día actual (hoy) */
+				.calendar-day.today {
+					border: 2px solid var(--mysiss-purple);
+					font-weight: bold;
+				}
+				
+				/* ===== ESTILOS PARA MODAL DE ID AUDITORÍA ===== */
+				
+				.modal-id-table {
+					width: 100%;
+					border-collapse: collapse;
+					margin-top: 0.5rem;
+				}
+
+				/* Encabezados de la tabla de IDs */
+				.modal-id-table thead th {
+					background: var(--mysiss-light-purple);
+					color: var(--mysiss-purple);
+					padding: 0.6rem;
+					text-align: left;
+					font-weight: 600;
+					font-size: 0.9rem;
+					border-bottom: 2px solid var(--mysiss-purple);
+				}
+
+				/* Celdas del cuerpo de la tabla de IDs */
+				.modal-id-table tbody td {
+					padding: 0.6rem;
+					border-bottom: 1px solid #e5e7eb;
+					font-size: 0.85rem;
+					color: #333;
+				}
+
+				/* Filas de la tabla de IDs con efecto hover */
+				.modal-id-table tbody tr {
+					cursor: pointer;
+					transition: background 0.2s ease;
+				}
+
+				.modal-id-table tbody tr:hover {
+					background: var(--mysiss-light-purple);
+				}
+				
+				
+				/* Contenedor para label e input en línea */
+				.modal-field-inline {
+					display: flex;
+					align-items: center;
+					gap: 1rem;
+					margin-bottom: 1rem;
+				}
+
+				.modal-field-inline label {
+					min-width: 80px;
+					font-weight: 600;
+					margin: 0;
+					padding: 0;
+					line-height: 1;
+				}
+
+				.modal-field-inline select {
+					flex: 1;
+					margin: 0;
+				}
+
+				.modal-select:focus {
+					outline: none;
+					border-color: var(--mysiss-purple);
+					box-shadow: 0 0 0 3px rgba(128, 0, 128, 0.1);
+				}
+
+				
+				/* ===== ANIMACIÓN DE APARICIÓN ===== */
+				
+				.main-content {
+					animation: fadeInContent 0.7s ease-out;
+				}
+
+
+				@keyframes fadeInContent {
+					from {
+						opacity: 0;
+						transform: translateY(30px);
+						transform: translateX(-20px);
+					}
+					to {
+						opacity: 1;
+						transform: translateY(0);
+						transform: translateY(0);
+					}
+				}
+
+				@keyframes slideInFromLeft {
+					from {
+						opacity: 0;
+						transform: translateX(-20px);
+					}
+					to {
+						opacity: 1;
+						transform: translateX(0);
+					}
+				}
+				
+				/* Animación de aparición de la tabla */
+				@keyframes fadeInTable {
+					from {
+						opacity: 0;
+						transform: translateY(20px);
+					}
+					to {
+						opacity: 1;
+						transform: translateY(0);
+					}
+				}
+				
+				@keyframes fadeInButtons {
+					from {
+						opacity: 0;
+						transform: translateY(20px);
+					}
+					to {
+						opacity: 1;
+						transform: translateY(0);
+					}
+				}
+				
+				/* ===== DISEÑO RESPONSIVO ===== */
+
+				/* Tablets y pantallas medianas (hasta 1024px) */
+				@media (max-width: 1024px) {
+					.sidebar {
+						width: 200px;
+					}
+					
+					.main-content {
+						margin-left: 200px;
+						width: calc(100% - 200px);
+					}
+					
+					.logo {
+						font-size: 2.8rem;
+					}
+				}
+
+				/* Tablets pequeñas (hasta 768px) */
+				@media (max-width: 768px) {
+					.sidebar {
+						position: fixed;
+						left: -252px;
+						transition: left 0.3s ease;
+					}
+					
+					.sidebar.active {
+						left: 0;
+					}
+					
+					.main-content {
+						margin-left: 0;
+						width: 100%;
+						padding: 1rem;
+					}
+					
+					.filtersContainer {
+						grid-template-columns: 1fr;
+						gap: 1rem;
+					}
+					
+					.menu-button {
+						top: 10px;
+						right: 10px;
+						padding: 10px 20px;
+					}
+					
+					.section-title {
+						font-size: 1.5rem;
+						margin-top: 3rem;
+					}
+					
+					.results-table {
+						font-size: 12px;
+					}
+					
+					.results-table th,
+					.results-table td {
+						padding: 0.3rem;
+					}
+				}
+
+				/* Móviles (hasta 480px) */
+				@media (max-width: 480px) {
+					.logo {
+						font-size: 2.2rem;
+					}
+					
+					.nav-link {
+						padding: 10px 16px;
+						font-size: 0.9rem;
+					}
+					
+					.filterTitle {
+						font-size: 0.9rem;
+					}
+					
+					.form-field {
+						flex-direction: column;
+						align-items: flex-start;
+					}
+					
+					.form-field label {
+						min-width: auto;
+						margin-bottom: 0.3rem;
+					}
+					
+					.input-with-icon {
+						width: 100%;
+					}
+					
+					.form-field input,
+					#caso {
+						width: 100%;
+					}
+					
+					.search-button {
+						width: 100%;
+						padding: 0.6rem 1rem;
+					}
+					
+					.action-buttons {
+						flex-direction: column;
+					}
+					
+					.action-btn {
+						width: 100%;
+					}
+					
+					.results-table {
+						font-size: 10px;
+					}
+					
+					.modal-content {
+						width: 95%;
+						padding: 1rem;
+					}
+				}
+
+            </style>
+        </head>
+        <body>
+		    <div class="topButtons">
+			
+				<!-- Botón de icono de sobre -->
+                <button class="mail-button" data-tooltip="Mensajería" onclick="toggleMessages()"aria-label="Mensajes">
+                 <i class="fas fa-envelope"></i> <!-- Icono de sobre -->
+			     <!-- Badge de notificación (se mostrará dinámicamente) -->
+			     <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                </button>
+				
+				<!-- Botón menú -->
+				<a href="../Auditoria.html" class="menu-button">
+				 <i class="fas fa-bars"></i><!-- Icono de menú hamburguesa (3 líneas horizontales) -->
+				 Menú
+				</a>
+			</div>
+			
+			<!-- ===== PANEL DE MENSAJES ===== -->
+			<div id="messagesPanel" class="messages-panel">
+				<!-- Encabezado del panel -->
+				<div class="messages-header">
+					<span>Centro de mensajes</span>
+					<button class="close-messages" onclick="toggleMessages()">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<!-- Lista de mensajes (se llenará dinámicamente) -->
+				<div id="messagesList" class="messages-list">
+					<div class="no-messages">No hay mensajes para mostrar</div>
+				</div>
+				<!-- Botón aceptar para limpiar las notificaciones -->
+				<button class="accept-messages" id="acceptMessagesBtn" onclick="acceptMessages()">Aceptar</button>
+				
+			</div>
+			
+            <div class="app-container">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+				    <div class="sidebar-top">
+                        <div class="logo">mySiss</div> <!-- Logo mysiss -->
+				        <nav><!-- Menú -->
+						 <a href="AcuentasM-CarConvenios.html" class="nav-link" ><strong>Cargar convenio</strong></a>
+						 <a href="AcuentasM-ConfConvenios.html" class="nav-link"><strong>Configurar convenio</strong></a>
+						 <a href="AcuentasM-Validaciones.html" class="nav-link"><strong>Validaciones</strong></a>
+						 <a href="AcuentasM-EstCuenta.html" class="nav-link"><strong>Estados de cuenta</strong></a>
+						 <a href="AcuentasM-Gauditoria.html" class="nav-link"><strong>Gestionar auditoría</strong></a>
+						 <a href="#" class="nav-link active"><strong>Gestionar correcciones</strong></a>
+						 <a href="AcuentasM-Resultados.html" class="nav-link"><strong>Resultados</strong></a>
+                        </nav>
+					</div>
+					<div class ="sidebar-bottom">
+					 <!-- Sección de logout en la parte inferior -->
+					 <a href="../loginA.html" class="nav-link" data-section="logout"><strong>Cerrar sesión</strong></a>
+					</div>
+                </aside>
+				
+				<!-- Contenido principal de la página -->
+                <main class="main-content">
+					<h1 class="section-title">Gestionar correciones</h1>
+					<!-- Sección filtros de búsqueda -->
+					
+					<div class ="filtersContainer">
+						<!-- Filtro búsqueda general -->
+						<div class="filterSection">
+							<!-- Campo: Apellido 1 -->
+                            <div class="form-field">
+                             <label for="apellido1">Apellido 1:</label>
+                             <input type="text" id="apellido1" placeholder="Ingrese primer apellido">
+                            </div>
+							
+							<!-- campo: Fecha auditoría -->
+							<div class="form-field">
+                                <label for="estadoAccion">Fecha auditoría:</label>
+							    <div class="input-with-icon">
+                                    <input type="text" id="fechaAudit" placeholder="Seleccione una fecha">
+									<!-- Botón con icono de lupa para abrir modal -->
+                                    <button class="search-icon-btn" onclick="openModal('fechaAudit')" aria-label="Seleccionar fecha">
+                                     <i class="fas fa-search"></i>
+                                    </button>
+								</div>
+                            </div>
+
+                            <!-- Campo: Apellido 2 -->
+                            <div class="form-field">
+                             <label for="apellido2">Apellido 2:</label>
+                             <input type="text" id="apellido2" placeholder="Ingrese segundo apellido">
+                            </div>
+							
+							<!-- campo: ID de auditoría -->
+							<div class="form-field">
+                                <label for="estadoAccion">ID auditoría:</label>
+							    <div class="input-with-icon">
+                                    <input type="text" id="idAuditoria" placeholder="Seleccione un número de ID">
+									<!-- Botón con icono de lupa para abrir modal -->
+                                    <button class="search-icon-btn" onclick="openModal('idAuditoria')" aria-label="Seleccionar ID">
+                                     <i class="fas fa-search"></i>
+                                    </button>
+								</div>
+                            </div>
+
+                            <!-- Campo: Nombre -->
+                            <div class="form-field">
+                             <label for="nombre">Nombre:</label>
+                             <input type="text" id="nombre" placeholder="Ingrese nombre">
+                            </div>
+							
+							<!-- campo: Estado de la acción -->
+							<div class="form-field">
+                                <label for="estadoAccion">Estado de la acción:</label>
+							    <div class="input-with-icon">
+                                    <input type="text" id="estadoAccion" placeholder="Seleccione estado de la acción">
+									<!-- Botón con icono de lupa para abrir modal -->
+                                    <button class="search-icon-btn" onclick="openModal('estado')" aria-label="Seleccionar estado acción">
+                                     <i class="fas fa-search"></i>
+                                    </button>
+								</div>
+                            </div>
+						</div>
+					</div>
+					
+					<!-- ===== BOTÓN DE BÚSQUEDA ===== -->
+                    <div class="search-button-container">
+                     <button class="search-button" onclick="realizarBusqueda()">Búsqueda</button>
+                    </div>
+					
+					<!-- ===== SECCIÓN DE RESULTADOS ===== -->
+					
+                    <h2 class="results-title">Lista de aciertos</h2>
+
+                    <!-- Contenedor de la tabla (inicialmente oculto) -->
+                    <div class="table-container" id="tableContainer">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                 <th>Selección</th>
+								 <th>ID auditoría</th>
+                                 <th>Paciente</th>
+                                 <th>Documento</th>
+                                 <th>Responsable pago</th>
+                                 <th># Caso</th>
+								 <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                             <!-- Las filas se generan dinámicamente con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ===== BOTONES INFERIORES ===== -->
+					
+                    <div class="action-buttons" id="actionButtons">
+                        <button class="action-btn" onclick="accionGestionar()">Gestionar</button>
+                    </div>
+					
+				</main>
+			</div>
+			
+			<!-- ===== MODAL PARA SELECCIONAR OPCIONES ===== -->
+			
+            <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <!-- Encabezado del modal -->
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="modalTitle">Seleccione una opción</h3>
+                        <!-- Botón para cerrar el modal -->
+                        <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">
+                         <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+					<div id="modalBody">
+                        <!-- Lista de opciones del modal -->
+                        <ul class="modal-options" id="modalOptions">
+                            <!-- Las opciones se generan dinámicamente con JavaScript -->
+                        </ul>
+					</div>
+                </div>
+            </div>
+			
+			
+            <script>
+			
+			    // ===== VARIABLES GLOBALES =====
+                let campoActual = ''; // Almacena qué campo está siendo editado
+				let auditorSeleccionado = '';
+                let pacientesSeleccionados = [];
+				let resultadosActuales = [];
+				let messages = []; // Array para almacenar los mensajes
+				let calendarioMesActual = new Date().getMonth();
+                let calendarioAnioActual = new Date().getFullYear();
+                let fechaSeleccionada = null;
+				
+				//Inicialización página
+				
+				window.addEventListener('DOMContentLoaded', function() {
+                    cargarMensajesDesdeSession();
+                });
+				
+				// Sistema de mensajería
+				
+				function toggleMessages() {
+					
+					const panel = document.getElementById('messagesPanel');
+					
+					// Si el panel está oculto, mostrarlo
+					if (panel.style.display === 'none' || panel.style.display === '') {
+						panel.style.display = 'block';
+					} else {
+						// Si está visible, ocultarlo
+						panel.style.display = 'none';
+					}
+				}
+				
+				// Funciones para el modal
+
+                // Abre el modal con las opciones correspondientes al campo seleccionado
+ 
+                function openModal(campo) {
+				
+				    campoActual = campo; // Guarda el campo actual
+				    const modal = document.getElementById('modalOverlay');
+				    const modalTitle = document.getElementById('modalTitle');
+				    const modalOptions = document.getElementById('modalOptions');
+
+                    // Cambia el título del modal según el campo
+                    const titulos = {
+						estado: 'Estado de la acción',
+						idAuditoria: 'ID de auditoría',
+						fechaAudit: 'Seleccione una fecha' 
+                    };
+                    modalTitle.textContent = titulos[campo];
+
+                    // Limpia las opciones anteriores
+                    modalBody.innerHTML = '';
+					
+					if (campo === 'fechaAudit') {
+                       
+                        // Crea el contenedor del calendario
+                        const calendarioContainer = document.createElement('div');
+                        calendarioContainer.className = 'calendar-container';
+                        calendarioContainer.id = 'calendarContainer';
+                        
+                        // Genera el calendario
+                        generarCalendario(calendarioContainer);
+                        
+                        // Agrega el calendario al cuerpo del modal
+                        modalBody.appendChild(calendarioContainer);
+					
+					} else if (campo === 'idAuditoria') {
+					
+						//Extraer datos de ID localStorage
+					    const datosJSON = localStorage.getItem('ACuentasMedicas');
+						let opcionesId = [];
+						
+						if(datosJSON){
+							try {
+							    const todosDatos = JSON.parse(datosJSON);
+								// Filtra registros 04,05,06,07
+								opcionesId = todosDatos.filter(cuenta => 
+									cuenta.estado === '04' || cuenta.estado === '05' || cuenta.estado === '06' || cuenta.estado === '07'
+								);
+							}catch (e){
+								console.error('Error al parsear JSON:', e);
+							}
+						}
+						
+						// Crea la tabla con dos columnas (ID y Paciente)
+						const tabla = document.createElement('table');
+                        tabla.className = 'modal-id-table';
+						
+						// Crea el encabezado de la tabla
+                        const thead = document.createElement('thead');
+                        thead.innerHTML = `
+                            <tr>
+                                <th>ID</th>
+                                <th>Paciente</th>
+                            </tr>
+                        `;
+                        tabla.appendChild(thead);
+						
+						// Crea el cuerpo de la tabla con las opciones
+                        const tbody = document.createElement('tbody');
+						if (opcionesId.length > 0) {
+						    opcionesId.forEach(cuenta => {
+							    const nombreCompleto = [
+                                    cuenta.apellido1 || '',
+                                    cuenta.apellido2 || '',
+                                    cuenta.nombre || '',
+                                    cuenta.segundoNombre || ''
+                                ]
+								.filter(parte => parte.trim() !== '')
+								.join(' ');
+
+								const tr = document.createElement('tr');
+								tr.innerHTML = `
+								    <td>${cuenta.idAuditoria || 'N/A'}</td>
+									<td>${nombreCompleto || 'Sin nombre'}</td>
+								`;
+								// Al hacer clic en la fila, selecciona el ID
+								tr.onclick = function() {
+								    seleccionarOpcionModal(cuenta.idAuditoria || '');
+								};
+								tbody.appendChild(tr);
+							});
+							
+						}else{
+						    // Si no hay datos, muestra mensaje
+							const tr = document.createElement('tr');
+							tr.innerHTML = '<td colspan="2" style="text-align:center; padding:1rem;">No hay auditorías disponibles</td>';
+						    tbody.appendChild(tr);
+						}
+						
+						tabla.appendChild(tbody);
+						
+						// Agrega la tabla al cuerpo del modal
+                        modalBody.appendChild(tabla);
+						
+					} else if (campo === 'estado') {
+					
+						const estadosAccion = [
+							'Estado de cuenta con hallazgo',
+							'Estado de cuenta gestionada',
+							'Estado de cuenta con correcciones',
+							'Finalizada'
+						];
+						
+						const ul = document.createElement('ul');
+						ul.className = 'modal-options';
+						ul.id = 'modalOptions';
+						
+						estadosAccion.forEach(estado => {
+							const li = document.createElement('li');
+							li.className = 'modal-option';
+							li.textContent = estado;
+							li.onclick = function() {
+								seleccionarOpcionModal(estado);
+							};
+							ul.appendChild(li);
+						});
+						modalBody.appendChild(ul);
+					}
+				
+					// Muestra el modal añadiendo la clase 'active'
+                    modal.classList.add('active');
+			    }
+				
+				// ===== FUNCIÓN PARA GENERAR EL CALENDARIO =====
+				
+                function generarCalendario(container) {
+                    // Limpia el contenedor
+                    container.innerHTML = '';
+                    
+                    // Crea el encabezado del calendario (navegación)
+                    const header = document.createElement('div');
+                    header.className = 'calendar-header';
+                    
+                    // Botón para ir al mes anterior
+                    const btnAnterior = document.createElement('button');
+                    btnAnterior.className = 'calendar-nav-btn';
+                    btnAnterior.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                    btnAnterior.onclick = () => {
+                        calendarioMesActual--;
+                        if (calendarioMesActual < 0) {
+                            calendarioMesActual = 11;
+                            calendarioAnioActual--;
+                        }
+                        generarCalendario(container);
+                    };
+                    
+                    // Muestra el mes y año actual
+                    const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio','Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                    const mesAnio = document.createElement('div');
+                    mesAnio.className = 'calendar-month-year';
+                    mesAnio.textContent = `${mesesNombres[calendarioMesActual]} ${calendarioAnioActual}`;
+                    
+                    // Botón para ir al mes siguiente
+                    const btnSiguiente = document.createElement('button');
+                    btnSiguiente.className = 'calendar-nav-btn';
+                    btnSiguiente.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                    btnSiguiente.onclick = () => {
+                        calendarioMesActual++;
+                        if (calendarioMesActual > 11) {
+                            calendarioMesActual = 0;
+                            calendarioAnioActual++;
+                        }
+                        generarCalendario(container);
+                    };
+                    
+                    // Agrega los elementos al encabezado
+                    header.appendChild(btnAnterior);
+                    header.appendChild(mesAnio);
+                    header.appendChild(btnSiguiente);
+                    container.appendChild(header);
+                    
+                    // Crea la grilla del calendario
+                    const grid = document.createElement('div');
+                    grid.className = 'calendar-grid';
+                    
+                    // Agrega los encabezados de los días de la semana
+                    const diasSemana = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+                    diasSemana.forEach(dia => {
+                        const diaHeader = document.createElement('div');
+                        diaHeader.className = 'calendar-day-header';
+                        diaHeader.textContent = dia;
+                        grid.appendChild(diaHeader);
+                    });
+                    
+                    // Calcula el primer día del mes y los días totales
+                    const primerDia = new Date(calendarioAnioActual, calendarioMesActual, 1);
+                    const ultimoDia = new Date(calendarioAnioActual, calendarioMesActual + 1, 0);
+                    const diasEnMes = ultimoDia.getDate();
+                    const primerDiaSemana = primerDia.getDay(); // 0=Domingo, 1=Lunes, etc.
+                    
+                    // Ajusta el primer día (Lunes=0, Domingo=6)
+                    const ajustePrimerDia = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1;
+                    
+                    // Agrega días vacíos antes del primer día del mes
+                    for (let i = 0; i < ajustePrimerDia; i++) {
+                        const diaVacio = document.createElement('div');
+                        diaVacio.className = 'calendar-day disabled';
+                        grid.appendChild(diaVacio);
+                    }
+                    
+                    // Obtiene la fecha de hoy
+                    const hoy = new Date();
+                    const esHoy = (dia) => {
+                        return hoy.getDate() === dia && 
+                               hoy.getMonth() === calendarioMesActual && 
+                               hoy.getFullYear() === calendarioAnioActual;
+                    };
+                    
+                    // Agrega los días del mes
+                    for (let dia = 1; dia <= diasEnMes; dia++) {
+                        const diaElemento = document.createElement('div');
+                        diaElemento.className = 'calendar-day';
+                        diaElemento.textContent = dia;
+                        
+                        // Marca el día actual
+                        if (esHoy(dia)) {
+                            diaElemento.classList.add('today');
+                        }
+                        
+                        // Marca el día seleccionado
+                        if (fechaSeleccionada && 
+                            fechaSeleccionada.getDate() === dia &&
+                            fechaSeleccionada.getMonth() === calendarioMesActual &&
+                            fechaSeleccionada.getFullYear() === calendarioAnioActual) {
+                            diaElemento.classList.add('selected');
+                        }
+                        
+                        // Al hacer clic en un día, lo selecciona
+                        diaElemento.onclick = () => seleccionarFecha(dia);
+                        
+                        grid.appendChild(diaElemento);
+                    }
+                    
+                    container.appendChild(grid);
+                }
+
+                // ===== FUNCIÓN PARA SELECCIONAR UNA FECHA DEL CALENDARIO =====
+				
+                function seleccionarFecha(dia) {
+                    // Crea el objeto Date con la fecha seleccionada
+                    fechaSeleccionada = new Date(calendarioAnioActual, calendarioMesActual, dia);
+                    
+                    // Formatea la fecha en formato DD/MM/YYYY
+                    const diaStr = String(dia).padStart(2, '0');
+                    const mesStr = String(calendarioMesActual + 1).padStart(2, '0');
+                    const anioStr = calendarioAnioActual;
+                    const fechaFormateada = `${diaStr}/${mesStr}/${anioStr}`;
+                    
+                    // Coloca la fecha en el campo de texto
+                    document.getElementById(campoActual).value = fechaFormateada;
+                    
+                    // Cierra el modal
+                    closeModal();
+                }
+				
+				// Cierra el modal
+				
+                function closeModal() {
+				
+					const modal = document.getElementById('modalOverlay');
+					// Oculta el modal removiendo la clase 'active'
+					modal.classList.remove('active');
+                }
+
+                //Cierra el modal solo si se hace clic en el fondo oscuro
+
+                function closeModalOnOverlay(event) {
+                    
+					// Si el clic es directamente en el overlay (no en el contenido del modal)
+                    if (event.target.id === 'modalOverlay') {
+                     closeModal();
+                    }
+                }
+				
+				// Función para seleccionar una opción del modal y cerrar automáticamente
+				
+				function seleccionarOpcionModal(valor) {
+					
+					// Asigna el valor al campo correspondiente
+					if (campoActual === 'idAuditoria') {
+						document.getElementById('idAuditoria').value = valor;
+					} else if (campoActual === 'estado') {
+						document.getElementById('estadoAccion').value = valor;
+					}
+					
+					// Cierra el modal automáticamente
+					closeModal();
+				}
+				
+				// Funciones para búsqueda
+				
+				function realizarBusqueda() {				
+				
+					// Obtiene los valores de todos los campos
+					const apellido1 = document.getElementById('apellido1').value.trim().toLowerCase();;
+					const apellido2 = document.getElementById('apellido2').value.trim().toLowerCase();;
+					const nombre = document.getElementById('nombre').value.trim().toLowerCase();;
+			        const fecha = document.getElementById('fechaAudit').value.trim();
+					const idAuditoria = document.getElementById('idAuditoria').value.trim();
+					const estado = document.getElementById('estadoAccion').value.trim();
+
+
+					// Valida que al menos un campo esté diligenciado
+					if (!apellido1 && !apellido2 && !nombre && !fecha && !idAuditoria && !estado) {
+						alert('Por favor complete al menos un campo de búsqueda.');
+						return;
+					}
+					
+					// Obtiene datos del local storage
+					const acuentasMedicas = JSON.parse(localStorage.getItem('ACuentasMedicas')) || [];
+					
+					//Filtra los resultados según los criterios de búsqueda
+					let resultados = acuentasMedicas.filter(cuenta => {
+					    let coincide = true;
+						
+						//Filtra por estados 
+						if (cuenta.estado !== '04' && cuenta.estado !== '05' && cuenta.estado !== '06' && cuenta.estado !== '07') {
+                            return false;
+                        }
+						// Búsqueda por apellido 1 (coincidencia parcial)
+						if (apellido1 && !cuenta.apellido1.toLowerCase().includes(apellido1)) {
+						    coincide = false;
+						}
+						// Búsqueda por apellido 2 (coincidencia parcial)
+						if (apellido2 && !cuenta.apellido2.toLowerCase().includes(apellido2)) {
+						    coincide = false;
+						}
+						// Búsqueda por nombre (coincidencia parcial en nombre o segundo nombre)
+						if (nombre) {
+						    const nombreCompleto = (cuenta.nombre + ' ' + (cuenta.segundoNombre || '')).toLowerCase();
+							if (!nombreCompleto.includes(nombre)) {
+							    coincide = false;
+							}
+						}
+						// Búsqueda por fecha de auditoría (coincidencia exacta)
+						if (fecha) {
+						    // Convierte la fecha del localStorage a formato DD/MM/YYYY
+							const fechaAsignacion = new Date(cuenta.fechaAsignacion);
+							const dia = String(fechaAsignacion.getDate()).padStart(2, '0');
+							const mes = String(fechaAsignacion.getMonth() + 1).padStart(2, '0');
+							const anio = fechaAsignacion.getFullYear();
+							const fechaFormateada = `${dia}/${mes}/${anio}`;
+							
+							if (fechaFormateada !== fecha) {
+							    coincide = false;
+							}
+						}
+						// Búsqueda por ID de auditoría (coincidencia exacta
+						if (idAuditoria && cuenta.idAuditoria !== idAuditoria) {
+						    coincide = false;
+						}
+						// Búsqueda por estado de la acción
+						if (estado) {
+						    if (estado === 'Estado de cuenta con hallazgo' && cuenta.estado !== '04') {
+							    coincide = false;
+							}else if (estado === 'Estado de cuenta gestionada' && cuenta.estado !== '05') {
+								coincide = false;
+							}else if (estado === 'Estado de cuenta con correcciones' && cuenta.estado !== '06') {
+								coincide = false;
+							}else if (estado === 'Finalizada' && cuenta.estado !== '07') {
+								coincide = false;
+							}
+						}
+						return coincide;
+					});
+					
+					// Si no hay resultados, muestra alerta
+					if (resultados.length === 0) {
+						alert('No se encontraron resultados.');
+						// Oculta la tabla y los botones
+						document.getElementById('tableContainer').classList.remove('visible');
+						document.getElementById('actionButtons').classList.remove('visible');
+						return;
+					}
+					
+					// Muestra los resultados en la tabla
+                    mostrarResultados(resultados);
+				}
+				
+				function mostrarResultados(resultados) {
+				    
+					// Guarda los resultados en la variable global
+                    resultadosActuales = resultados;
+					
+					const tableBody = document.getElementById('tableBody');
+					const tableContainer = document.getElementById('tableContainer');
+					const actionButtons = document.getElementById('actionButtons');
+					
+					// Limpia el contenido anterior de la tabla
+					tableBody.innerHTML = '';
+					
+					// Genera las filas de la tabla con los resultados
+					resultados.forEach((cuenta, index) => {
+						// Concatena el nombre completo del paciente
+						const nombreCompleto = `${cuenta.apellido1} ${cuenta.apellido2} ${cuenta.nombre}${cuenta.segundoNombre ? ' ' + cuenta.segundoNombre : ''}`;
+						
+						// Determina el texto del estado
+						let estadoTexto = '';
+						switch(cuenta.estado) {
+							case '02':
+							    estadoTexto = 'Asignada';
+							break;
+							case '03':
+								estadoTexto = 'Estado de cuenta con soporte';
+							break;
+							case '04':
+								estadoTexto = 'Estado de cuenta con hallazgo';
+							break;
+							case '05':
+							    estadoTexto = 'Estado de cuenta gestionada';
+							break;
+							case '06':
+								estadoTexto = 'Estado de cuenta con correcciones';
+							break;
+							case '07':
+								estadoTexto = 'Finalizada';
+							break;
+							default:
+							    estadoTexto = 'Desconocido';
+						}
+						
+						//Crear fila
+						const fila = `
+						    <tr>
+							    <td><input type="checkbox" id="check-${index}" aria-label="Seleccionar paciente"></td>
+                                <td>${cuenta.idAuditoria || ''}</td>
+								<td>${nombreCompleto}</td>
+								<td>${cuenta.documento || ''}</td>
+								<td>${cuenta.responsablePago || ''}</td>
+								<td>${cuenta.numeroCaso || ''}</td>
+								<td>${estadoTexto}</td>
+							</tr>
+						`;
+						tableBody.innerHTML += fila;
+					});
+					
+					// Muestra la tabla y los botones
+					tableContainer.classList.add('visible');
+					actionButtons.classList.add('visible');
+				}
+				
+				function updateMessagesUI() {
+				 
+				    // Obtiene el badge
+				    const badge = document.getElementById('notificationBadge');
+					
+					//Guarda en sessionStorage
+					sessionStorage.setItem('centroMensajes', JSON.stringify({
+						messages: messages,
+						badgeState: messages.length > 0 ? 'withNumber' : 'empty'
+					}));
+					
+					// Actualiza badge de notificación
+					badge.style.display = 'flex';
+					badge.textContent = messages.length;
+					
+					// Actualiza lista de mensajes
+					actualizarListaMensajes();
+
+				}
+				
+				function acceptMessages() {
+				
+					// Cierra el panel de mensajes
+					const panel = document.getElementById('messagesPanel');
+					panel.style.display = 'none';
+		
+					// Obtiene el badge de notificación
+					const badge = document.getElementById('notificationBadge');
+		
+					// Mantiene el badge visible pero sin número
+					badge.style.display = 'flex';
+					badge.textContent = ''; // Deja solo el círculo rojo
+
+					// Actualiza estado session storage
+					sessionStorage.setItem('centroMensajes', JSON.stringify({
+						messages: messages,
+						badgeState: 'onlyCircle' // Solo círculo rojo sin número
+				    }));
+                }
+				
+				function accionGestionar(){
+				    
+					// Verifica si hay algún checkbox seleccionado
+					const checkboxes = document.querySelectorAll('#tableBody input[type="checkbox"]:checked');
+					if (checkboxes.length === 0) {
+						alert('Por favor seleccione un registro.');
+						return;
+					} 
+					if(checkboxes.length > 1){
+					    alert('Por favor seleccione únicamente un registro.');
+						return;
+					}
+					
+					// Obtiene el índice del paciente seleccionado
+					const checkbox = checkboxes[0];
+					const index = parseInt(checkbox.id.split('-')[1]);
+					
+					// Obtiene los datos del ARRAY ORIGINAL
+					const paciente = resultadosActuales[index];
+					
+					const pacienteSeleccion = {
+					    nombre: paciente.nombre,
+						segundoNombre: paciente.segundoNombre,
+						apellido1: paciente.apellido1,
+						apellido2: paciente.apellido2,
+						documento: paciente.documento,
+						responsablePago: paciente.responsablePago,
+						numeroCaso: paciente.numeroCaso,
+						nombreAuditor: paciente.nombreAuditor,
+						idAuditoria: paciente.idAuditoria,
+						estado: paciente.estado
+					}
+					
+					// Guarda los datos en sessionStorage
+                    sessionStorage.setItem('pacienteSeleccionado', JSON.stringify(pacienteSeleccion));
+					
+					// Abre el archivo en la misma ventana
+				    window.open('AcuentasM-GestcorrecA.html', '_self');
+				
+				}
+				
+				function cargarMensajesDesdeSession() {
+					
+					// Obtiene los datos del sessionStorage
+					const datosGuardados = sessionStorage.getItem('centroMensajes');
+					
+					if (datosGuardados) {
+						try {
+							const datos = JSON.parse(datosGuardados);
+							
+							// Restaura el array de mensajes
+							if (datos.messages && Array.isArray(datos.messages)) {
+								messages = datos.messages;
+							}
+							
+							//Verifica auditorías con estado '05' y agrega mensajes
+							verificarNuevasActualizaciones();
+							
+							// Restaura el estado del badge
+							const badge = document.getElementById('notificationBadge');
+							
+							if (datos.badgeState === 'withNumber') {
+								// Badge con número
+								badge.style.display = 'flex';
+								badge.textContent = messages.length;
+							} else if (datos.badgeState === 'onlyCircle') {
+								// Círculo rojo sin número
+								badge.style.display = 'flex';
+								badge.textContent = '';
+							} else {
+								// Oculta badge
+								badge.style.display = 'none';
+							}
+							
+							// Actualiza la lista de mensajes
+							actualizarListaMensajes();
+							
+						} catch (e) {
+							console.error('Error al cargar mensajes desde sessionStorage:', e);
+						}
+					} else{
+						verificarNuevasActualizaciones();
+					}
+				}
+				
+				function actualizarListaMensajes() {
+					
+					const messagesList = document.getElementById('messagesList');
+					const acceptBtn = document.getElementById('acceptMessagesBtn');
+					
+					if (messages.length === 0) {
+						// Mensaje por defecto
+						messagesList.innerHTML = '<div class="no-messages">No hay mensajes para mostrar</div>';
+						acceptBtn.style.display = 'none';
+					} else {
+						// Construye HTML con todos los mensajes
+						let messagesHTML = '';
+						
+						// Recorre array de mensajes del más reciente al más antiguo
+						for (let i = messages.length - 1; i >= 0; i--) {
+							const message = messages[i];
+							messagesHTML += `
+								<div class="message-item">
+									<div class="message-text">${message.text}</div>
+									<div class="message-date">${message.date}</div>
+								</div>
+							`;
+						}
+						
+						// Inserta HTML en el contenedor
+						messagesList.innerHTML = messagesHTML;
+						
+						// Muestra botón aceptar cuando hay mensajes
+						acceptBtn.style.display = 'block';
+					}
+				}
+				
+				function verificarNuevasActualizaciones() {
+					// Obtiene datos del localStorage
+					const acuentasMedicas = JSON.parse(localStorage.getItem('ACuentasMedicas')) || [];
+					// Filtra auditorías con estado '05'
+					const auditoriasActualizadas = acuentasMedicas.filter(cuenta => cuenta.estado === '05');
+					//Verifica si existe mensaje
+					auditoriasActualizadas.forEach(auditoria => {
+						const mensajeExiste = messages.some(msg =>
+							msg.text.includes(auditoria.idAuditoria) && 
+							msg.text.includes('Estado de cuenta gestionada')
+						);
+						if (!mensajeExiste) {
+							// Obtiene fecha y hora actual
+							const ahora = new Date();
+							const fechaFormateada = ahora.toLocaleDateString('es-ES');
+							// Crea el nuevo mensaje
+							const nuevoMensaje = {
+								text: `Auditoría <strong>${auditoria.idAuditoria}</strong> actualizada. Estado: Estado de cuenta gestionada`,
+								date: `${fechaFormateada}`
+							};
+							
+							// Agrega el mensaje al array
+							messages.push(nuevoMensaje);
+						}	
+					});
+					// Actualiza el sessionStorage con los mensajes nuevos
+					if (messages.length > 0) {
+						updateMessagesUI();
+					}
+				}
+
+            </script>
+        </body>
+    </html>

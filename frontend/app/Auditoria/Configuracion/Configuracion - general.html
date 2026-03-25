@@ -1,0 +1,786 @@
+    <!DOCTYPE html>
+    <html lang="es">
+        <head>
+            <!-- Font Awesome para iconos - librería de iconos gratuita -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>mySiss - Auditoría</title>
+            <link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+            <style>
+			
+                :root {
+                 --mysiss-purple: #800080;
+                 --mysiss-light-purple: #EBE3F2;
+                 --mysiss-hover-purple: #DFD1EE;
+                }
+	
+				*{
+				 margin: 0;
+				 padding: 0;
+				 box-sizing: border-box;
+				}
+
+				body {
+				 font-family: system-ui, -apple-system, sans-serif;
+				 background: white;
+				 min-height: 100vh;
+				}
+
+				.focus-outline:focus {
+				 outline: 2px solid var(--mysiss-purple);
+				 outline-offset: 2px;
+				}
+
+				/* == Layout == */
+				.app-container {
+				 display: flex;
+				 min-height: 100vh;
+				}
+
+				/* == Sidebar == */
+				.sidebar {
+				 position:fixed;
+				 left:0;
+				 top:0;
+				 width: 190px;
+				 height: 100vh;
+				 overflow-y: auto;
+				 background: var(--mysiss-light-purple);
+				 padding: 0.8rem;
+				 z-index: 100;
+				 display: flex;
+				 flex-direction: column;
+				 justify-content: space-between; /* Distribuye el espacio entre logo/menú y cerrar sesión */
+				}
+				
+				.sidebar-top {
+				 flex-grow: 1; /* Ocupa el espacio disponible */
+				 display: flex;
+				 flex-direction: column;
+				}
+
+				/* == Contenedor para el botón de cerrar sesión que siempre estará al fondo == */
+				.sidebar-bottom {
+				 margin-top: auto; /* Empuja este elemento hacia abajo */
+				 padding-top: 1rem; /* Espacio superior */
+				}
+
+				.logo {
+				 font-size: 3.1rem;
+				 font-weight: bold;
+				 color: var(--mysiss-purple);
+				 margin-bottom: 2rem;
+				 text-align: center;
+				}
+
+				.nav-link {
+				 display: block;
+				 padding: 15px 25px;
+				 color: var(--mysiss-purple);
+				 text-decoration: none;
+				 border-radius: 0.5rem;
+				 font-weight: 500;
+				 margin-bottom: 0.5rem;
+				 transition: all 0.3s ease; /* Transición suave para hover */
+				 /*border-left: 4px solid transparent;  Borde izquierdo invisible por defecto */
+				 cursor: pointer;
+				}
+				
+				/* == OPCIÓN MENU SELECCIONADA == */
+				
+				.nav-linkG{
+				 display: block;
+				 padding: 15px 25px;
+				 color: var(--mysiss-purple);
+				 text-decoration: none;
+				 border-radius: 0.5rem;
+				 font-weight: 500;
+				 margin-bottom: 0.5rem;
+				 <!-- transition: all 0.3s ease; /* Transición suave para hover */ -->
+				 /*border-left: 4px solid transparent;  Borde izquierdo invisible por defecto */
+				 cursor: pointer;
+				 background: white;
+				
+				}
+				
+				.nav-link:hover {
+				 background: var(--mysiss-hover-purple);
+				}
+			
+				/* ===== CONTENIDO PRINCIPAL ===== */
+				
+				.main-content {
+				 flex: 1;/* Ocupa el espacio restante */
+				 padding: 30px;
+				 margin-left: 190px; /* Espacio para el sidebar fijo */
+				 min-height: 100vh;
+				 background-color: #ffffff;
+				 position: relative;
+				 height: auto;
+				}
+				
+			    .app-container {
+					display: flex; /* Layout flexbox para sidebar + contenido */
+					min-height: 100vh; /* Altura mínima de toda la ventana */
+					position: relative;
+				}
+				
+			    .section-title {
+				 font-size: 1.875rem;
+				 font-weight: bold;
+				 color: var(--mysiss-purple);
+				 margin-bottom: 1rem;
+				}
+
+			    /* == FORMS == */
+			    .form-group {
+				 margin-bottom: 1rem;
+				}
+
+			    .form-label {
+				 display: block;
+				 margin-bottom: 0.5rem;
+				 color: #374151;
+				 font-weight: 500;
+			    }
+
+			    .form-input {
+				 width: 100%;
+				 padding: 0.5rem;
+				 border: 1px solid #D1D5DB;
+				 border-radius: 0.375rem;
+				 font-size: 1rem;
+				}
+
+			    .form-input:focus {
+				 outline: none;
+				 border-color: var(--mysiss-purple);
+				 box-shadow: 0 0 0 2px rgba(128, 0, 128, 0.1);
+				}
+				
+			    /* ===== ESTILOS DEL FORMULARIO ===== */
+				
+				.config-form {
+					background: white;
+					padding: 20px;
+					border-radius: 12px; /* Bordes redondeados */
+					box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); /* Sombra sutil */
+					margin-bottom: 30px;
+				}
+
+				/* == GRID de 4 columnas para los campos del formulario general == */
+				
+				.form-grid {
+					display: grid;
+					grid-template-columns: 1fr 1fr 1fr 1fr; /* 4 columnas */
+					gap: 20px; /* Espacio entre elementos */
+					margin-bottom: 25px;
+				}
+				
+				/* == CONTENEDOR para cada campo del formulario == */
+				
+				.form-group {
+					display: flex;
+					flex-direction: column; /* Label arriba, input abajo */
+				}
+				
+				.form-groupCheck{
+				 display: flex;
+				 text-align: center;
+				}
+				
+				.column-groupCheck{
+				 display: flex;
+				 flex-direction:column;
+				 margin: 0 auto;
+				}
+
+				/* == ESTILOS PARA LAS ETIQUETAS == */
+				
+				.form-group label {
+					font-weight: 600;
+					margin-bottom: 9px;
+					color: #333;
+					font-size: 14px;
+				}
+				
+				.form-groupCheck label{
+					font-weight: 600;
+					margin-bottom: 22px;
+					color: #333;
+					font-size: 14px;
+				}
+			
+				/* == ESTILOS PARA INPUTS Y SELECTS == */
+				
+				.form-group input,
+				.form-group select {
+					padding: 12px;
+					border: 2px solid #e1e5e9; /* Borde gris claro */
+					border-radius: 8px;
+					font-size: 14px;
+					transition: all 0.3s ease; /* Transición suave */
+					background-color: white;
+				}
+				
+				.form-groupCheck input{
+				  padding: 12px;
+				  border: 2px solid #e1e5e9; /* Borde gris claro */
+				  border-radius: 8px;
+				  font-size: 14px;
+				  transition: all 0.3s ease; /* Transición suave */
+				  background-color: white;
+				}
+				
+				.column-groupCheck input{
+				  transform: scale(1.7);
+				  justify-content: center;
+				}
+				
+			    /* == TAMAÑO DE CHECKBOX == */
+				
+				/* == MODO EDITAR ==*/
+				
+				.data-table input[type="checkbox"].edit-input{
+				 transform: scale(1.5); /* Aumenta el checkbox al 150% */
+                 cursor: pointer; /* Cursor de mano al pasar sobre él */
+                 margin: 0 auto; /* Centra el checkbox horizontalmente */
+                 display: block; /* Necesario para que margin: auto funcione */
+				}
+				
+				/* == MODO VISUALIZAR ==*/
+				
+				.data-table input[type="checkbox"]:disabled {
+                 transform: scale(1.5); /* Aumenta el tamaño al 150% */
+                 cursor: not-allowed; /* Cursor que indica deshabilitado */
+                 margin: 0 auto; /* Centra horizontalmente */
+                 display: block; /* Permite el centrado */
+                }
+
+				/* == EFECTO FOCUS EN INPUTS == */
+				
+				.form-group input:focus,
+				.form-group select:focus {
+					outline: none; /* Quita el outline por defecto */
+					border-color: #8e44ad; /* Borde púrpura */
+					box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1); /* Sombra púrpura sutil */
+				}
+				
+				/* == BOTÓN MENÚ en la parte superior derecha == */
+				
+				.menu-button {
+				   position: fixed;
+				   top: 20px;
+				   right: 20px;
+				   background: var(--mysiss-purple);
+				   color: white;
+				   border: none;
+				   padding: 12px 30px;
+				   border-radius: 8px;
+				   font-size: 16px;
+				   font-weight: 600;
+				   cursor: pointer;
+				   transition: all 0.3s ease;
+				   box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
+				   text-decoration: none;
+				   display: inline-flex; /*alinear icono y texto*/
+				   align-items: center; /*Centra verticalmente el icono y texto*/
+				   gap: 10px; /*Espacio de 10px entre el icono y el texto*/
+				   z-index: 1000;
+				}
+				
+				.menu-button:hover {
+				  transform: translateY(-2px);
+				  box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+				  background: var(--mysiss-hover-purple);
+				}
+				
+				/* == ESTILO para el icono del menú hamburguesa == */
+				
+				.menu-button i {
+				  font-size: 18px; /* Tamaño del icono ligeramente más grande que el texto */
+				}
+
+				/* == BOTÓN PRINCIPAL "Agregar" == */
+				
+				.btn-agregar {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); /* Sombra con color púrpura */
+				}
+				
+				.btn-agregarFormulario,
+				.btn-cancelarFormulario	{
+				 background: var(--mysiss-purple);
+				 color: white;
+				 border: none;
+				 padding: 8px 26px;
+				 border-radius: 8px;
+				 font-size: 14px;
+				 font-weight: 700;
+				 cursor: pointer;
+				 transition: all 0.3s ease;
+				 box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); /* Sombra con color púrpura */
+				}
+
+				/* EFECTO HOVER del botón agregar */
+				
+				.btn-agregar:hover, 
+				.btn-agregarFormulario:hover,
+				.btn-cancelarFormulario:hover {
+					transform: translateY(-2px); /* Efecto de elevación */
+					box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3); /* Sombra más intensa */
+				}
+				
+				/* ===== ESTILOS DE LA TABLA ===== */
+				
+				.table-container {
+					background: white;
+					border-radius: 12px;
+					box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+					overflow: hidden; /* Para que el border-radius funcione correctamente */
+				}
+
+				/* HEADER DE LA TABLA */
+				
+				.table-header {
+					background: var(--mysiss-purple);
+					color: white;
+					padding: 20px;
+					font-size: 18px;
+					font-weight: 600;
+				}
+
+				/* == TABLA DE DATOS == */
+				
+				.data-table {
+					width: 100%;
+					border-collapse: collapse; /* Elimina espacios entre celdas */
+				}
+
+				/* == CELDAS DE LA TABLA == */
+				
+				.data-table th,
+				.data-table td {
+					padding: 15px;
+					text-align: left;
+					border-bottom: 1px solid #f0f0f0; /* Línea divisoria entre filas */
+				}
+
+				/* == HEADERS DE LA TABLA == */
+				
+				.data-table th {
+					background-color: #f8f9fa; /* Fondo gris claro */
+					font-weight: 600;
+					color: #333;
+					font-size: 14px;
+				}
+
+				/* == EFECTO HOVER en las filas == */
+				
+				.data-table tr:hover {
+					background-color: #f8f9fa;
+				}
+				
+				/* ===== BOTONES DE ACCIÓN ===== */
+				
+				.btn-action {
+					padding: 6px 12px;
+					border: none;
+					border-radius: 6px;
+					cursor: pointer;
+					font-size: 12px;
+					font-weight: 500;
+					margin: 0 2px;
+					transition: all 0.2s ease;
+				}
+
+				/* == BÓTON EDITAR == */
+				
+				.btn-edit,
+				.btn-options {
+					background-color: var(--mysiss-purple);
+					color: white;
+				}
+
+				.btn-edit:hover,
+				.btn-options:hover{
+					background-color: var(--mysiss-hover-purple);
+				}
+
+				/* == BÓTON GUARDAR == */
+				
+				.btn-save {
+					background-color: #27ae60;
+					color: white;
+				}
+
+				.btn-save:hover {
+					background-color: #229954; /* Verde más oscuro */
+				}
+
+				/* == BÓTON CANCELAR == */
+				
+				.btn-cancel {
+					background-color: #95a5a6;
+					color: white;
+				}
+
+				.btn-cancel:hover {
+					background-color: #7f8c8d; /* Gris más oscuro */
+				}
+				
+				/* Botón agregar línea */
+				.btn-add-line {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 6px 12px;
+					border-radius: 6px;
+					font-size: 12px;
+					font-weight: 500;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				.btn-add-line:hover {
+					background-color: var(--mysiss-hover-purple);
+				}
+
+				/* ===== ESTADO VACÍO ===== */
+				.empty-state {
+					text-align: center;
+					padding: 50px 20px;
+					color: #666;
+					font-style: italic;
+				}
+				
+				/* ===== ANIMACIONES ===== */
+				
+				.fade-in {
+					animation: fadeIn 0.5s ease-in;
+				}
+
+				@keyframes fadeIn {
+					from { 
+						opacity: 0; 
+						transform: translateY(20px); /* Aparece desde abajo */
+					}
+					to { 
+						opacity: 1; 
+						transform: translateY(0); 
+					}
+				}
+				
+				@keyframes slideUp {
+					from {
+						opacity: 0;
+						transform: translateY(20px);
+					}
+					to {
+						opacity: 1;
+						transform: translateY(0);
+					}
+				}
+
+				/* ===== DISEÑO RESPONSIVO ===== */
+				
+				@media (max-width: 768px) {
+					/* En pantallas pequeñas, formulario en una sola columna */
+					.form-grid {
+						grid-template-columns: 1fr;
+						gap: 15px;
+					}
+					
+					/* Sidebar más pequeño */
+					.sidebar {
+						width: 200px;
+					}
+					
+					/* Ajustar margen del contenido principal */
+					.main-content {
+						margin-left: 200px;
+						padding: 20px;
+					}
+                }
+
+            </style>
+        </head>
+        <body>
+            <!-- Botón menú -->
+            <a href="Auditoria.html" class="menu-button">
+	         <i class="fas fa-bars"></i><!-- Icono de menú hamburguesa (3 líneas horizontales) -->
+	         Menú
+	        </a>
+            <div class="app-container">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+			        <div class="sidebar-top">
+                        <div class="logo">mySiss</div> <!-- Logo mysiss -->
+					    <!-- Menú -->
+                        <nav>
+                          <a href="#" class="nav-linkG" data-section="general"><strong>General</strong></a>
+                          <a href="Configuracion - campos.html" class="nav-link" data-section="campos"><strong>Campos</strong></a>
+						</nav>
+					</div>
+					<div class ="sidebar-bottom">
+					 <!-- Sección de logout en la parte inferior -->
+					 <a href="../login.html" class="nav-link" data-section="logout"><strong>Cerrar sesión</strong></a>
+					</div>
+                </aside>
+                <main class="main-content">
+                    <!-- Config Section -->
+                    <section id="general-section" class="fade-in">
+                        <h2 class="section-title">Configuración general</h2>
+		                <!-- ===== FORMULARIO DE GENERAL ===== -->
+                        <div class="config-form">
+                            <form id="configForm">
+                                <!-- Grid de 4 columnas para los campos -->
+                                <div class="form-grid">
+                                    <!-- Campo: Código sede -->
+                                    <div class="form-group">
+									    <label for="codigoSede">Código sede</label>
+                                        <input type="text" id="codigoSede" name="codigoSede" required>
+                                    </div>
+                                    <!-- Campo: Sede -->
+                                    <div class="form-group">
+                                     <label for="sede">Sede</label>
+                                     <input type="text" id="sede" name="sede" required>
+                                    </div>
+                                    <!-- Campo: Usuario -->
+                                    <div class="form-group">
+                                     <label for="usuario">Usuario</label>
+                                     <input type="text" id="usuario" name="usuario" required>
+                                    </div>
+							        <!-- Campo: Correo electrónico -->
+                                    <div class="form-group">
+                                     <label for="correo">Correo electrónico</label>
+                                     <input type="email" id="correo" name="correo"required>
+                                    </div>
+                                    <!-- Campo: Código servicio -->
+                                    <div class="form-group">
+                                     <label for="codigoServicio">Código servicio</label>
+                                     <input type="text" id="codigoServicio" name="codigoServicio"required>
+                                    </div>
+                                    <!-- Campo: Servicio/Área -->
+                                    <div class="form-group">
+                                     <label for="servicio">Servicio/Área</label>
+                                     <input type="text" id="servicio" name="servicio"required>
+                                    </div>
+                                    <!-- Campo: Código área física -->
+                                    <div class="form-group">
+                                     <label for="codigoAreaf">Código área física</label>
+                                     <input type="text" id="codigoAreaf" name="codigoAreaf">
+                                    </div>
+							        <!-- Campo: Área física -->
+                                    <div class="form-group">
+                                     <label for="areaf">Área física</label>
+                                     <input type="text" id="areaf" name="areaf">
+                                    </div>
+                                </div>
+                                <!-- Botón para enviar el formulario -->
+                                <button type="submit" class="btn-agregar">Agregar</button>
+                            </form>
+                        </div>
+                        <!-- ===== CONTENEDOR DE LA TABLA ===== -->
+				        <div class="table-container">
+				         <!-- Header de la tabla -->
+				         <!--<div class="table-header">
+				         Registros
+					     </div>-->
+				            <!-- Contenido dinámico de la tabla -->
+				            <div id="tableContent">
+					         <!-- Estado inicial: sin datos -->
+					            <div class="empty-state">
+					             No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+						        </div>
+					        </div>
+				        </div>
+			        </section>
+			
+                </main>
+	        </div>
+            <script>
+			
+	          // ===== VARIABLES GLOBALES ===== 
+			  
+	          <!--  Array para almacenar todos los registros de configuración general -->
+	          let configData = [];
+
+	          <!--  Índice del registro que se está editando (-1 = no hay edición activa) se crea uno para cada sección-->
+	          let editingIndex = -1;
+	 
+	          <!-- ===== REFERENCIAS A ELEMENTOS DEL DOM ===== -->
+	          <!--  Formulario general -->
+	          const form = document.getElementById('configForm');
+		
+	          <!--  Contenedor donde se renderiza la tabla general -->
+	          const tableContent = document.getElementById('tableContent');
+
+	          <!-- ===== EVENT LISTENERS ===== -->
+		
+	          <!--  Escuchar el evento submit del formulario general -->
+	          form.addEventListener('submit', handleSubmit);
+			  
+	            <!-- ===== FUNCIÓN PRINCIPAL: MANEJAR ENVÍO DEL FORMULARIO GENERAL ===== -->
+				
+	            function handleSubmit(e) {
+	             <!--  Prevenir el comportamiento por defecto del formulario (recarga de página) -->
+		         e.preventDefault();
+		 
+		         <!--  Crear objeto FormData para extraer los datos del formulario general -->
+		         const formData = new FormData(form);
+			
+		            <!--  Crear nuevo registro con los datos del formulario general -->
+		            const newRecord = {
+                     codigoSede: formData.get('codigoSede'),
+                     sede: formData.get('sede'),
+                     usuario: formData.get('usuario'),
+                     codigoServicio: formData.get('codigoServicio'),
+                     servicio: formData.get('servicio'),
+				     codigoArea: formData.get('codigoAreaf'),
+				     areaF: formData.get('areaf'),
+                     correo: formData.get('correo'),
+				     activo: true, /*Campo activo seleccionado*/
+                     id: Date.now() // ID único basado en timestamp
+                    };
+			
+			        <!--  Verificar si estamos en modo edición o modo agregar -->
+			        if (editingIndex >= 0) {
+			         <!--  MODO EDICIÓN: Actualizar registro existente -->
+			         <!--  Mantener el ID original pero actualizar todos los demás campos -->
+			         configData[editingIndex] = { ...newRecord, id: configData[editingIndex].id };
+			         editingIndex = -1;/*Salir del modo edición*/
+			        }else{
+			         <!--  MODO AGREGAR: Añadir nuevo registro al array -->
+			         configData.push(newRecord);
+			        }
+			
+			        <!--  Limpiar el formulario después de procesar -->
+			        form.reset();
+			
+			        <!--  Actualizar la visualización de la tabla -->
+			        renderTable();
+	            }
+				
+		        <!-- ===== FUNCIÓN: RENDERIZAR LA TABLA GENERAL ===== -->
+				
+		        function renderTable(){
+		            <!--  Si no hay datos, mostrar estado vacío -->
+		            if (configData.length === 0) {
+			            tableContent.innerHTML = `
+			                <div class="empty-state">
+			                 No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+                            </div>
+                        `;
+                        return;
+                    }
+					
+			        <!--  Generar HTML de la tabla con todos los registros de general -->
+			        const tableHTML = `
+			            <table class="data-table">
+			                <thead>
+                                <tr>
+                                 <th>Código sede</th>
+                                 <th>Sede</th>
+                                 <th>Código servicio</th>
+                                 <th>Servicio/Área</th>
+						         <th>Código área física</th>
+						         <th>Área física</th>
+                                 <th>Usuario</th>
+                                 <th>Correo electrónico</th>
+						         <th>Activo</th>
+                                 <th>Acciones</th>
+                                </tr>
+				            </thead>
+				            <tbody>
+				                ${configData.map((record, index) => `
+				                    <tr id="row-${record.id}" ${editingIndex === index ? 'style="background-color: #f0f8ff;"' : ''}>
+					                    <!-- Para cada celda, mostrar input si está en modo edición, sino mostrar el valor -->
+				                        <td>${editingIndex === index ? `<input type="text" class="edit-input" value="${record.codigoSede}" data-field="codigoSede">` :record.codigoSede}</td>
+					                    <td>${editingIndex === index ? `<input type="text" class="edit-input" value="${record.sede}" data-field="sede">` :record.sede}</td>
+					                    <td>${editingIndex === index ? `<input type="text" class="edit-input" value="${record.codigoServicio}" data-field="codigoServicio">` :record.codigoServicio}</td>
+							            <td>${editingIndex === index ? `<input type="text" class="edit-input" value="${record.servicio}" data-field="servicio">` :record.servicio}</td>
+							            <td>${editingIndex === index ? `<input type="text" class="edit-input" value="${record.codigoArea}" data-field="codigoArea">` :record.codigoArea}</td>
+                                        <td>${editingIndex === index ? `<input type="text" class="edit-input" value="${record.areaF}" data-field="areaF">` :record.areaF}</td>
+							            <td>${editingIndex === index ? `<input type="text" class="edit-input" value="${record.usuario}" data-field="usuario">` :record.usuario}</td>
+					                    <td>${editingIndex === index ? `<input type="text" class="edit-input" value="${record.correo}" data-field="correo">` :record.correo}</td>
+							            <td style="text-align: center;">${editingIndex === index ? `<input type="checkbox" class="edit-input" ${record.activo ? 'checked' : ''} data-field="activo">` : `<input type="checkbox" ${record.activo ? 'checked' : ''} disabled>`}</td>
+					                    <td>
+					                        <!-- Mostrar botones diferentes según el modo (Edición) -->
+						                    ${editingIndex === index ?`
+								             <button class="btn-action btn-save" onclick="saveEdit(${index})">Guardar</button> 
+						                     <button class="btn-action btn-cancel" onclick="cancelEdit()">Cancelar</button>
+								            `:`
+						                     <!-- Mostrar botones diferentes según el modo (Normal) -->
+						                     <button class="btn-action btn-edit" onclick="editRecord(${index})">Editar</button>
+						                     <!-- <button class="btn-action btn-delete" onclick="deleteConfig(${index})">Eliminar</button> -->`}
+						                </td>
+					                </tr>
+				                `).join('')}
+				            </tbody>
+				        </table> 
+			        `;
+		            <!-- Insertar el html generado en el contenedor -->
+			        tableContent.innerHTML=tableHTML;
+		        }
+		        
+				<!-- ===== FUNCIÓN: INICIAR EDICIÓN DE UN REGISTRO GENERAL ===== -->
+                
+				function editRecord(index) {
+		         <!--  Establecer el indice de edición -->
+                 editingIndex = index;
+			     <!--  Volver a renderizar la tabla para los inputs de edición -->
+                 renderTable();
+                }
+				
+                <!-- ===== FUNCIÓN: CANCELAR EDICIÓN DEL REGISTRO GENERAL ===== -->
+				
+                function cancelEdit() {
+			     <!--  Salir del modo edición index -1 -->
+                 editingIndex = -1;
+            
+                 <!--  Volver a renderizar la tabla estado normal -->
+                 renderTable();
+                }
+		
+		        // ===== FUNCIÓN: GUARDAR EDICIÓN DEL REGISTRO GENERAL =====
+				
+		        function saveEdit(index) {
+		         <!--  Obtener fila que se está editando -->
+                 const row = document.getElementById(`row-${configData[index].id}`);
+            
+                 <!--  Obtener los inputs de edición de la fila obtenida -->
+                 const inputs = row.querySelectorAll('.edit-input');
+            
+                    <!--  Actualizar el registro con las ediciones -->
+                    inputs.forEach(input => {
+                     const field = input.getAttribute('data-field'); /* Obtener el nombre del campo*/
+				        if(field === 'activo'){
+				         configData[index][field] = input.checked; // Guarda true si está marcado, false si no
+				        }else {
+				         configData[index][field] = input.value; // Guarda el valor del input
+				        }
+                    });
+
+			        <!--  Salir del modo edición actualizando el index -->
+                    editingIndex = -1;
+            
+                    <!--  Volver a renderizar la tabla -->
+                    renderTable();
+                }
+				
+				openModal('sede')
+				
+		
+            </script>
+        </body>
+    </html>

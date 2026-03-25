@@ -1,0 +1,2767 @@
+ <!DOCTYPE html>
+    <html lang="es">
+        <head>
+			<!-- Font Awesome para iconos - librería de iconos gratuita -->
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+			<!-- SheetJS para exportar a Excel -->
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+			<!-- jsPDF para exportar a PDF -->
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+			<!-- jsPDF AutoTable para crear tablas en PDF -->
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>mySiss - Auditoría</title>
+			<link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+            <style>
+			
+                :root {
+					--mysiss-purple: #800080;
+					--mysiss-light-purple: #EBE3F2;
+					--mysiss-hover-purple: #DFD1EE;
+                }
+				
+				/* ===== RESET Y ESTILOS GLOBALES ===== */
+				
+				*{
+					margin: 0;
+					padding: 0;
+					box-sizing: border-box;
+				}
+
+				body {
+				 font-family: system-ui, -apple-system, sans-serif;
+				 background: white;
+				 min-height: 100vh;
+				}
+
+				.focus-outline:focus {
+				 outline: 2px solid var(--mysiss-purple);
+				 outline-offset: 2px;
+				}
+
+				/* == Layout == */
+				.app-container {
+				 display: flex;
+				 min-height: 100vh;
+				}
+
+				/* == Sidebar == */
+				.sidebar {
+				 position:fixed;
+				 left:0;
+				 top:0;
+				 width: 252px;
+				 height: 100vh;
+				 overflow-y: auto;
+				 background: var(--mysiss-light-purple);
+				 padding: 0.8rem;
+				 z-index: 100;
+				 display: flex;
+				 flex-direction: column;
+				 justify-content: space-between; /* Distribuye el espacio entre logo/menú y cerrar sesión */
+				}
+				
+				.sidebar-top {
+				 flex-grow: 1; /* Ocupa el espacio disponible */
+				 display: flex;
+				 flex-direction: column;
+				}
+
+				/* == Contenedor para el botón de cerrar sesión que siempre estará al fondo == */
+				
+				.sidebar-bottom {
+				 margin-top: auto; /* Empuja este elemento hacia abajo */
+				 padding-top: 0.4rem; /* Espacio superior */
+				}
+				
+				.logo {
+				 font-size: 3.4rem;
+				 font-weight: bold;
+				 color: var(--mysiss-purple);
+				 margin-bottom: 1.5rem;
+				 text-align: center;
+				}
+
+				.nav-link {
+				 display: block;
+				 padding: 14px 24px;
+				 color: var(--mysiss-purple);
+				 text-decoration: none;
+				 border-radius: 0.5rem;
+				 font-weight: 500;
+				 margin-bottom: 0.5rem;
+				 transition: all 0.3s ease; /* Transición suave para hover */
+				 /*border-left: 4px solid transparent;  Borde izquierdo invisible por defecto */
+				 cursor: pointer;
+				}
+				
+				.nav-link:hover {
+				 background: var(--mysiss-hover-purple);
+				}
+				
+				.nav-link.active {
+					background: white;
+				}
+
+				/* ===== BOTÓN MENU ===== */
+
+				.menu-button {
+				   position: absolute;
+				   top: 20px;
+				   right: 20px;
+				   background: var(--mysiss-purple);
+				   color: white;
+				   border: none;
+				   padding: 12px 30px;
+				   border-radius: 8px;
+				   font-size: 16px;
+				   font-weight: 600;
+				   cursor: pointer;
+				   transition: all 0.3s ease;
+				   box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
+				   text-decoration: none;
+				   display: inline-flex; /*alinear icono y texto*/
+				   align-items: center; /*Centra verticalmente el icono y texto*/
+				   gap: 10px; /*Espacio de 10px entre el icono y el texto*/
+				   z-index: 1000;
+				}
+				
+				.menu-button:hover {
+				  transform: translateY(-2px);
+				  box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+				  background: var(--mysiss-hover-purple);
+				}
+				
+				/* Estilo para el icono del menú hamburguesa */
+				
+				.menu-button i {
+				  font-size: 18px;
+				}
+				
+				
+				/* ===== CONTENIDO PRINCIPAL ===== */
+				
+			    .main-content {
+                  margin-left: 252px;
+                  padding: 1rem 1.5rem;
+                  width: calc(100% - 252px);
+                  min-height: 100vh;
+                }
+
+                /* Título principal de la sección */
+                .section-title {
+                   font-size: 2rem;
+                   font-weight: bold;
+                   color: var(--mysiss-purple);
+                   margin-bottom: 2rem;
+                }
+				
+				/* ===== SISTEMA DE PESTAÑAS ===== */
+				
+				/* Contenedor principal de todo el sistema de pestañas */
+				
+				.tabs-container {
+					width: 100%;
+					background: white;
+					border-radius: 12px;
+					box-shadow: 0 2px 8px rgba(128, 0, 128, 0.1);
+					overflow: hidden;
+				}
+
+				/* Encabezado con los botones de pestañas */
+				
+				.tabs-header {
+					display: flex;
+					background: var(--mysiss-light-purple);
+					<!-- border-bottom: 2px solid var(--mysiss-purple); -->
+				}
+
+				/* Estilo de cada botón de pestaña */
+				
+				.tab-button {
+					flex: 1;
+					padding: 16px 24px;
+					background: transparent;
+					border: none;
+					color: var(--mysiss-purple);
+					font-size: 1rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					border-bottom: 3px solid transparent;
+				}
+
+				/* Efecto hover en los botones de pestaña */
+				
+				.tab-button:hover {
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* Pestaña actualmente activa */
+				
+				.tab-button.active {
+					background: white;
+					<!-- border-bottom: 3px solid var(--mysiss-purple); -->
+				}
+
+				/* Contenedor de los paneles de contenido */
+				
+				.tabs-content {
+					padding: 1rem;
+				}
+
+				/* Panel individual de cada pestaña (oculto por defecto) */
+				
+				.tab-panel {
+					display: none;
+				}
+
+				/* Panel activo (visible) */
+			
+				.tab-panel.active {
+					display: block;
+					animation: fadeIn 0.3s ease-in;
+				}
+			
+			    /* ===== TABLA DE CONVENIOS ===== */
+				
+				/* Estilos de la tabla que muestra los convenios */
+				
+				.convenios-table {
+					width: 100%;
+					border-collapse: collapse;
+					font-size: 0.9rem;
+				}
+
+				/* Encabezados de la tabla */
+				
+				.convenios-table thead {
+					background: #f8f9fa;
+				}
+
+				/* Celdas de encabezado */
+				
+				.convenios-table th {
+					padding: 14px;
+					text-align: left;
+					color: #333;
+					font-weight: 600;
+					<!-- border-bottom: 2px solid var(--mysiss-purple); -->
+				}
+				
+				/* Primera columna (selección) centrada y con ancho fijo */
+				
+				.convenios-table th:first-child {
+					text-align: center;
+					width: 60px;
+				}
+				
+				/* Celdas de datos */
+				
+				.convenios-table td {
+					padding: 12px 14px;
+					border-bottom: 1px solid #e0e0e0;
+					color: #333;
+				}
+
+				/* Primera celda (checkbox) centrada */
+				
+				.convenios-table td:first-child {
+					text-align: center;
+				}
+				
+				/* Efecto hover en las filas de la tabla */
+				
+				.convenios-table tbody tr:hover {
+					background: #f9f9f9;
+				}
+
+				/* Estilo del checkbox de selección */
+				
+				.convenios-table input[type="checkbox"] {
+					width: 16px;
+					height: 16px;
+					cursor: pointer;
+				}
+
+				/* ===== MENSAJE CUANDO NO HAY CONVENIOS ===== */
+				
+				/* Contenedor del mensaje cuando no existen convenios */
+				
+				.no-convenios-message {
+					text-align: center;
+					padding: 3rem;
+					color: #666;
+				}
+
+				/* Icono grande del mensaje */
+				
+				.no-convenios-message i {
+					font-size: 4rem;
+					color: var(--mysiss-purple);
+					margin-bottom: 1.5rem;
+				}
+
+				/* Título del mensaje */
+				
+				.no-convenios-message h3 {
+					font-size: 1.5rem;
+					color: var(--mysiss-purple);
+					margin-bottom: 0.5rem;
+				}
+
+				/* Texto del mensaje */
+				
+				.no-convenios-message p {
+					font-size: 1rem;
+					line-height: 1.6;
+				}
+				
+				/* ===== BUSCADOR DE CONVENIOS ===== */
+
+				.search-input-convenios {
+					width: 280px;
+					padding: 0.2rem 0.2rem;
+					border: 2px solid var(--mysiss-purple);
+					border-radius: 6px;
+					font-size: 0.9rem;
+					transition: all 0.3s ease;
+				}
+
+				.search-input-convenios:focus {
+					outline: none;
+					border-color: var(--mysiss-purple);
+					box-shadow: 0 0 0 3px rgba(128, 0, 128, 0.1);
+				}
+
+				.search-input-convenios::placeholder {
+					color: #999;
+				}
+
+				/* Mensaje de no resultados en búsqueda */
+				.no-search-results {
+					text-align: center;
+					padding: 2rem;
+					color: #666;
+				}
+
+				.no-search-results i {
+					font-size: 3rem;
+					color: var(--mysiss-purple);
+					margin-bottom: 1rem;
+				}
+
+				.no-search-results h3 {
+					font-size: 1.3rem;
+					color: var(--mysiss-purple);
+					margin-bottom: 0.5rem;
+				}
+
+				/* ===== PESTAÑA VISUALIZAR CONVENIO ===== */
+
+
+				/* Grid optimizado para visualización (3 columnas) */
+				.form-grid-visualizar {
+					display: grid;
+					grid-template-columns: repeat(3, 1fr);
+					gap: 1rem;
+					margin-bottom: 1rem;
+				}
+
+				/* Campo que ocupa el ancho completo */
+				.form-group-full {
+					grid-column: span 3;
+				}
+
+				/* Estilo para inputs de solo lectura */
+				.visualizar-convenio-container input[readonly] {
+					background-color: #f9f9f9;
+					border: 1px solid #e0e0e0;
+					cursor: not-allowed;
+					color: #333;
+				}
+
+				/* Ajustar tabla de posiciones en visualización */
+				#tab-visualizar .positions-table td {
+					<!-- background-color: #f9f9f9; -->
+				}
+
+				/* Checkbox deshabilitado en visualización */
+				#tab-visualizar .positions-table input[type="checkbox"]:disabled {
+					cursor: not-allowed;
+				}
+				
+				/* ===== BOTÓN DE EXPORTAR ===== */
+
+				.export-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 8px 12px;
+					border-radius: 8px;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					font-size: 1.2rem;
+					box-shadow: 0 2px 8px rgba(128, 0, 128, 0.2);
+				}
+
+				.export-button:hover {
+					background: var(--mysiss-hover-purple);
+					transform: translateY(-2px);
+					box-shadow: 0 4px 12px rgba(128, 0, 128, 0.3);
+				}
+
+				/* Tooltip para el botón de exportar */
+				.export-button:hover::after {
+					content: "Exportar";
+					position: absolute;
+					bottom: -35px;
+					right: 0;
+					background: #333;
+					color: white;
+					padding: 6px 12px;
+					border-radius: 4px;
+					font-size: 12px;
+					white-space: nowrap;
+					z-index: 1000;
+				}
+
+				/* Contenedor para título con botón */
+				.header-title-container {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 1rem;
+					padding-bottom: 0.5rem;
+					border-bottom: 2px solid var(--mysiss-purple);
+				}
+
+				/* ===== MODAL DE EXPORTACIÓN ===== */
+
+				.modal-export-content {
+					max-width: 500px;
+					padding: 0.5rem;
+				}
+
+				.export-options {
+					display: flex;
+					flex-direction: column;
+					gap: 1rem;
+					margin-top: 1.5rem;
+				}
+
+				.export-option-btn {
+					display: flex;
+					align-items: center;
+					gap: 1rem;
+					padding: 8px 12px;
+					border: none;
+					border-radius: 8px;
+					background: white;
+					color: var(--mysiss-purple);
+					font-size: 1rem;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				.export-option-btn:hover {
+					background: var(--mysiss-light-purple);
+					transform: translateX(5px);
+					box-shadow: 0 4px 12px rgba(128, 0, 128, 0.2);
+				}
+
+				.export-option-btn i {
+					font-size: 1rem;
+				}
+
+				/* Iconos de colores específicos */
+				.export-icon-excel {
+					color: #1D6F42; /* Verde de Excel */
+				}
+
+				.export-icon-pdf {
+					color: #D32F2F; /* Rojo de PDF */
+				}
+				
+				/* Responsive para el modal de exportación */
+				@media (max-width: 768px) {
+					.modal-export-content {
+						max-width: 90%;
+					}
+					
+					.export-option-btn {
+						font-size: 1rem;
+						padding: 1rem;
+					}
+				}
+
+				/* ===== ESTILOS PARA LA PESTAÑA CREAR CONVENIOS ===== */
+
+				/* Contenedor principal de crear convenios */
+				
+				.crear-convenio-container {
+					max-width: 100%;
+					position: relative;
+				}
+
+				/* Botón de guardar */
+				
+				.save-button {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 8px 12px;
+					border-radius: 8px;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					font-size: 1.2rem;
+					box-shadow: 0 2px 8px rgba(128, 0, 128, 0.2);
+				}
+
+				.save-button:hover {
+					background: var(--mysiss-hover-purple);
+					transform: translateY(-2px);
+					box-shadow: 0 4px 12px rgba(128, 0, 128, 0.3);
+				}
+
+				/* Tooltip para el botón de guardar */
+
+				.save-button:hover::after {
+					content: "Guardar convenio";
+					position: absolute;
+					bottom: -35px;
+					right: 0;
+					background: #333;
+					color: white;
+					padding: 6px 12px;
+					border-radius: 4px;
+					font-size: 12px;
+					white-space: nowrap;
+					z-index: 1000;
+				}
+
+				/* Sección de encabezado del convenio */
+				
+				.header-section {
+					background: white;
+					padding: 1rem;
+					border-radius: 8px;
+					margin-bottom: 0.2rem;
+					<!-- box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); -->
+				}
+
+				/* Título de la sección "Encabezado" */
+				
+				.section-subtitle {
+					font-size: 1rem;
+					font-weight: 600;
+					color: var(--mysiss-purple);
+					margin-bottom: 5px;
+					<!-- padding-bottom: 0.5rem; -->
+					<!-- border-bottom: 2px solid var(--mysiss-purple); -->
+				}
+				
+				.section-subtitle.no-border {
+                    border-bottom: none;
+					margin-bottom: 0;
+                }
+
+				/* Grid para los campos del encabezado (2 columnas) */
+				
+				.form-grid {
+					display: grid;
+					grid-template-columns: repeat(2, 1fr);
+					gap: 1.5rem;
+					margin-bottom: 1rem;
+				}
+
+				/* Cada campo del formulario */
+				
+				.form-group {
+					display: flex;
+					flex-direction: column;
+				}
+
+				/* Etiqueta del campo */
+				
+				.form-group label {
+					font-weight: 500;
+					color: #333;
+					margin-bottom: 0.5rem;
+					font-size: 0.8rem;
+				}
+
+				/* Input de texto */
+				
+				.form-group input[type="text"] {
+					padding: 0.6rem;
+					border: 1px solid #d1d5db;
+					border-radius: 6px;
+					font-size: 0.8rem;
+					transition: all 0.3s ease;
+				}
+
+				/* Efecto focus en los inputs */
+				
+				.form-group input[type="text"]:focus {
+					outline: none;
+					border-color: var(--mysiss-purple);
+					box-shadow: 0 0 0 3px rgba(128, 0, 128, 0.1);
+				}
+
+				/* Contenedor para input con botón de búsqueda */
+				
+				.input-with-search {
+					display: flex;
+					gap: 0.5rem;
+				}
+
+				.input-with-search input {
+					flex: 1;
+				}
+
+				/* Botón de ayuda de búsqueda (lupa) */
+				
+				.search-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 6px 12px;
+					border-radius: 6px;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					font-size: 12px;
+				}
+
+				.search-btn:hover {
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* Sección de posiciones */
+				
+				.positions-section {
+					background: white;
+					padding: 1rem;
+					border-radius: 8px;
+					<!-- box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); -->
+					<!-- margin-top: 0.5rem; -->
+				}
+
+				/* Encabezado de la sección posiciones (título + botón agregar) */
+				
+				.positions-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					padding-bottom: 0.3rem;
+                    border-bottom: 2px solid var(--mysiss-purple);
+					margin-bottom: 10px;
+				}
+
+				/* Botón agregar posición */
+				
+				.add-position-btn-inline {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.4rem 1rem;
+					border-radius: 6px;
+					font-size: 0.6rem;
+					<!-- font-weight: 600; -->
+					cursor: pointer;
+					transition: all 0.3s ease;
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+				}
+
+				.add-position-btn-inline:hover {
+					background: var(--mysiss-hover-purple);
+					transform: translateY(-1px);
+				}
+				
+				.add-position-btn-inline:hover::after {
+					content: "Agregar posición";
+					position: absolute;
+					bottom: -35px;
+					left: 35%;
+					transform: translateX(-50%);
+					background: #333;
+					color: white;
+					padding: 6px 12px;
+					border-radius: 4px;
+					font-size: 12px;
+					white-space: nowrap;
+					z-index: 1000;
+				}				
+
+				/* Contenedor de la tabla de posiciones */
+				
+				.positions-table-container {
+					overflow-x: auto;
+					<!-- margin-top: 1rem; -->
+				}
+
+				/* Tabla de posiciones */
+				
+				.positions-table {
+					width: 100%;
+					border-collapse: collapse;
+					font-size: 0.85rem;
+				}
+
+				/* Encabezado de la tabla de posiciones */
+				
+				.positions-table thead {
+					background: #f8f9fa;
+				}
+
+				.positions-table th {
+					padding: 0.8rem 0.5rem;
+					text-align: center;
+					font-weight: 600;
+					color: #333;
+					<!-- border-bottom: 2px solid var(--mysiss-purple); -->
+					font-size: 0.85rem;
+				}
+
+				/* Celdas de la tabla de posiciones */
+				
+				.positions-table td {
+					padding: 0.6rem 0.5rem;
+					border-bottom: 1px solid #e0e0e0;
+					text-align: center;
+				}
+
+				/* Inputs dentro de la tabla de posiciones */
+				
+				.positions-table input[type="text"] {
+					width: 100%;
+					padding: 0.4rem;
+					border: 1px solid #d1d5db;
+					border-radius: 4px;
+					font-size: 0.85rem;
+				}
+
+				.positions-table input[type="text"]:focus {
+					outline: none;
+					border-color: var(--mysiss-purple);
+				}
+
+				/* Checkbox de autorización */
+				
+				.positions-table input[type="checkbox"] {
+					width: 18px;
+					height: 18px;
+					cursor: pointer;
+				}
+
+				/* Botón eliminar posición */
+				
+				.delete-position-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 4px 8px;
+					border-radius: 6px;
+					font-size: 12px;
+					font-weight: 500;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				.delete-position-btn:hover {
+					background: var(--mysiss-hover-purple);
+					transform: scale(1.05);
+				}
+
+				/* Mensaje cuando no hay posiciones */
+				
+				.no-positions {
+					text-align: center;
+					padding: 2rem;
+					color: #666;
+					font-style: italic;
+				}
+
+				/* ===== MODAL (POP-UP) ===== */
+
+				/* Fondo oscuro del modal que cubre toda la pantalla */
+				
+				.modal-overlay {
+					display: none;
+					position: fixed;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+					background: rgba(0, 0, 0, 0.5);
+					z-index: 1001;
+					justify-content: center;
+					align-items: center;
+				}
+
+				/* Cuando el modal está activo */
+				
+				.modal-overlay.active {
+					display: flex;
+				}
+
+				/* Contenedor del contenido del modal */
+				
+				.modal-content {
+					background: white;
+					padding: 1.5rem;
+					border-radius: 0.5rem;
+					max-width: 400px;
+					width: 90%;
+					max-height: 500px;
+					overflow-y: auto;
+					box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+				}
+
+				/* Encabezado del modal */
+				
+				.modal-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 1rem;
+				}
+
+				/* Título del modal */
+				
+				.modal-title {
+					font-size: 1.15rem;
+					font-weight: bold;
+					color: var(--mysiss-purple);
+					white-space: nowrap;
+				}
+
+				/* Botón para cerrar el modal (X) */
+				
+				.modal-close {
+					background: none;
+					border: none;
+					font-size: 1.5rem;
+					color: var(--mysiss-purple);
+					cursor: pointer;
+					padding: 0;
+					width: 30px;
+					height: 30px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+
+				/* Efecto hover del botón cerrar */
+				
+				.modal-close:hover {
+					color: #600060;
+				}
+
+				/* ===== ESTILOS PARA MODAL DE CALENDARIO ===== */
+
+				/* Contenedor del calendario */
+				
+				.calendar-container {
+					width: 100%;
+					margin-top: 0.5rem;
+				}
+
+				/* Encabezado del calendario (mes y año con botones de navegación) */
+				
+				.calendar-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 1rem;
+					padding: 0.5rem;
+					background: var(--mysiss-light-purple);
+					border-radius: 0.375rem;
+				}
+
+				/* Botones de navegación del calendario (anterior/siguiente) */
+				
+				.calendar-nav-btn {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 0.4rem 0.7rem;
+					border-radius: 0.375rem;
+					cursor: pointer;
+					font-size: 0.9rem;
+					transition: all 0.3s ease;
+				}
+
+				.calendar-nav-btn:hover {
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* Texto del mes y año actual */
+				
+				.calendar-month-year {
+					font-weight: 600;
+					color: var(--mysiss-purple);
+					font-size: 1rem;
+				}
+
+				/* Grilla del calendario (7 columnas para los días de la semana) */
+				
+				.calendar-grid {
+					display: grid;
+					grid-template-columns: repeat(7, 1fr);
+					gap: 0.3rem;
+				}
+
+				/* Encabezados de los días de la semana (L, M, M, J, V, S, D) */
+				
+				.calendar-day-header {
+					text-align: center;
+					font-weight: 600;
+					color: var(--mysiss-purple);
+					padding: 0.5rem;
+					font-size: 0.8rem;
+				}
+
+				/* Cada celda del día en el calendario */
+				
+				.calendar-day {
+					text-align: center;
+					padding: 0.6rem;
+					border: 1px solid #e5e7eb;
+					border-radius: 0.375rem;
+					cursor: pointer;
+					transition: all 0.2s ease;
+					font-size: 0.85rem;
+					background: white;
+				}
+
+				/* Efecto hover en los días */
+				
+				.calendar-day:hover {
+					background: var(--mysiss-light-purple);
+					border-color: var(--mysiss-purple);
+				}
+
+				/* Día seleccionado */
+				
+				.calendar-day.selected {
+					background: var(--mysiss-purple);
+					color: white;
+					font-weight: bold;
+				}
+
+				/* Días que no pertenecen al mes actual (deshabilitados) */
+				
+				.calendar-day.disabled {
+					color: #d1d5db;
+					cursor: not-allowed;
+					background: #f9fafb;
+				}
+
+				.calendar-day.disabled:hover {
+					background: #f9fafb;
+					border-color: #e5e7eb;
+				}
+
+				/* Día actual (hoy) */
+				
+				.calendar-day.today {
+					border: 2px solid var(--mysiss-purple);
+					font-weight: bold;
+				}
+				
+				/* ===== ESTILOS PARA MODAL DE ASEGURADORAS ===== */
+
+				/* Buscador del modal */
+				
+				.modal-search {
+					width: 100%;
+					padding: 0.75rem;
+					<!-- border: 2px solid var(--mysiss-purple); -->
+					border-radius: 6px;
+					font-size: 0.95rem;
+					margin-bottom: 1rem;
+					transition: all 0.3s ease;
+				}
+
+				.modal-search:focus {
+					outline: none;
+					border-color: var(--mysiss-purple);
+					box-shadow: 0 0 0 3px rgba(128, 0, 128, 0.1);
+				}
+
+				/* Tabla de aseguradoras */
+				
+				.aseguradoras-table {
+					width: 100%;
+					border-collapse: collapse;
+					font-size: 0.9rem;
+				}
+
+				.aseguradoras-table thead {
+					background: var(--mysiss-light-purple);
+					position: sticky;
+					top: 0;
+				}
+
+				.aseguradoras-table th {
+					padding: 0.75rem;
+					text-align: left;
+					color: var(--mysiss-purple);
+					font-weight: 600;
+					border-bottom: 2px solid var(--mysiss-purple);
+				}
+
+				.aseguradoras-table td {
+					padding: 0.75rem;
+					border-bottom: 1px solid #e0e0e0;
+					cursor: pointer;
+					transition: background 0.2s ease;
+				}
+
+				.aseguradoras-table tbody tr:hover {
+					background: var(--mysiss-hover-purple);
+				}
+
+				/* Mensaje cuando no hay resultados */
+				
+				.no-results {
+					text-align: center;
+					padding: 2rem;
+					color: #666;
+					font-style: italic;
+				}
+				
+				/* ===== ANIMACIONES ===== */
+				
+				/* Animación de aparición gradual */
+				
+				@keyframes fadeIn {
+					from {
+						opacity: 0;
+						transform: translateY(10px);
+					}
+					to {
+						opacity: 1;
+						transform: translateY(0);
+					}
+				}
+
+				/* ===== DISEÑO RESPONSIVO ===== */
+				
+				/* Ajustes para pantallas pequeñas (tablets y móviles) */
+				
+				@media (max-width: 768px) {
+				
+					/* Sidebar más estrecho */
+					
+					.sidebar {
+						width: 200px;
+					}
+
+					/* Ajustar margen del contenido principal */
+					
+					.main-content {
+						margin-left: 200px;
+						padding: 20px;
+					}
+
+					/* Pestañas en dos columnas en pantallas pequeñas */
+					
+					.tabs-header {
+						flex-wrap: wrap;
+					}
+
+					.tab-button {
+						flex: 1 1 50%;
+					}
+
+					/* Tabla más compacta en móviles */
+					
+					.convenios-table {
+						font-size: 0.85rem;
+					}
+
+					.convenios-table th,
+					.convenios-table td {
+						padding: 8px;
+					}
+				}
+            </style>
+        </head>
+        <body>
+		
+            <!-- Botón menú -->
+            <a href="../Auditoria.html" class="menu-button">
+	         <i class="fas fa-bars"></i><!-- Icono de menú hamburguesa (3 líneas horizontales) -->
+	         Menú
+	        </a>
+			
+            <div class="app-container">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+				    <div class="sidebar-top">
+                        <div class="logo">mySiss</div> <!-- Logo mysiss -->
+				        <nav><!-- Menú -->
+						 <a href="AcuentasM-CarConvenios.html" class="nav-link" ><strong>Cargar convenio</strong></a>
+						 <a href="#" class="nav-link active"><strong>Configurar convenio</strong></a>
+						 <a href="AcuentasM-Validaciones.html" class="nav-link"><strong>Validaciones</strong></a>
+						 <a href="AcuentasM-EstCuenta.html" class="nav-link"><strong>Estados de cuenta</strong></a>
+						 <a href="AcuentasM-Gauditoria.html" class="nav-link"><strong>Gestionar auditoría</strong></a>
+						 <a href="AcuentasM-Gestcorrec.html" class="nav-link"><strong>Gestionar correcciones</strong></a>
+						 <a href="AcuentasM-Resultados.html" class="nav-link"><strong>Resultados</strong></a>
+                        </nav>
+					</div>
+					<div class ="sidebar-bottom">
+					 <!-- Sección de logout en la parte inferior -->
+					 <a href="../loginA.html" class="nav-link" data-section="logout"><strong>Cerrar sesión</strong></a>
+					</div>
+                </aside>
+				
+				<!-- Contenido principal de la página -->
+                <main class="main-content">
+				    
+					<h1 class="section-title">Configurar convenio</h1>
+				 
+				    <!-- Contenedor del sistema de pestañas -->
+                    <div class="tabs-container">
+					    <div class="tabs-header">
+						    <button class="tab-button active" onclick="cambiarPestana('convenios')">Convenios</button>
+							<button class="tab-button" onclick="cambiarPestana('visualizar')">Visualizar convenios</button>
+							<button class="tab-button" onclick="cambiarPestana('modificar')">Modificar convenios</button>
+							<button class="tab-button" onclick="cambiarPestana('crear')">Crear convenios</button>
+						</div>
+						
+						<!-- Contenido de cada pestaña -->
+                        <div class="tabs-content">
+						    
+							<!-- Convenios -->
+                            <div id="tab-convenios" class="tab-panel active">
+								<!-- Contenedor del buscador-->
+								<div id="search-container" style="display: none; margin-bottom: 0.5rem; text-align: right;">
+									<input type="text" id="buscadorConvenios" class="search-input-convenios" placeholder="Buscar por ID, nombre o responsable...">
+								</div>	
+                                <div id="convenios-table-container">
+                                    <!-- La tabla se crea con JavaScript -->
+                                </div>
+                            </div>
+							<!-- Visualizar convenios -->
+                            <div id="tab-visualizar" class="tab-panel">
+                                <div class="visualizar-convenio-container">
+									<!-- Sección de Encabezado -->
+									<div class="header-section">
+										<div class="header-title-container">
+											<h2 class="section-subtitle no-border">Encabezado</h2>
+											<button class="export-button" onclick="abrirModalExportar()">
+												<i class="fas fa-download"></i>
+											</button>
+										</div>
+										<!-- Grid de campos del encabezado en 3 columnas -->
+										<div class="form-grid-visualizar">
+											<div class="form-group">
+												<label for="idConvenio">ID convenio</label>
+												<input type="text" id="idConvenio" readonly>
+											</div>
+											<div class="form-group">
+												<label for="nombreConvenio">Nombre convenio</label>
+												<input type="text" id="nombreConvenio" readonly>
+											</div>
+											<div class="form-group">
+												<label for="estado">Estado</label>
+												<input type="text" id="estado" readonly>
+											</div>
+											<div class="form-group">
+												<label for="fechaInicio">Fecha inicio</label>
+												<input type="text" id="fechaInicio" readonly>
+											</div>
+											<div class="form-group">
+												<label for="fechaFin">Fecha fin</label>
+												<input type="text" id="fechaFin" readonly>
+											</div>
+											<div class="form-group">
+												<label for="responsable">Responsable de pago</label>
+												<input type="text" id="responsable" readonly>
+											</div>
+											<div class="form-group form-group-full">
+												<label for="contacto">Contacto</label>
+												<input type="text" id="contacto" readonly>
+											</div>
+										</div>
+									</div>
+									
+									<!-- Sección de Posiciones -->
+									<div class="positions-section">
+										<!-- Encabezado con título-->
+										<div class="positions-header">
+											<h2 class="section-subtitle no-border">Posiciones</h2>
+										</div>
+										<!-- Contenedor de la tabla de posiciones -->
+										<div class="positions-table-container">
+											<table class="positions-table" id="positionsTable">
+												<thead>
+													<tr>
+														<th>Código servicio</th>
+														<th>Descripción</th>
+														<th>Tarifa</th>
+														<th>Observación</th>
+														<th>Autorización</th>
+														<th>Catálogo diagnóstico</th>
+														<th>Código diagnóstico</th>
+													</tr>
+												</thead>
+												<tbody id="positionsTableBody">
+													<!-- Las filas se agregan dinámicamente con JavaScript -->
+													<tr>
+														<td colspan="7" class="no-positions">Seleccione un convenio para visualizar sus posiciones.</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							<!-- Modificar convenios -->
+							 <div id="tab-modificar" class="tab-panel">
+                                <div class="modificar-convenio-container">
+                                    <!-- Sección de Encabezado -->
+							        <div class="header-section">
+									    <div class="header-title-container">
+										    <h2 class="section-subtitle">Encabezado</h2>
+											<!-- Botón de guardar con tooltip -->
+											<button class="save-button" onclick="guardarConvenio()">
+												<i class="fas fa-save"></i>
+											</button>
+										</div>
+										<!-- Grid de campos del encabezado -->
+								        <div class="form-grid">
+									        <div class="form-group">
+										        <label for="idConvenio">ID convenio</label>
+										        <input type="text" id="idConvenio-modificar" placeholder="Ingrese ID del convenio">
+									        </div>
+											<div class="form-group">
+										        <label for="nombreConvenio">Nombre convenio</label>
+										        <input type="text" id="nombreConvenio-modificar" placeholder="Ingrese nombre del convenio">
+									        </div>
+											<div class="form-group">
+										        <label for="fechaInicio">Fecha inicio</label>
+										        <div class="input-with-search">
+												    <input type="text" id="fechaInicio-modificar" placeholder="Seleccione fecha de inicio">
+													<button class="search-btn" onclick="abrirCalendario('fechaInicio')" aria-label="Seleccionar fecha de inicio">
+													    <i class="fas fa-search"></i>
+													</button>
+												</div>
+									        </div>
+									        <div class="form-group">
+										        <label for="fechaFin">Fecha fin</label>
+										        <div class="input-with-search">
+												    <input type="text" id="fechaFin-modificar" placeholder="Seleccione fecha fin">
+													<button class="search-btn" onclick="abrirCalendario('fechaFin')" aria-label="Seleccionar fecha fin">
+													    <i class="fas fa-search"></i>
+													</button>
+												</div>
+									        </div>
+											<div class="form-group">
+												<label for="responsable">Responsable de pago</label>
+												<div class="input-with-search">
+												    <input type="text" id="responsable-modificar" placeholder="Ingrese responsable">
+													<button class="search-btn" onclick="abrirModalAseguradoras()" aria-label="Buscar aseguradora">
+													    <i class="fas fa-search"></i>
+													</button>
+												</div>
+											</div>
+											<div class="form-group">
+												<label for="contacto">Contacto</label>
+												<input type="text" id="contacto-modificar" placeholder="Ingrese contacto">
+											</div>
+											<div class="form-group">
+												<label for="estado">Estado</label>
+												<div class="input-with-search">
+													<input type="text" id="estado-modificar" placeholder="Ingrese estado">
+													<button class="search-btn" onclick="abrirModalEstados()" aria-label="Buscar estado">
+														<i class="fas fa-search"></i>
+													</button>
+												</div>
+											</div>
+									    </div>
+								    </div>
+									
+									<!-- Sección de Posiciones -->
+									<div class="positions-section">
+									    <!-- Encabezado con título-->
+										<div class="positions-header">
+										    <h2 class="section-subtitle no-border">Posiciones</h2>
+											<!-- Botón agregar -->
+ 								            <button class="add-position-btn-inline" onclick="agregarPosicion()">
+									            <i class="fas fa-plus"></i>
+									        </button>
+										</div>
+										<!-- Contenedor de la tabla de posiciones -->
+										<div class="positions-table-container">
+									        <table class="positions-table" id="positionsTable-modificar">
+								                <thead>
+									                <tr>
+										                <th>Código servicio</th>
+														<th>Descripción</th>
+														<th>Tarifa</th>
+														<th>Observación</th>
+														<th>Autorización</th>
+														<th>Catálogo diagnóstico</th>
+														<th>Código diagnóstico</th>
+														<th>Acciones</th>
+										            
+									                </tr>
+								                </thead>
+											    <tbody id="positionsTableBody-modificar">
+												    <!-- Las filas se agregan dinámicamente con JavaScript -->
+													<tr>
+													    <td colspan="8" class="no-positions">No hay posiciones agregadas. Haga clic en "Agregar posición" para comenzar.</td>
+													</tr>
+											 
+											    </tbody>
+										    </table>
+									    </div>
+								    </div>
+                                </div>
+                            </div>
+							
+							<!-- Crear convenios -->
+							<div id="tab-crear" class="tab-panel">
+                                <div class="crear-convenio-container">
+								    <!-- Sección de Encabezado -->
+							        <div class="header-section">
+									    <div class="header-title-container">
+										    <h2 class="section-subtitle no-border">Encabezado</h2>
+											<!-- Botón de guardar con tooltip -->
+											<button class="save-button" onclick="guardarConvenio()">
+												<i class="fas fa-save"></i>
+											</button>
+										</div>
+										<!-- Grid de campos del encabezado -->
+								        <div class="form-grid">
+									        <div class="form-group">
+										        <label for="idConvenio">ID convenio</label>
+										        <input type="text" id="idConvenio-crear" placeholder="Ingrese ID del convenio">
+									        </div>
+											<div class="form-group">
+										        <label for="nombreConvenio">Nombre convenio</label>
+										        <input type="text" id="nombreConvenio-crear" placeholder="Ingrese nombre del convenio">
+									        </div>
+											<div class="form-group">
+										        <label for="fechaInicio">Fecha inicio</label>
+										        <div class="input-with-search">
+												    <input type="text" id="fechaInicio-crear" placeholder="Seleccione fecha de inicio">
+													<button class="search-btn" onclick="abrirCalendario('fechaInicio')" aria-label="Seleccionar fecha de inicio">
+													    <i class="fas fa-search"></i>
+													</button>
+												</div>
+									        </div>
+									        <div class="form-group">
+										        <label for="fechaFin">Fecha fin</label>
+										        <div class="input-with-search">
+												    <input type="text" id="fechaFin-crear" placeholder="Seleccione fecha fin">
+													<button class="search-btn" onclick="abrirCalendario('fechaFin')" aria-label="Seleccionar fecha fin">
+													    <i class="fas fa-search"></i>
+													</button>
+												</div>
+									        </div>
+											<div class="form-group">
+												<label for="responsable">Responsable de pago</label>
+												<div class="input-with-search">
+												    <input type="text" id="responsable-crear" placeholder="Ingrese responsable">
+													<button class="search-btn" onclick="abrirModalAseguradoras()" aria-label="Buscar aseguradora">
+													    <i class="fas fa-search"></i>
+													</button>
+												</div>
+											</div>
+											<div class="form-group">
+												<label for="contacto">Contacto</label>
+												<input type="text" id="contacto-crear" placeholder="Ingrese contacto">
+											</div>
+											<div class="form-group">
+												<label for="estado">Estado</label>
+												<div class="input-with-search">
+													<input type="text" id="estado-crear" placeholder="Ingrese estado">
+													<button class="search-btn" onclick="abrirModalEstados()" aria-label="Buscar estado">
+														<i class="fas fa-search"></i>
+													</button>
+												</div>
+											</div>
+									    </div>
+								    </div>
+									
+									<!-- Sección de Posiciones -->
+									<div class="positions-section">
+									    <!-- Encabezado con título-->
+										<div class="positions-header">
+										    <h2 class="section-subtitle no-border">Posiciones</h2>
+											<!-- Botón agregar -->
+ 								            <button class="add-position-btn-inline" onclick="agregarPosicion()">
+									            <i class="fas fa-plus"></i>
+									        </button>
+										</div>
+										<!-- Contenedor de la tabla de posiciones -->
+										<div class="positions-table-container">
+									        <table class="positions-table" id="positionsTable-crear">
+								                <thead>
+									                <tr>
+										                <th>Código servicio</th>
+														<th>Descripción</th>
+														<th>Tarifa</th>
+														<th>Observación</th>
+														<th>Autorización</th>
+														<th>Catálogo diagnóstico</th>
+														<th>Código diagnóstico</th>
+														<th>Acciones</th>
+										            
+									                </tr>
+								                </thead>
+											    <tbody id="positionsTableBody-crear">
+												    <!-- Las filas se agregan dinámicamente con JavaScript -->
+													<tr>
+													    <td colspan="8" class="no-positions">No hay posiciones agregadas. Haga clic en "Agregar posición" para comenzar.</td>
+													</tr>
+											 
+											    </tbody>
+										    </table>
+									    </div>
+								    </div>
+							    </div>
+						
+                            </div>						
+					    </div>
+					</div>
+				
+				</main>
+	        </div>
+			
+			<!-- ===== MODAL PARA EXPORTAR ===== -->
+			<div class="modal-overlay" id="modalExportarOverlay" onclick="cerrarModalExportar(event)">
+				<div class="modal-content modal-export-content" onclick="event.stopPropagation()">
+					<div class="modal-header">
+						<h3 class="modal-title">Seleccionar formato</h3>
+						<button class="modal-close" onclick="cerrarModalExportar()" aria-label="Cerrar">
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+					<div class="export-options">
+						<!-- Botón Exportar a Excel -->
+						<button class="export-option-btn" onclick="exportarConvenio('excel')">
+							<i class="fas fa-file-excel export-icon-excel"></i>
+							<span>Exportar a Excel</span>
+						</button>
+						
+						<!-- Botón Exportar a PDF -->
+						<button class="export-option-btn" onclick="exportarConvenio('pdf')">
+							<i class="fas fa-file-pdf export-icon-pdf"></i>
+							<span>Exportar a PDF</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- ===== MODAL PARA CALENDARIO ===== -->
+            <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalEnOverlay(event)">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <!-- Encabezado -->
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="modalTitle">Seleccione una fecha</h3>
+                        <!-- Botón para cerrar el modal -->
+                        <button class="modal-close" onclick="cerrarModal()" aria-label="Cerrar">
+                         <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+					<div id="modalBody">
+                        <!-- El calendario se genera dinámicamente aquí -->
+                    </div>
+                </div>
+            </div>
+
+			<!-- ===== MODAL PARA SELECCIONAR ASEGURADORA ===== -->
+			<div class="modal-overlay" id="modalAseguradorasOverlay" onclick="cerrarModalAseguradoras(event)">
+				<div class="modal-content" onclick="event.stopPropagation()">
+					<div class="modal-header">
+						<h3 class="modal-title">Seleccione un responsable</h3>
+						<button class="modal-close" onclick="cerrarModalAseguradoras()" aria-label="Cerrar">
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+					<div id="modalAseguradorasBody">
+						<!-- Buscador -->
+						<input type="text" 
+							   id="buscadorAseguradoras" 
+							   class="modal-search" 
+							   placeholder="Búsqueda..."
+							   oninput="filtrarAseguradoras()">
+						
+						<!-- Tabla de aseguradoras -->
+						<div style="max-height: 300px; overflow-y: auto;">
+							<table class="aseguradoras-table">
+								<thead>
+									<tr>
+										<th>Código</th>
+										<th>Nombre</th>
+									</tr>
+								</thead>
+								<tbody id="tablaAseguradorasBody">
+									<!-- Las filas se generan dinámicamente -->
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- ===== MODAL PARA SELECCIONAR ESTADO ===== -->
+			<div class="modal-overlay" id="modalEstadosOverlay" onclick="cerrarModalEstados(event)">
+				<div class="modal-content" onclick="event.stopPropagation()">
+					<div class="modal-header">
+						<h3 class="modal-title">Seleccione un estado</h3>
+						<button class="modal-close" onclick="cerrarModalEstados()" aria-label="Cerrar">
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+					<div id="modalEstadosBody">
+						<!-- Tabla de estados -->
+						<div style="max-height: 300px; overflow-y: auto;">
+							<table class="aseguradoras-table">
+								<thead>
+									<tr>
+										<th>Código</th>
+										<th>Estado</th>
+									</tr>
+								</thead>
+								<tbody id="tablaEstadosBody">
+									<!-- Las filas se generan dinámicamente -->
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+            <script>
+			  
+			    /* ===== VARIABLES GLOBALES ===== */
+		
+                // Variable para almacenar el ID del convenio seleccionado actualmente
+                let convenioSeleccionado = null;
+				
+				// Variables para el sistema de calendario
+				let campoActual = ''; 
+				let calendarioMesActual = new Date().getMonth();
+                let calendarioAnioActual = new Date().getFullYear();
+                let fechaSeleccionada = null;
+				
+				// Contador para las posiciones agregadas
+				let contadorPosiciones = 0;
+				
+				// Base de datos
+				const aseguradoras = [
+					{ codigo: '001', nombre: 'Seguro de vida S.A' },
+					{ codigo: '002', nombre: 'Colvida' },
+					{ codigo: '003', nombre: 'Salud Corp' },
+					{ codigo: '004', nombre: 'Mediseguros' },
+					{ codigo: '005', nombre: 'Protección total' },
+					{ codigo: '006', nombre: 'Salud total' },
+					{ codigo: '007', nombre: 'EPS Sura' },
+					{ codigo: '008', nombre: 'Compensar' },
+					{ codigo: '009', nombre: 'Sanitas' },
+					{ codigo: '010', nombre: 'Nueva EPS' },
+					{ codigo: '011', nombre: 'Coomeva salud'}
+				];
+				
+				const estado =[{ codigo: '001', nombre: 'Vigente' },{ codigo: '002', nombre: 'No vigente' },]
+
+                /* ===== INICIALIZACIÓN ===== */
+
+                window.addEventListener('DOMContentLoaded', function() {
+                    cargarConvenios();
+					// Agrega evento de búsqueda activa
+					const buscador = document.getElementById('buscadorConvenios');
+					if (buscador) {
+						buscador.addEventListener('input', buscarConvenios);
+					}
+                });
+				
+				
+				/* ===== FUNCIÓN MANEJO PESTAÑAS ===== */
+				
+				function cambiarPestana(nombrePestana) {
+				
+					// Validar selección para pestañas restringidas
+					if ((nombrePestana === 'visualizar' || nombrePestana === 'modificar')) {
+						if (!convenioSeleccionado) {
+							alert('Por favor seleccione un convenio de la tabla para acceder a esta opción.');
+							return;
+						}
+					}
+
+					// Obtener todos los botones de pestañas y contenido
+					const tabButtons = document.querySelectorAll('.tab-button');
+					const tabPanels = document.querySelectorAll('.tab-panel');
+
+					// Remover la clase 'active' de todos los botones y paneles
+					tabButtons.forEach(button => button.classList.remove('active'));
+					tabPanels.forEach(panel => panel.classList.remove('active'));
+
+					// Encontrar el botón correspondiente a la pestaña seleccionada
+					const botonActivo = Array.from(tabButtons).find(button =>
+						button.textContent.toLowerCase().includes(nombrePestana)
+					);
+
+					// Si se encontró el botón, agregarle la clase 'active'
+					if (botonActivo) {
+						botonActivo.classList.add('active');
+					}
+
+					// Activar el panel de contenido correspondiente
+					const panelActivo = document.getElementById('tab-' + nombrePestana);
+					if (panelActivo) {
+						panelActivo.classList.add('active');
+					}
+					
+					// Cargar datos si es la pestaña de visualizar
+					if (nombrePestana === 'visualizar' && convenioSeleccionado) {
+						cargarDatosVisualizacion();
+					}
+					
+					// Cargar datos si es la pestaña de modificar
+					if (nombrePestana === 'modificar' && convenioSeleccionado) {
+						cargarDatosModificacion();
+					}
+				}
+
+                /* ===== FUNCIONES PESTAÑA CONVENIOS ===== */
+
+                function cargarConvenios() {
+					// Obtener el contenedor donde va la información del convenio
+					const container = document.getElementById('convenios-table-container');
+					const searchContainer = document.getElementById('search-container');
+
+					// Intentar obtener los convenios desde localStorage
+					const conveniosGuardados = localStorage.getItem('conveniosActuales');
+
+					// Si no existe convenio en localStorage, mostrar mensaje informativo
+					if (!conveniosGuardados) {
+						// Ocultar el buscador
+						searchContainer.style.display = 'none';
+						
+						container.innerHTML = `
+							<div class="no-convenios-message">
+								<h3>No se encontraron convenios configurados</h3>
+								<p>
+								 Actualmente no hay convenios cargados en el sistema.<br>
+								 Por favor, cree uno manualmente o carguelo desde la opción "Cargar convenio".
+								</p>
+							</div>
+						`;
+						return;
+					}
+
+					// Variable para almacenar el objeto del convenio
+					let convenios;
+
+					try {
+						convenios = JSON.parse(conveniosGuardados);
+
+						// Validar que sea un array
+						if (!Array.isArray(convenios)) {
+							convenios = [convenios];
+						}
+					} catch (error) {
+						// Si hay error al parsear, mostrar mensaje de error
+						console.error('Error al parsear el convenio:', error);
+						searchContainer.style.display = 'none';
+						container.innerHTML = `
+							<div class="no-convenios-message">
+								<i class="fas fa-exclamation-triangle"></i>
+								<h3>Error al cargar convenio</h3>
+								<p>No se pudo leer correctamente la información del convenio guardado.</p>
+							</div>
+						`;
+						return;
+					}
+
+					// Mostrar el buscador ya que hay convenios
+					searchContainer.style.display = 'block';
+					
+					// Limpiar el buscador al cargar convenios
+					const buscador = document.getElementById('buscadorConvenios');
+					buscador.value = '';
+
+					// Renderizar la tabla
+					renderizarTablaConvenios(convenios);
+					
+				}
+				
+				function renderizarTablaConvenios(convenios) {
+					const container = document.getElementById('convenios-table-container');
+					if (convenios.length === 0) {
+						container.innerHTML = `
+							<div class="no-search-results">
+								<i class="fas fa-search"></i>
+								<h3>No se encontraron resultados</h3>
+								<p>No hay convenios que coincidan con tu búsqueda.</p>
+							</div>
+						`;
+						return;
+					}
+
+					// Genera la tabla HTML con los datos de todos los convenios
+					const filasHTML = convenios.map(convenio => `
+						<tr>
+							<td>
+								<input type="checkbox"
+									   class="checkbox-convenio"
+									   onchange="manejarSeleccion(this, '${convenio.idConvenio}')">
+							</td>
+							<td>${convenio.idConvenio || 'N/A'}</td>
+							<td>${convenio.nombreConvenio || 'N/A'}</td>
+							<td>${convenio.responsable || 'N/A'}</td>
+							<td>${convenio.estadoConvenio || 'N/A'}</td>
+							<td>${convenio.fechaInicio || 'N/A'}</td>
+							<td>${convenio.fechaFin || 'N/A'}</td>
+						</tr>
+					`).join('');
+
+					container.innerHTML = `
+						<table class="convenios-table">
+							<thead>
+								<tr>
+									<th>Selección</th>
+									<th>ID convenio</th>
+									<th>Nombre convenio</th>
+									<th>Responsable de pago</th>
+									<th>Estado convenio</th>
+									<th>Fecha inicio</th>
+									<th>Fecha fin</th>
+								</tr>
+							</thead>
+							<tbody>
+								${filasHTML}
+							</tbody>
+						</table>
+					`;
+				}
+				
+				function buscarConvenios() {
+					const buscador = document.getElementById('buscadorConvenios');
+					const textoBusqueda = buscador.value.toLowerCase().trim();
+					// Obtiene convenios del localStorage
+					const conveniosGuardados = localStorage.getItem('conveniosActuales');
+					if (!conveniosGuardados) return;
+					
+					let convenios = JSON.parse(conveniosGuardados);
+					if (!Array.isArray(convenios)) {
+						convenios = [convenios];
+					}
+					
+					// Si el campo está vacío, muestra todos los convenios
+					if (textoBusqueda === '') {
+						renderizarTablaConvenios(convenios);
+						return;
+					}
+					
+					// Filtra convenios que coincidan con la búsqueda
+					const resultados = convenios.filter(convenio => 
+						(convenio.idConvenio || '').toLowerCase().includes(textoBusqueda) ||
+						(convenio.nombreConvenio || '').toLowerCase().includes(textoBusqueda) ||
+						(convenio.responsable || '').toLowerCase().includes(textoBusqueda)
+					);
+					
+					// Renderiza los resultados filtrados
+					renderizarTablaConvenios(resultados);
+				}
+
+				function manejarSeleccion(checkbox, idConvenio) {
+				
+				    // Desmarcar todos los demás checkboxes
+					if (checkbox.checked) {
+						document.querySelectorAll('.checkbox-convenio').forEach(cb => {
+							if (cb !== checkbox) {
+								cb.checked = false;
+							}
+						});
+						convenioSeleccionado = idConvenio;
+					} else {
+						convenioSeleccionado = null;
+					}
+				}					
+				
+				/* ===== FUNCIÓN PESTAÑA VISUALIZAR CONVENIOS ===== */
+				
+				function cargarDatosVisualizacion() {
+					// Obtener convenios del localStorage
+					const conveniosGuardados = localStorage.getItem('conveniosActuales');
+					if (!conveniosGuardados) return;
+
+					let convenios = JSON.parse(conveniosGuardados);
+					if (!Array.isArray(convenios)) {
+						convenios = [convenios];
+					}
+
+					// Buscar el convenio seleccionado
+					const convenio = convenios.find(c => c.idConvenio === convenioSeleccionado);
+					if (!convenio) return;
+
+					// Llenar campos del encabezado (usar IDs únicos para visualización)
+					document.querySelector('#tab-visualizar #idConvenio').value = convenio.idConvenio || '';
+					document.querySelector('#tab-visualizar #nombreConvenio').value = convenio.nombreConvenio || '';
+					document.querySelector('#tab-visualizar #fechaInicio').value = convenio.fechaInicio || '';
+					document.querySelector('#tab-visualizar #fechaFin').value = convenio.fechaFin || '';
+					document.querySelector('#tab-visualizar #responsable').value = convenio.responsable || '';
+					document.querySelector('#tab-visualizar #contacto').value = convenio.contacto || '';
+					document.querySelector('#tab-visualizar #estado').value = convenio.estadoConvenio || '';
+
+					// Llenar tabla de posiciones
+					const tbody = document.querySelector('#tab-visualizar #positionsTableBody');
+					tbody.innerHTML = '';
+
+					if (!convenio.posiciones || convenio.posiciones.length === 0) {
+						tbody.innerHTML = '<tr><td colspan="7" class="no-positions">No hay posiciones registradas en este convenio.</td></tr>';
+						return;
+					}
+
+					// Crear filas para cada posición
+					convenio.posiciones.forEach(posicion => {
+						const fila = document.createElement('tr');
+						fila.innerHTML = `
+							<td>${posicion.codigoServicio || ''}</td>
+							<td>${posicion.descripcion || ''}</td>
+							<td>${posicion.tarifa || ''}</td>
+							<td>${posicion.observacion || ''}</td>
+							<td><input type="checkbox" ${posicion.autorizacion ? 'checked' : ''} disabled></td>
+							<td>${posicion.catalogoDiagnostico || ''}</td>
+							<td>${posicion.codigoDiagnostico || ''}</td>
+						`;
+						tbody.appendChild(fila);
+					});
+				}
+				
+				/* ===== FUNCIONES PARA MODAL DE EXPORTACIÓN ===== */
+
+				function abrirModalExportar() {
+					// Verificar que haya un convenio seleccionado
+					if (!convenioSeleccionado) {
+						alert('No hay convenio para exportar. Por favor seleccione un convenio primero.');
+						return;
+					}
+					
+					const modal = document.getElementById('modalExportarOverlay');
+					modal.classList.add('active');
+				}
+
+				function cerrarModalExportar(event) {
+					const modal = document.getElementById('modalExportarOverlay');
+					
+					// Si se hizo clic en el overlay o se llamó directamente
+					if (!event || event.target.id === 'modalExportarOverlay') {
+						modal.classList.remove('active');
+					}
+				}
+
+				function exportarConvenio(formato) {
+					// Obtener convenios del localStorage
+					const conveniosGuardados = localStorage.getItem('conveniosActuales');
+					if (!conveniosGuardados) {
+						alert('No hay datos para exportar.');
+						return;
+					}
+
+					let convenios = JSON.parse(conveniosGuardados);
+					if (!Array.isArray(convenios)) {
+						convenios = [convenios];
+					}
+
+					// Buscar el convenio seleccionado
+					const convenio = convenios.find(c => c.idConvenio === convenioSeleccionado);
+					if (!convenio) {
+						alert('No se encontró el convenio seleccionado.');
+						return;
+					}
+
+					// Exportar según el formato seleccionado
+					if (formato === 'excel') {
+						exportarConvenioExcel(convenio);
+					} else if (formato === 'pdf') {
+						exportarConvenioPDF(convenio);
+					}
+
+					// Cerrar el modal
+					cerrarModalExportar();
+				}
+				
+				function exportarConvenioExcel(convenio){
+					try {
+						// Crea un nuevo libro de trabajo
+						const wb = XLSX.utils.book_new();
+						
+						//Encabezado
+						const datosCompletos  = [
+							['INFORMACIÓN DEL CONVENIO'],
+							[],
+							// Datos del encabezado
+							['ID convenio:', convenio.idConvenio || 'N/A'],
+							['Nombre convenio:', convenio.nombreConvenio || 'N/A'],
+							['Estado:', convenio.estadoConvenio || 'N/A'],
+							['Fecha inicio:', convenio.fechaInicio || 'N/A'],
+							['Fecha fin:', convenio.fechaFin || 'N/A'],
+							['Responsable:', convenio.responsable || 'N/A'],
+							['Contacto:', convenio.contacto || 'N/A'],
+							[],
+							[],
+							// Título de posiciones
+							['POSICIONES'],
+							[]
+						];
+						
+						//Posiciones
+						if (convenio.posiciones && convenio.posiciones.length > 0) {
+							const encabezadosPosiciones = [
+								'Código servicio',
+								'Descripción',
+								'Tarifa',
+								'Observación',
+								'Autorización',
+								'Catálogo diagnóstico',
+								'Código diagnóstico'
+							];
+							datosCompletos.push(encabezadosPosiciones);
+							//Datos Posiciones
+							convenio.posiciones.forEach(pos => {
+								datosCompletos.push([
+									pos.codigoServicio || '',
+									pos.descripcion || '',
+									pos.tarifa || '',
+									pos.observacion || '',
+									pos.autorizacion ? 'Sí' : 'No',
+									pos.catalogoDiagnostico || '',
+									pos.codigoDiagnostico || ''
+								]);
+							});
+						} else {
+							datosCompletos.push(['No hay posiciones registradas en este convenio.']);
+						}
+						
+						// Crea hoja con todos los datos
+						const ws = XLSX.utils.aoa_to_sheet(datosCompletos);
+						
+						// Aplica ancho de columnas
+						ws['!cols'] = [
+							{ wch: 20 },
+							{ wch: 35 },
+							{ wch: 12 },
+							{ wch: 25 },
+							{ wch: 12 },
+							{ wch: 22 },
+							{ wch: 18 }
+						];
+						
+						// Agrega la hoja al libro
+						XLSX.utils.book_append_sheet(wb, ws, 'Convenio');
+						
+						// Genera nombre del archivo
+						const nombreArchivo = `Convenio_${convenio.idConvenio || 'sin_id'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+						// Descarga archivo
+						XLSX.writeFile(wb, nombreArchivo);
+						
+						console.log('Excel exportado exitosamente:', nombreArchivo);
+						
+					} catch (error) {
+						console.error('Error al exportar a Excel:', error);
+						alert('Error al exportar a Excel. Por favor intente nuevamente.');
+					}
+				}
+				
+				function exportarConvenioPDF(convenio) {
+					try {
+						// Crear nuevo documento PDF (A4, orientación portrait)
+						const { jsPDF } = window.jspdf;
+						const doc = new jsPDF();
+						
+						// Variables de posición
+						let yPosition = 20;
+						const margenIzquierdo = 15;
+						const anchoLinea = 180;
+						
+						// ===== LOGO MYSISS =====
+						// Logo en texto (puedes reemplazar con imagen si tienes la URL)
+						doc.setFontSize(28);
+						doc.setTextColor(128, 0, 128); // Color morado
+						doc.setFont(undefined, 'bold');
+						doc.text('mySiss', margenIzquierdo, yPosition);
+						
+						yPosition += 15;
+						
+						// ===== TÍTULO =====
+						doc.setFontSize(16);
+						doc.setTextColor(0, 0, 0);
+						doc.text('INFORMACIÓN DEL CONVENIO', margenIzquierdo, yPosition);
+						
+						yPosition += 3;
+						
+						// Línea separadora
+						doc.setDrawColor(128, 0, 128);
+						doc.setLineWidth(0.5);
+						doc.line(margenIzquierdo, yPosition, margenIzquierdo + anchoLinea, yPosition);
+						
+						yPosition += 10;
+						
+						// ===== DATOS DEL ENCABEZADO =====
+						doc.setFontSize(11);
+						doc.setFont(undefined, 'normal');
+						
+						const datosEncabezado = [
+							{ label: 'ID convenio:', valor: convenio.idConvenio || 'N/A' },
+							{ label: 'Nombre convenio:', valor: convenio.nombreConvenio || 'N/A' },
+							{ label: 'Estado:', valor: convenio.estadoConvenio || 'N/A' },
+							{ label: 'Fecha inicio:', valor: convenio.fechaInicio || 'N/A' },
+							{ label: 'Fecha fin:', valor: convenio.fechaFin || 'N/A' },
+							{ label: 'Responsable:', valor: convenio.responsable || 'N/A' },
+							{ label: 'Contacto:', valor: convenio.contacto || 'N/A' }
+						];
+						
+						datosEncabezado.forEach(item => {
+							doc.setFont(undefined, 'bold');
+							doc.text(item.label, margenIzquierdo, yPosition);
+							doc.setFont(undefined, 'normal');
+							doc.text(item.valor, margenIzquierdo + 45, yPosition);
+							yPosition += 7;
+						});
+						
+						yPosition += 5;
+						
+						// ===== TABLA DE POSICIONES =====
+						if (convenio.posiciones && convenio.posiciones.length > 0) {
+							// Título de la sección
+							doc.setFontSize(14);
+							doc.setFont(undefined, 'bold');
+							doc.text('POSICIONES', margenIzquierdo, yPosition);
+							yPosition += 8;
+							
+							// Preparar datos de la tabla
+							const encabezados = [
+								'Código\nservicio',
+								'Descripción',
+								'Tarifa',
+								'Observación',
+								'Autorización',
+								'Catálogo\ndiagnóstico',
+								'Código\ndiagnóstico'
+							];
+							
+							const filas = convenio.posiciones.map(pos => [
+								pos.codigoServicio || '',
+								pos.descripcion || '',
+								pos.tarifa || '',
+								pos.observacion || '',
+								pos.autorizacion ? 'Sí' : 'No',
+								pos.catalogoDiagnostico || '',
+								pos.codigoDiagnostico || ''
+							]);
+							
+							// Crear tabla usando autoTable
+							doc.autoTable({
+								startY: yPosition,
+								head: [encabezados],
+								body: filas,
+								theme: 'grid',
+								styles: {
+									fontSize: 8,
+									cellPadding: 2,
+									overflow: 'linebreak'
+								},
+								headStyles: {
+									fillColor: [128, 0, 128], // Color morado
+									textColor: [255, 255, 255],
+									fontStyle: 'bold',
+									halign: 'center'
+								},
+								columnStyles: {
+									0: { cellWidth: 20 },  // Código servicio
+									1: { cellWidth: 35 },  // Descripción
+									2: { cellWidth: 18 },  // Tarifa
+									3: { cellWidth: 30 },  // Observación
+									4: { cellWidth: 22, halign: 'center' },  // Autorización
+									5: { cellWidth: 25 },  // Catálogo diagnóstico
+									6: { cellWidth: 22 }   // Código diagnóstico
+								},
+								alternateRowStyles: {
+									fillColor: [245, 245, 245]
+								}
+							});
+						} else {
+							doc.setFontSize(10);
+							doc.setFont(undefined, 'italic');
+							doc.text('No hay posiciones registradas en este convenio.', margenIzquierdo, yPosition);
+						}
+						
+						// ===== PIE DE PÁGINA =====
+						const totalPaginas = doc.internal.getNumberOfPages();
+						for (let i = 1; i <= totalPaginas; i++) {
+							doc.setPage(i);
+							doc.setFontSize(8);
+							doc.setTextColor(128, 128, 128);
+							doc.text(
+								`Página ${i} de ${totalPaginas} - Generado el ${new Date().toLocaleDateString('es-CO')}`,
+								margenIzquierdo,
+								doc.internal.pageSize.height - 10
+							);
+						}
+						
+						// Generar nombre del archivo
+						const nombreArchivo = `Convenio_${convenio.idConvenio || 'sin_id'}_${new Date().toISOString().split('T')[0]}.pdf`;
+						
+						// Descargar el archivo
+						doc.save(nombreArchivo);
+						
+						console.log('PDF exportado exitosamente:', nombreArchivo);
+						
+					} catch (error) {
+						console.error('Error al exportar a PDF:', error);
+						alert('Error al exportar a PDF. Por favor intente nuevamente.');
+					}
+				}
+				
+				/* ===== FUNCIÓN PESTAÑA MODIFICAR CONVENIOS ===== */
+
+				function cargarDatosModificacion() {
+					// Obtener convenios del localStorage
+					const conveniosGuardados = localStorage.getItem('conveniosActuales');
+					if (!conveniosGuardados) return;
+
+					let convenios = JSON.parse(conveniosGuardados);
+					if (!Array.isArray(convenios)) {
+						convenios = [convenios];
+					}
+
+					// Buscar el convenio seleccionado
+					const convenio = convenios.find(c => c.idConvenio === convenioSeleccionado);
+					if (!convenio) return;
+
+					// Llenar campos del encabezado CON SUFIJO -modificar
+					document.querySelector('#tab-modificar #idConvenio-modificar').value = convenio.idConvenio || '';
+					document.querySelector('#tab-modificar #nombreConvenio-modificar').value = convenio.nombreConvenio || '';
+					document.querySelector('#tab-modificar #fechaInicio-modificar').value = convenio.fechaInicio || '';
+					document.querySelector('#tab-modificar #fechaFin-modificar').value = convenio.fechaFin || '';
+					document.querySelector('#tab-modificar #responsable-modificar').value = convenio.responsable || '';
+					document.querySelector('#tab-modificar #contacto-modificar').value = convenio.contacto || '';
+					document.querySelector('#tab-modificar #estado-modificar').value = convenio.estadoConvenio || '';
+
+					// Llenar tabla de posiciones
+					const tbody = document.querySelector('#tab-modificar #positionsTableBody-modificar');
+					tbody.innerHTML = '';
+					contadorPosiciones = 0;
+
+					if (!convenio.posiciones || convenio.posiciones.length === 0) {
+						tbody.innerHTML = '<tr><td colspan="8" class="no-positions">No hay posiciones agregadas. Haga clic en "Agregar posición" para comenzar.</td></tr>';
+						return;
+					}
+
+					// Crear filas para cada posición
+					convenio.posiciones.forEach(posicion => {
+						contadorPosiciones++;
+						const fila = document.createElement('tr');
+						fila.id = `position-${contadorPosiciones}-modificar`;
+						fila.innerHTML = `
+							<td><input type="text" value="${posicion.codigoServicio || ''}" /></td>
+							<td><input type="text" value="${posicion.descripcion || ''}" /></td>
+							<td><input type="text" value="${posicion.tarifa || ''}" /></td>
+							<td><input type="text" value="${posicion.observacion || ''}" /></td>
+							<td><input type="checkbox" ${posicion.autorizacion ? 'checked' : ''} /></td>
+							<td><input type="text" value="${posicion.catalogoDiagnostico || ''}" /></td>
+							<td><input type="text" value="${posicion.codigoDiagnostico || ''}" /></td>
+							<td>
+								<button class="delete-position-btn" onclick="eliminarPosicion(${contadorPosiciones}, '-modificar')">
+									Eliminar posición
+								</button>
+							</td>
+						`;
+						tbody.appendChild(fila);
+					});
+				}
+				
+				/* ===== FUNCIONES PARA EL CALENDARIO ===== */
+
+				function abrirCalendario(campo) {
+					// Guardar el campo actual que se está editando
+					campoActual = campo;
+
+					// Obtener elementos del modal
+					const modal = document.getElementById('modalOverlay');
+					const modalTitle = document.getElementById('modalTitle');
+					const modalBody = document.getElementById('modalBody');
+
+					// Cambiar el título del modal
+					modalTitle.textContent = 'Seleccione una fecha';
+
+					// Limpiar el contenido anterior del modal
+					modalBody.innerHTML = '';
+
+					// Crear el contenedor del calendario
+					const calendarioContainer = document.createElement('div');
+					calendarioContainer.className = 'calendar-container';
+					calendarioContainer.id = 'calendarContainer';
+
+					// Generar el calendario
+					generarCalendario(calendarioContainer);
+
+					// Agregar el calendario al cuerpo del modal
+					modalBody.appendChild(calendarioContainer);
+
+					// Mostrar el modal
+					modal.classList.add('active');
+				}
+
+
+				function generarCalendario(container) {
+				
+					// Limpia el contenedor
+					container.innerHTML = '';
+
+					// Crea el encabezado del calendario (navegación)
+					const header = document.createElement('div');
+					header.className = 'calendar-header';
+
+					// Botón para ir al mes anterior
+					const btnAnterior = document.createElement('button');
+					btnAnterior.className = 'calendar-nav-btn';
+					btnAnterior.innerHTML = '<i class="fas fa-chevron-left"></i>';
+					btnAnterior.onclick = () => {
+						calendarioMesActual--;
+						if (calendarioMesActual < 0) {
+							calendarioMesActual = 11;
+							calendarioAnioActual--;
+						}
+						generarCalendario(container);
+					};
+
+					// Muestra el mes y año actual
+					const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+					const mesAnio = document.createElement('div');
+					mesAnio.className = 'calendar-month-year';
+					mesAnio.textContent = `${mesesNombres[calendarioMesActual]} ${calendarioAnioActual}`;
+
+					// Botón para ir al mes siguiente
+					const btnSiguiente = document.createElement('button');
+					btnSiguiente.className = 'calendar-nav-btn';
+					btnSiguiente.innerHTML = '<i class="fas fa-chevron-right"></i>';
+					btnSiguiente.onclick = () => {
+						calendarioMesActual++;
+						if (calendarioMesActual > 11) {
+							calendarioMesActual = 0;
+							calendarioAnioActual++;
+						}
+						generarCalendario(container);
+					};
+
+					// Agrega los elementos al encabezado
+					header.appendChild(btnAnterior);
+					header.appendChild(mesAnio);
+					header.appendChild(btnSiguiente);
+					container.appendChild(header);
+
+					// Crea la grilla del calendario
+					const grid = document.createElement('div');
+					grid.className = 'calendar-grid';
+
+					// Agrega los encabezados de los días de la semana
+					const diasSemana = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+					diasSemana.forEach(dia => {
+						const diaHeader = document.createElement('div');
+						diaHeader.className = 'calendar-day-header';
+						diaHeader.textContent = dia;
+						grid.appendChild(diaHeader);
+					});
+
+					// Calcula el primer día del mes y los días totales
+					const primerDia = new Date(calendarioAnioActual, calendarioMesActual, 1);
+					const ultimoDia = new Date(calendarioAnioActual, calendarioMesActual + 1, 0);
+					const diasEnMes = ultimoDia.getDate();
+					const primerDiaSemana = primerDia.getDay();
+
+					// Ajusta el primer día (Lunes=0, Domingo=6)
+					const ajustePrimerDia = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1;
+
+					// Agrega días vacíos antes del primer día del mes
+					for (let i = 0; i < ajustePrimerDia; i++) {
+						const diaVacio = document.createElement('div');
+						diaVacio.className = 'calendar-day disabled';
+						grid.appendChild(diaVacio);
+					}
+
+					// Obtiene la fecha de hoy
+					const hoy = new Date();
+					const esHoy = (dia) => {
+						return hoy.getDate() === dia &&
+							   hoy.getMonth() === calendarioMesActual &&
+							   hoy.getFullYear() === calendarioAnioActual;
+					};
+
+					// Agrega los días del mes
+					for (let dia = 1; dia <= diasEnMes; dia++) {
+						const diaElemento = document.createElement('div');
+						diaElemento.className = 'calendar-day';
+						diaElemento.textContent = dia;
+
+						// Marca el día actual
+						if (esHoy(dia)) {
+							diaElemento.classList.add('today');
+						}
+
+						// Marca el día seleccionado
+						if (fechaSeleccionada &&
+							fechaSeleccionada.getDate() === dia &&
+							fechaSeleccionada.getMonth() === calendarioMesActual &&
+							fechaSeleccionada.getFullYear() === calendarioAnioActual) {
+							diaElemento.classList.add('selected');
+						}
+
+						// Al hacer clic en un día, lo selecciona
+						diaElemento.onclick = () => seleccionarFecha(dia);
+
+						grid.appendChild(diaElemento);
+					}
+
+					container.appendChild(grid);
+				}
+
+
+				function seleccionarFecha(dia) {
+					// Crea el objeto Date con la fecha seleccionada
+					fechaSeleccionada = new Date(calendarioAnioActual, calendarioMesActual, dia);
+
+					// Formatea la fecha en formato DD/MM/YYYY
+					const diaStr = String(dia).padStart(2, '0');
+					const mesStr = String(calendarioMesActual + 1).padStart(2, '0');
+					const anioStr = calendarioAnioActual;
+					const fechaFormateada = `${diaStr}/${mesStr}/${anioStr}`;
+
+					// Identificar la pestaña activa y construir el sufijo
+					const pestanaActiva = document.querySelector('.tab-panel.active').id;
+					const sufijo = pestanaActiva.replace('tab', ''); // 'tab-crear' → '-crear', 'tab-modificar' → '-modificar'
+					
+					// Coloca la fecha en el campo de texto correspondiente
+					const campo = document.getElementById(campoActual + sufijo);
+					if(campo){
+						campo.value = fechaFormateada;
+					}
+
+					// Cierra el modal
+					cerrarModal();
+				}
+
+
+				function cerrarModal() {
+					const modal = document.getElementById('modalOverlay');
+					modal.classList.remove('active');
+				}
+
+
+				function cerrarModalEnOverlay(event) {
+					if (event.target.id === 'modalOverlay') {
+						cerrarModal();
+					}
+				}
+				
+				/* ===== FUNCIONES PARA MODAL DE ASEGURADORAS ===== */
+				
+				function abrirModalAseguradoras() {
+					const modal = document.getElementById('modalAseguradorasOverlay');
+					const buscador = document.getElementById('buscadorAseguradoras');
+					
+					// Limpiar el buscador
+					buscador.value = '';
+					
+					// Mostrar todas las aseguradoras
+					mostrarAseguradoras(aseguradoras);
+					
+					// Mostrar el modal
+					modal.classList.add('active');
+					
+					// Dar foco al buscador
+					setTimeout(() => buscador.focus(), 100);
+				}
+
+				function mostrarAseguradoras(lista) {
+					const tbody = document.getElementById('tablaAseguradorasBody');
+					
+					if (lista.length === 0) {
+						tbody.innerHTML = `
+							<tr>
+								<td colspan="2" class="no-results">
+									No se encontraron resultados
+								</td>
+							</tr>
+						`;
+						return;
+					}
+					
+					tbody.innerHTML = lista.map(aseguradora => `
+						<tr onclick="seleccionarAseguradora('${aseguradora.codigo}', '${aseguradora.nombre}')">
+							<td>${aseguradora.codigo}</td>
+							<td>${aseguradora.nombre}</td>
+						</tr>
+					`).join('');
+				}
+
+				function filtrarAseguradoras() {
+					const buscador = document.getElementById('buscadorAseguradoras');
+					const textoBusqueda = buscador.value.toLowerCase().trim();
+					
+					if (textoBusqueda === '') {
+						mostrarAseguradoras(aseguradoras);
+						return;
+					}
+					
+					const resultados = aseguradoras.filter(aseguradora => 
+						aseguradora.codigo.toLowerCase().includes(textoBusqueda) ||
+						aseguradora.nombre.toLowerCase().includes(textoBusqueda)
+					);
+					
+					mostrarAseguradoras(resultados);
+				}
+
+				function seleccionarAseguradora(codigo, nombre) {
+    
+					// Identificar la pestaña activa y construir el sufijo
+					const pestanaActiva = document.querySelector('.tab-panel.active').id;
+					const sufijo = pestanaActiva.replace('tab', ''); // 'tab-crear' → '-crear', 'tab-modificar' → '-modificar'
+					
+					// Colocar solo el nombre en el input
+					const campoResponsable = document.getElementById('responsable' + sufijo);
+					if (campoResponsable) {
+						campoResponsable.value = nombre;
+					}
+					
+					// Cerrar el modal
+					cerrarModalAseguradoras();
+				}
+
+				function cerrarModalAseguradoras(event) {
+					const modal = document.getElementById('modalAseguradorasOverlay');
+					
+					// Si se hizo clic en el overlay o se llamó directamente
+					if (!event || event.target.id === 'modalAseguradorasOverlay') {
+						modal.classList.remove('active');
+					}
+				}
+				
+				/* ===== FUNCIONES PARA MODAL DE ESTADOS ===== */
+				function abrirModalEstados() {
+					const modal = document.getElementById('modalEstadosOverlay');
+					// Muestra todos los estados
+					mostrarEstados(estado);
+					modal.classList.add('active');
+				}
+				
+				function mostrarEstados(lista) {
+					const tbody = document.getElementById('tablaEstadosBody');
+					if (lista.length === 0) {
+						tbody.innerHTML = `
+							<tr>
+								<td colspan="2" class="no-results">
+									No se encontraron resultados
+								</td>
+							</tr>
+						`;
+						return;
+					}
+					tbody.innerHTML = lista.map(est => `
+						<tr onclick="seleccionarEstado('${est.codigo}', '${est.nombre}')">
+							<td>${est.codigo}</td>
+							<td>${est.nombre}</td>
+						</tr>
+					`).join('');	
+				}
+				
+				function seleccionarEstado(codigo, nombre) {
+					// Identifica pestaña activa y construye el sufijo
+					const pestanaActiva = document.querySelector('.tab-panel.active').id;
+					const sufijo = pestanaActiva.replace('tab', ''); // 'tab-crear' → '-crear', 'tab-modificar' → '-modificar'
+					// Coloca nombre en el input
+					const campoEstado = document.getElementById('estado' + sufijo);
+					if (campoEstado) {
+						campoEstado.value = nombre;
+					}
+					cerrarModalEstados();
+				}
+				
+				function cerrarModalEstados(event) {
+					const modal = document.getElementById('modalEstadosOverlay');
+					if (!event || event.target.id === 'modalEstadosOverlay') {
+						modal.classList.remove('active');
+					}
+				}
+
+				/* ===== FUNCIONES PARA GESTIONAR POSICIONES ===== */
+
+				function agregarPosicion() {
+    
+					// Identificar la pestaña activa
+					const pestanaActiva = document.querySelector('.tab-panel.active').id;
+					const sufijo = pestanaActiva === 'tab-crear' ? '-crear' : '-modificar';
+					
+					// Obtener el tbody de la tabla CORRECTO según la pestaña
+					const tbody = document.getElementById('positionsTableBody' + sufijo);
+
+					// Verificar si existe el mensaje "No hay posiciones"
+					const mensajeVacio = tbody.querySelector('.no-positions');
+					
+					// Si existe el mensaje, eliminar toda la fila que lo contiene
+					if (mensajeVacio) {
+						tbody.innerHTML = '';
+						contadorPosiciones = 0; // Resetear contador cuando limpiamos la tabla
+					}
+
+					// Incrementar el contador de posiciones
+					contadorPosiciones++;
+
+					// Crear una nueva fila
+					const nuevaFila = document.createElement('tr');
+					nuevaFila.id = `position-${contadorPosiciones}${sufijo}`;
+
+					// Contenido de la nueva fila con todos los campos
+					nuevaFila.innerHTML = `
+						<td><input type="text" placeholder="Código" /></td>
+						<td><input type="text" placeholder="Descripción" /></td>
+						<td><input type="text" placeholder="Tarifa" /></td>
+						<td><input type="text" placeholder="Observación" /></td>
+						<td><input type="checkbox" /></td>
+						<td><input type="text" placeholder="Catálogo" /></td>
+						<td><input type="text" placeholder="Código diagnóstico" /></td>
+						<td>
+							<button class="delete-position-btn" onclick="eliminarPosicion(${contadorPosiciones}, '${sufijo}')">
+								Eliminar posición
+							</button>
+						</td>
+					`;
+
+					// Agregar la fila al tbody
+					tbody.appendChild(nuevaFila);
+				}
+
+				function eliminarPosicion(id, sufijo) {
+					
+					// Obtener la fila a eliminar
+					const fila = document.getElementById(`position-${id}${sufijo}`);
+
+					if (fila) {
+						// Eliminar la fila
+						fila.remove();
+
+						// Verificar si quedan filas en la tabla
+						const tbody = document.getElementById('positionsTableBody' + sufijo);
+						if (tbody.children.length === 0) {
+							// Si no quedan filas, mostrar el mensaje de "No hay posiciones"
+							tbody.innerHTML = `
+								<tr>
+									<td colspan="8" class="no-positions">No hay posiciones agregadas. Haga clic en "Agregar posición" para comenzar.</td>
+								</tr>
+							`;
+							// Resetear el contador
+							contadorPosiciones = 0;
+						}
+					}
+				}
+				
+				/* ===== FUNCIÓN PARA GUARDAR EL CONVENIO ===== */
+
+				function guardarConvenio() {
+    
+					// Identificar la pestaña activa
+					const pestanaActiva = document.querySelector('.tab-panel.active').id;
+					const esModificar = pestanaActiva === 'tab-modificar';
+					const sufijo = pestanaActiva.replace('tab', ''); // '-crear' o '-modificar'
+					
+					// Obtener los valores de los campos del encabezado CON SUFIJO
+					const idConvenio = document.querySelector(`#${pestanaActiva} #idConvenio${sufijo}`).value.trim();
+					const nombreConvenio = document.querySelector(`#${pestanaActiva} #nombreConvenio${sufijo}`).value.trim();
+					const fechaInicio = document.querySelector(`#${pestanaActiva} #fechaInicio${sufijo}`).value.trim();
+					const fechaFin = document.querySelector(`#${pestanaActiva} #fechaFin${sufijo}`).value.trim();
+					const responsable = document.querySelector(`#${pestanaActiva} #responsable${sufijo}`).value.trim();
+					const contacto = document.querySelector(`#${pestanaActiva} #contacto${sufijo}`).value.trim();
+					const estado = document.querySelector(`#${pestanaActiva} #estado${sufijo}`).value.trim();
+
+					// Validar que los campos obligatorios estén llenos
+					if (!idConvenio) {
+						alert('Campo ID Convenio obligatorio');
+						return;
+					}
+
+					if (!nombreConvenio) {
+						alert('Campo Nombre convenio obligatorio');
+						return;
+					}
+					
+					if (fechaInicio && fechaFin) {
+						// Convierte fechas a objetos Date
+						const partesInicio = fechaInicio.split('/');
+						const partesFin = fechaFin.split('/');
+						const dateInicio = new Date(partesInicio[2], partesInicio[1] - 1, partesInicio[0]);
+						const dateFin = new Date(partesFin[2], partesFin[1] - 1, partesFin[0]);
+						// Valida fecha inicio no sea mayor que fecha fin
+						if (dateInicio > dateFin) {
+							alert('"Fecha inicio" no debe ser superior a "Fecha fin"');
+							return;
+						}
+					}
+
+					// Recopilar las posiciones de la tabla
+					const tbody = document.getElementById('positionsTableBody' + sufijo);
+					const filas = tbody.querySelectorAll('tr');
+					const posiciones = [];
+
+					// Recorrer cada fila de la tabla (excepto el mensaje "No hay posiciones")
+					filas.forEach((fila) => {
+						// Verificar que no sea la fila del mensaje vacío
+						if (!fila.querySelector('.no-positions')) {
+							const inputs = fila.querySelectorAll('input[type="text"]');
+							const checkbox = fila.querySelector('input[type="checkbox"]');
+
+							// Crear objeto con los datos de la posición
+							const posicion = {
+								codigoServicio: inputs[0].value.trim(),
+								descripcion: inputs[1].value.trim(),
+								tarifa: inputs[2].value.trim(),
+								observacion: inputs[3].value.trim(),
+								autorizacion: checkbox.checked,
+								catalogoDiagnostico: inputs[4].value.trim(),
+								codigoDiagnostico: inputs[5].value.trim()
+							};
+
+							posiciones.push(posicion);
+						}
+					});
+					
+					// Validar que no haya códigos de servicio duplicados
+					const codigosServicio = posiciones.map(p => p.codigoServicio).filter(codigo => codigo !== '');
+					const codigosDuplicados = codigosServicio.filter((codigo, index) => codigosServicio.indexOf(codigo) !== index);
+
+					if (codigosDuplicados.length > 0) {
+						alert('Código de servicio ' + codigosDuplicados[0] + ' se encuentra repetido');
+						return;
+					}
+
+					// Crear el objeto con todos los datos del convenio
+					const convenioData = {
+						idConvenio: idConvenio,
+						nombreConvenio: nombreConvenio,
+						fechaInicio: fechaInicio,
+						fechaFin: fechaFin,
+						responsable: responsable,
+						contacto: contacto,
+						estadoConvenio: estado,
+						posiciones: posiciones
+					};
+
+					// Obtener convenios existentes o crear array vacío
+					let convenios = [];
+					const conveniosGuardados = localStorage.getItem('conveniosActuales');
+					if (conveniosGuardados) {
+						try {
+							convenios = JSON.parse(conveniosGuardados);
+							// Si no es un array, convertirlo en array
+							if (!Array.isArray(convenios)) {
+								convenios = [convenios];
+							}
+						} catch (error) {
+							console.error('Error al parsear convenios:', error);
+							convenios = [];
+						}
+					}
+
+					if (esModificar) {
+						// MODO MODIFICAR: Actualizar el convenio existente
+						const indice = convenios.findIndex(c => c.idConvenio === convenioSeleccionado);
+						
+						if (indice !== -1) {
+							// Si el ID cambió, verificar que no exista otro convenio con ese ID
+							if (idConvenio !== convenioSeleccionado) {
+								const existeOtro = convenios.some(c => c.idConvenio === idConvenio);
+								if (existeOtro) {
+									alert('El convenio con el ID "' + idConvenio + '" ya existe. Por favor utilice un ID diferente.');
+									return;
+								}
+							}
+							
+							// Actualizar el convenio
+							convenios[indice] = convenioData;
+							alert('Convenio modificado exitosamente.');
+							
+							// Actualizar el convenio seleccionado si cambió el ID
+							convenioSeleccionado = idConvenio;
+						} else {
+							alert('Error: No se encontró el convenio a modificar.');
+							return;
+						}
+					} else {
+						// MODO CREAR: Agregar nuevo convenio
+						const indiceExistente = convenios.findIndex(c => c.idConvenio === idConvenio);
+
+						if (indiceExistente !== -1) {
+							alert('El convenio con el ID "' + idConvenio + '" ya existe. Por favor utilice un ID diferente.');
+							return;
+						} else {
+							convenios.push(convenioData);
+							alert('Convenio guardado exitosamente.');
+						}
+					}
+					
+					// Guardar array completo en localStorage
+					localStorage.setItem('conveniosActuales', JSON.stringify(convenios));
+
+					
+					// Solo limpiar el formulario si estamos en modo crear
+					if (!esModificar) {
+						limpiarFormularioConvenio();
+					}
+
+					// Recargar los convenios en la pestaña principal
+					cargarConvenios();
+				}
+				
+				
+				/* ===== FUNCIÓN PARA LIMPIAR EL FORMULARIO ===== */
+
+				function limpiarFormularioConvenio(sufijo = '') {
+				
+					// Limpiar campos del encabezado
+					document.getElementById('idConvenio-crear').value = '';
+					document.getElementById('nombreConvenio-crear').value = '';
+					document.getElementById('fechaInicio-crear').value = '';
+					document.getElementById('fechaFin-crear').value = '';
+					document.getElementById('responsable-crear').value = '';
+					document.getElementById('contacto-crear').value = '';
+					document.getElementById('estado-crear').value = '';
+					
+					//Limpiar formulario acción crear
+					const tbody = document.getElementById('positionsTableBody-crear');
+					
+
+					if(tbody){
+					
+						tbody.innerHTML = `
+							<tr>
+								<td colspan="8" class="no-positions">No hay posiciones agregadas. Haga clic en "Agregar posición" para comenzar.</td>
+							</tr>
+						`;
+					}
+					
+					// Resetear el contador de posiciones
+					contadorPosiciones = 0;
+					
+					// Resetear variables del calendario
+					fechaSeleccionada = null;
+					calendarioMesActual = new Date().getMonth();
+					calendarioAnioActual = new Date().getFullYear();
+				}
+
+            </script>
+        </body>
+    </html>

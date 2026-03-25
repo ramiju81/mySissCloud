@@ -1,0 +1,2331 @@
+    <!DOCTYPE html>
+    <html lang="es">
+        <head>
+            <!-- Font Awesome para iconos - librería de iconos gratuita -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>mySiss - Auditoría</title>
+            <link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+            <style>
+			
+                :root {
+                 --mysiss-purple: #800080;
+                 --mysiss-light-purple: #EBE3F2;
+                 --mysiss-hover-purple: #DFD1EE;
+                }
+	
+				*{
+				 margin: 0;
+				 padding: 0;
+				 box-sizing: border-box;
+				}
+
+				body {
+				 font-family: system-ui, -apple-system, sans-serif;
+				 background: white;
+				 min-height: 100vh;
+				}
+
+				.focus-outline:focus {
+				 outline: 2px solid var(--mysiss-purple);
+				 outline-offset: 2px;
+				}
+
+				/* == Layout == */
+				
+				.app-container {
+				 display: flex;
+				 min-height: 100vh;
+				}
+
+				/* == Sidebar == */
+				
+				.sidebar {
+				 position:fixed;
+				 left:0;
+				 top:0;
+				 width: 190px;
+				 height: 100vh;
+				 overflow-y: auto;
+				 background: var(--mysiss-light-purple);
+				 padding: 0.8rem;
+				 z-index: 100;
+				 display: flex;
+				 flex-direction: column;
+				 justify-content: space-between; /* Distribuye el espacio entre logo/menú y cerrar sesión */
+				}
+				
+				.sidebar-top {
+				 flex-grow: 1; /* Ocupa el espacio disponible */
+				 display: flex;
+				 flex-direction: column;
+				}
+				
+				/* == CONTENEDOR para el botón de cerrar sesión que siempre estará al fondo == */
+				
+				.sidebar-bottom {
+				 margin-top: auto; /* Empuja este elemento hacia abajo */
+				 padding-top: 1rem; /* Espacio superior */
+				}
+
+				.logo {
+				 font-size: 3.1rem;
+				 font-weight: bold;
+				 color: var(--mysiss-purple);
+				 margin-bottom: 2rem;
+				 text-align: center;
+				}
+
+				.nav-link {
+				 display: block;
+				 padding: 15px 25px;
+				 color: var(--mysiss-purple);
+				 text-decoration: none;
+				 border-radius: 0.5rem;
+				 font-weight: 500;
+				 margin-bottom: 0.5rem;
+				 transition: all 0.3s ease; /* Transición suave para hover */
+				 cursor: pointer;
+				}
+				
+				/* == OPCIÓN MENU SELECCIONADA == */
+				
+				.nav-linkC{
+				 display: block;
+				 padding: 15px 25px;
+				 color: var(--mysiss-purple);
+				 text-decoration: none;
+				 border-radius: 0.5rem;
+				 font-weight: 500;
+				 margin-bottom: 0.5rem;
+				 <!-- transition: all 0.3s ease; /* Transición suave para hover */ -->
+				 /*border-left: 4px solid transparent;  Borde izquierdo invisible por defecto */
+				 cursor: pointer;
+				 background: white;
+				
+				}
+				
+				.nav-link:hover {
+				 background: var(--mysiss-hover-purple);
+				}
+
+				/* ===== CONTENIDO PRINCIPAL ===== */
+				
+				.main-content {
+				 flex: 1;/* Ocupa el espacio restante */
+				 padding: 30px;
+				 margin-left: 190px; /* Espacio para el sidebar fijo */
+				 min-height: 100vh;
+				 background-color: #ffffff;
+				 position: relative;
+				 height: auto;
+				}
+				
+			    .app-container {
+					display: flex; /* Layout flexbox para sidebar + contenido */
+					min-height: 100vh; /* Altura mínima de toda la ventana */
+					position: relative;
+				}
+				
+			    .section-title {
+				 font-size: 1.875rem;
+				 font-weight: bold;
+				 color: var(--mysiss-purple);
+				 margin-top: 1.5rem;
+				 margin-bottom: 1.5rem;
+				}
+				
+				.container-title {
+				 font-size: 1.875rem;
+				 font-weight: bold;
+				 color: var(--mysiss-purple);
+				 margin-bottom: 1rem;
+				}
+				/* ===== BREADCRUMB MODERNO ===== */
+				
+				.breadcrumb-container {
+					display: flex;
+					align-items: center;
+					gap: 8px;
+					margin-bottom: 1.5rem;
+					flex-wrap: wrap;
+				}
+
+				.breadcrumb-item {
+					display: inline-flex;
+					align-items: center;
+					padding: 10px 20px;
+					background: #f0f0f0;
+					color: #666;
+					border-radius: 25px;
+					font-size: 14px;
+					font-weight: 600;
+					transition: all 0.3s ease;
+					cursor: pointer;
+					border: 2px solid transparent;
+				}
+
+				.breadcrumb-item:hover {
+					background: var(--mysiss-light-purple);
+					color: var(--mysiss-purple);
+					transform: translateY(-2px);
+				}
+
+				.breadcrumb-item.active {
+					background: var(--mysiss-purple);
+					color: white;
+					cursor: default;
+					box-shadow: 0 4px 12px rgba(128, 0, 128, 0.3);
+				}
+
+				.breadcrumb-item.active:hover {
+					transform: none;
+				}
+
+				.breadcrumb-separator {
+					color: var(--mysiss-purple);
+					font-size: 1.2rem;
+					font-weight: bold;
+				}
+
+				/* Opcional: efecto de "disabled" para niveles futuros */
+				.breadcrumb-item.disabled {
+					opacity: 0.4;
+					cursor: not-allowed;
+					pointer-events: none;
+				}
+
+			    /* == FORMS == */
+			    .form-group {
+				 margin-bottom: 1rem;
+				}
+
+			    .form-label {
+				 display: block;
+				 margin-bottom: 0.5rem;
+				 color: #374151;
+				 font-weight: 500;
+			    }
+
+			    .form-input {
+				 width: 100%;
+				 padding: 0.5rem;
+				 border: 1px solid #D1D5DB;
+				 border-radius: 0.375rem;
+				 font-size: 1rem;
+				}
+
+			    .form-input:focus {
+				 outline: none;
+				 border-color: var(--mysiss-purple);
+				 box-shadow: 0 0 0 2px rgba(128, 0, 128, 0.1);
+				}
+				
+
+				/* == GRID de 3 columnas para los campos del formulario de institución == */
+				.form-gridCampos {
+					display: grid;
+					grid-template-columns: 1fr 1fr 1fr; /* 3 columnas */
+					gap: 20px; /* Espacio entre elementos */
+					margin-bottom: 25px;
+				}
+				
+				/* == CONTENEDOR para cada campo del formulario == */
+				
+				.form-group {
+					display: flex;
+					flex-direction: column; /* Label arriba, input abajo */
+				}
+				
+				.form-groupCheck{
+				 display: flex;
+				 text-align: center;
+				}
+				
+				.column-groupCheck{
+				 display: flex;
+				 flex-direction:column;
+				 margin: 0 auto;
+				}
+
+
+				/* == Estilos para las etiquetas == */
+				
+				.form-group label {
+					font-weight: 600;
+					margin-bottom: 6px;
+					color: #333;
+					font-size: 14px;
+				}
+				
+				.form-groupCheck label{
+					font-weight: 600;
+					margin-bottom: 22px;
+					color: #333;
+					font-size: 14px;
+				}
+
+				/* == Estilos para inputs y selects == */
+				
+				.form-group input,
+				.form-group select {
+					padding: 12px;
+					border: 2px solid #e1e5e9; /* Borde gris claro */
+					border-radius: 8px;
+					font-size: 14px;
+					transition: all 0.3s ease; /* Transición suave */
+					background-color: white;
+				}
+				
+				.form-groupCheck input{
+				  padding: 12px;
+				  border: 2px solid #e1e5e9; /* Borde gris claro */
+				  border-radius: 8px;
+				  font-size: 14px;
+				  transition: all 0.3s ease; /* Transición suave */
+				  background-color: white;
+				}
+				
+				.column-groupCheck input{
+				  transform: scale(1.5);
+				  justify-content: center;
+				}
+			    
+				/* == TAMAÑO DE CHECKBOX == */
+				
+				/* == MODO EDITAR ==*/
+				
+				.data-table input[type="checkbox"].edit-input{
+				 transform: scale(1.5); /* Aumenta el checkbox al 150% */
+                 cursor: pointer; 
+                 margin: 0 auto;
+                 display: block;
+				}
+				
+				/* == MODO VISUALIZAR ==*/
+				
+				.data-table input[type="checkbox"]:disabled {
+                 transform: scale(1.5); /* Aumenta el tamaño al 150% */
+                 cursor: not-allowed; 
+                 margin: 0 auto; 
+                 display: block;
+                }
+
+				/* Efecto focus en inputs */
+				.form-group input:focus,
+				.form-group select:focus {
+					outline: none; 
+					border-color: #8e44ad; /* Borde púrpura */
+					box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1); /* Sombra púrpura sutil */
+				}
+				
+				/* Botón Menú en la parte superior derecha */
+				.menu-button {
+				   position: fixed;
+				   top: 20px;
+				   right: 20px;
+				   background: var(--mysiss-purple);
+				   color: white;
+				   border: none;
+				   padding: 12px 30px;
+				   border-radius: 8px;
+				   font-size: 16px;
+				   font-weight: 600;
+				   cursor: pointer;
+				   transition: all 0.3s ease;
+				   box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
+				   text-decoration: none;
+				   display: inline-flex; /*alinear icono y texto*/
+				   align-items: center; /*Centra verticalmente el icono y texto*/
+				   gap: 10px; /*Espacio de 10px entre el icono y el texto*/
+				   z-index: 1000;
+				}
+				
+				.menu-button:hover {
+				  transform: translateY(-2px);
+				  box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+				  background: var(--mysiss-hover-purple);
+				}
+				
+				/* Estilo para el icono del menú hamburguesa */
+				.menu-button i {
+				  font-size: 18px; /* Tamaño del icono ligeramente más grande que el texto */
+				}
+
+				/* Botón principal "Agregar" */
+				.btn-agregar {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 12px 30px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); /* Sombra con color púrpura */
+				}
+				
+				.btn-agregarFormulario,
+				.btn-cancelarFormulario	{
+				 background: var(--mysiss-purple);
+				 color: white;
+				 border: none;
+				 padding: 8px 26px;
+				 border-radius: 8px;
+				 font-size: 15px;
+				 font-weight: 700;
+				 cursor: pointer;
+				 transition: all 0.3s ease;
+				 box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); /* Sombra con color púrpura */
+				}
+
+				/* == Efecto hover del botón agregar == */
+				
+				.btn-agregar:hover, 
+				.btn-agregarFormulario:hover,
+				.btn-cancelarFormulario:hover {
+					transform: translateY(-2px); /* Efecto de elevación */
+					box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3); /* Sombra más intensa */
+				}
+				
+				.modal-container{
+				 display: none;
+				 position: fixed;
+				 z-index: 1;
+				 left: 0; top: 0;
+				 width: 100%; height: 100%;
+				 background-color: rgba(0,0,0,0.6);
+				 justify-content: center;
+				 align-items: center;
+				
+				}
+				
+				.modal-content {
+				  background-color: #fff;
+				  padding: 30px;
+				  border-radius: 8px;
+				  width: 90%;
+				  max-width: 700px;
+				  text-align: center;
+				  position: relative;
+				}
+				
+				.close {
+				 position: absolute;
+				 top: 10px;
+				 right: 15px;
+				 font-size: 24px;
+				 cursor: pointer;
+				 color: var(--mysiss-purple);
+				}
+				
+				/* ===== ESTILOS DE LA TABLA ===== */
+				.table-container {
+					background: white;
+					border-radius: 12px;
+					box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+					overflow: hidden; /* Para que el border-radius funcione correctamente */
+				}
+
+				/* Header de la tabla */
+				.table-header {
+					background: var(--mysiss-purple);
+					color: white;
+					padding: 20px;
+					font-size: 18px;
+					font-weight: 600;
+				}
+
+				/* Tabla de datos */
+				.data-table {
+					width: 100%;
+					border-collapse: collapse; /* Elimina espacios entre celdas */
+				}
+
+				/* Celdas de la tabla */
+				.data-table th,
+				.data-table td {
+					padding: 15px;
+					text-align: center;
+					vertical-align: middle;
+					border-bottom: 1px solid #f0f0f0; /* Línea divisoria entre filas */
+				}
+
+				/* Headers de la tabla */
+				.data-table th {
+					background-color: #f8f9fa; /* Fondo gris claro */
+					font-weight: 600;
+					color: #333;
+					font-size: 14px;
+				}
+
+				/* Efecto hover en las filas */
+				.data-table tr:hover {
+					background-color: #f8f9fa;
+				}
+				
+				/* Checkbox personalizado para selección de filas */
+				
+				.data-table input[type="checkbox"].row-selector {
+					transform: scale(1.3); /* Aumenta el tamaño del checkbox */
+					cursor: pointer; 
+					margin: 0 auto; /* Centra el checkbox */
+					display: block;
+				}
+
+				/* Botón de navegación en breadcrumb habilitado */
+				.breadcrumb-item.clickable {
+					cursor: pointer;
+				}
+
+				.breadcrumb-item.clickable:hover {
+					background: var(--mysiss-light-purple);
+					color: var(--mysiss-purple);
+					transform: translateY(-2px);
+				}
+				
+				/* ===== BOTONES DE ACCIÓN ===== */
+				
+				.btn-action {
+					padding: 6px 12px;
+					border: none;
+					border-radius: 6px;
+					cursor: pointer;
+					font-size: 12px;
+					font-weight: 500;
+					margin: 0 2px;
+					transition: all 0.2s ease;
+				}
+
+				/* Botón editar (purple) */
+				.btn-edit,
+				.btn-options {
+					background-color: var(--mysiss-purple);
+					color: white;
+				}
+
+				.btn-edit:hover,
+				.btn-options:hover{
+					background-color: var(--mysiss-hover-purple);
+				}
+
+<!-- 				/* Botón eliminar (purple) */
+				.btn-delete {
+					background-color: var(--mysiss-purple);
+					color: white;
+				} -->
+
+<!-- 				.btn-delete:hover {
+					background-color: var(--mysiss-hover-purple);
+				} -->
+
+				/* Botón guardar (verde) */
+				.btn-save {
+					background-color: #27ae60;
+					color: white;
+				}
+
+				.btn-save:hover {
+					background-color: #229954; /* Verde más oscuro */
+				}
+
+				/* Botón cancelar (gris) */
+				.btn-cancel {
+					background-color: #95a5a6;
+					color: white;
+				}
+
+				.btn-cancel:hover {
+					background-color: #7f8c8d; /* Gris más oscuro */
+				}
+				
+				/* Contenedor de botones en el header */
+				.options-buttons {
+					display: flex;
+					gap: 10px;
+				}
+				
+				/* Botón agregar línea */
+				.btn-add-line {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 6px 12px;
+					border-radius: 6px;
+					font-size: 12px;
+					font-weight: 500;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				.btn-add-line:hover {
+					background-color: var(--mysiss-hover-purple);
+				}
+
+				/* Botón salir */
+				.btn-exit {
+					background: var(--mysiss-purple);
+					color: white;
+					border: none;
+					padding: 6px 12px;
+					border-radius: 6px;
+					font-size: 12px;
+					font-weight: 500;
+					cursor: pointer;
+					transition: all 0.3s ease;
+				}
+
+				.btn-exit:hover {
+				 background-color: var(--mysiss-hover-purple);
+				}
+
+				/* ===== ESTADO VACÍO ===== */
+				.empty-state {
+					text-align: center;
+					padding: 50px 20px;
+					color: #666;
+					font-style: italic;
+				}
+				
+				/* ===== AGREGAR CAMPO ===== */
+				.AgregarCampos{
+				  padding: 20px 10px;
+				}
+
+				/* ===== ANIMACIONES ===== */
+				
+				.fade-in {
+					animation: fadeIn 0.5s ease-in;
+				}
+
+				@keyframes fadeIn {
+					from { 
+						opacity: 0; 
+						transform: translateY(20px); /* Aparece desde abajo */
+					}
+					to { 
+						opacity: 1; 
+						transform: translateY(0); 
+					}
+				}
+				
+				@keyframes slideUp {
+					from {
+						opacity: 0;
+						transform: translateY(20px);
+					}
+					to {
+						opacity: 1;
+						transform: translateY(0);
+					}
+				}
+
+				/* ===== DISEÑO RESPONSIVO ===== */
+				
+				@media (max-width: 768px) {
+					/* En pantallas pequeñas, formulario en una sola columna */
+					.form-grid {
+						grid-template-columns: 1fr;
+						gap: 15px;
+					}
+					
+					/* Sidebar más pequeño */
+					.sidebar {
+						width: 200px;
+					}
+					
+					/* Ajustar margen del contenido principal */
+					.main-content {
+						margin-left: 200px;
+						padding: 20px;
+					}
+                }
+
+            </style>
+        </head>
+        <body>
+            <!-- Botón menú -->
+            <a href="Auditoria.html" class="menu-button">
+	         <i class="fas fa-bars"></i><!-- Icono de menú hamburguesa (3 líneas horizontales) -->
+	         Menú
+	        </a>
+            <div class="app-container">
+               <!-- Sidebar -->
+                <aside class="sidebar">
+				    <div class="sidebar-top">
+                        <div class="logo">mySiss</div> <!-- Logo mysiss -->
+					    <!-- Menú -->
+                        <nav>
+						 <a href="#" class="nav-linkC" data-section="institucion"><strong>Instituciones</strong></a>
+                         <a href="ConfiguracionN - campos.html" class="nav-link" data-section="campos"><strong>Campos</strong></a>
+						 <a href="ConfiguracionN - RPago.html" class="nav-link" data-section="RPago"><strong>Responsable de pago</strong></a>
+                        </nav>
+					</div>
+					<div class ="sidebar-bottom">
+					 <!-- Sección de logout en la parte inferior -->
+                     <a href="loginA.html" class="nav-link" data-section="logout"><strong>Cerrar sesión</strong></a>
+					</div>
+
+                </aside>
+                <main class="main-content">
+			        <section id="campos-section" class="fade-in">
+					    <!-- Breadcrumb inicial dinámico -->
+						<div id="breadcrumb-instituciones-container"></div>
+                        <h2 class="section-title">Institución</h2>
+		                <!-- ===== CONTENEDOR DE LA TABLA ===== -->
+                        <div class="table-container">
+				            <div id="tableContentC">
+					            <!-- Estado inicial: sin datos -->
+					            <div class="empty-state">
+					             No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+						        </div>
+					        </div>
+				        </div>
+			            <div class="AgregarCampos">
+				         <!-- Botón para agregar institución -->
+                         <button type="button" class="btn-agregar" id= "btn-agregar" onclick="handleSubmitc()">Agregar</button>
+				        </div>
+				        <div  class="modal-container" id="modal-container">
+				            <div class="modal-content" id="modal-content">
+					           <h2 class="container-title">Agregar institución</h2>
+					            <form id="fieldsForm">
+						            <div class="form-gridCampos">
+						                <!-- Grid de 3 columnas para los campos -->
+                                        <div class="form-group">
+							                <label for="IdLista">Código</label>
+                                            <input type="text" id="IdLista" name="IdLista" required>
+							            </div>
+                                        <div class="form-group">
+							                <label for="nombre">Nombre</label>
+                                            <input type="text" id="nombre" name="nombre" required>
+							            </div>
+								        <div class="form-group">
+							                <label for="nit">NIT</label>
+                                            <input type="text" id="nit" name="nit" required>
+								        </div>
+										<div class="form-group">
+							                <label for="pais">País</label>
+                                            <input type="text" id="pais" name="pais" required>
+								        </div>
+										<div class="form-group">
+							                <label for="departamento">Departamento</label>
+                                            <input type="text" id="departamento" name="departamento">
+								        </div>
+										<div class="form-group">
+							                <label for="ciudad">Población/Ciudad</label>
+                                            <input type="text" id="ciudad" name="ciudad">
+								        </div>
+										 <div class="form-group">
+							                <label for="direccion">Dirección</label>
+                                            <input type="text" id="direccion" name="direccion">
+								        </div>
+										<div class="form-group">
+							                <label for="telefono">Teléfono</label>
+                                            <input type="text" id="telefono" name="telefono">
+								        </div>
+							            <div class="form-group">
+							                <label for="correo">Correo electrónico</label>
+                                            <input type="email" id="correo" name="correo" required>
+								        </div>
+										<div class="form-groupCheck">
+                                            <div class="column-groupCheck">
+                                             <label for="activo">Activo</label>
+                                             <input type="checkbox" id="activo" name="activo" checked>
+                                            </div>
+                                        </div>
+							        </div>
+						            <!-- Botón para enviar el formulario -->
+					                <button type="submit" class="btn-agregarFormulario">Agregar</button>
+						            <!-- Botón para cancelar el formulario -->
+					                <button type="button" class="btn-cancelarFormulario" onclick="closeModal()">Cancelar</button>
+						            <span class='close'>×</span>
+				                </form>
+					        </div>
+				        </div>
+			        </section>
+					<!-- Sección de sedes (inicialmente oculta) -->
+                    <section id="sedes-section" style="display: none;">
+                        <!-- El contenido se generará dinámicamente -->
+                    </section>
+					<!-- Sección de servicios (inicialmente oculta) -->
+                    <section id="servicios-section" style="display: none;">
+                        <!-- El contenido se generará dinámicamente -->
+                    </section>
+					<!-- Sección de área física (inicialmente oculta) -->
+                    <section id="areaF-section" style="display: none;">
+                        <!-- El contenido se generará dinámicamente -->
+                    </section>
+                </main>
+	        </div>
+            <script>
+	         // ===== VARIABLES GLOBALES =====
+	   
+		        //  Array para almacenar todos los registros de configuración instituciones
+	            let configDataC = [];
+		
+		        //  Objeto para almacenar todas las sedes de las instituciones
+		        let sedesData = {};
+			 
+			    //  Objeto para almacenar todos los servicios de las sedes
+			    let serviciosData = {};
+			 
+			    //  Objeto para almacenar todos las áreas físicas de los servicios
+			    let areaData = {};
+		
+	            //  Índice del registro que se está editando (-1 = no hay edición activa) se crea uno para cada sección
+		        let editingIndexC = -1;
+		        let editingIndexSede  = -1;
+			    let editingIndexServicio = -1;
+			    let editingIndexAfisica = -1;
+			    let currentInstitutionIndex = -1; //Para saber la institución que se está editando
+			    let currentSedeIndex = -1; //Para saber que sede se está editando
+			    let currentServicioIndex = -1; //Para saber que servicio se está editando
+				let selectedInstitutionRow = -1; // Fila de institución seleccionada
+				let selectedSedeRow = -1; // Fila de sede seleccionada
+				let selectedServicioRow = -1; // Fila de servicio seleccionada
+	 
+	            // ===== REFERENCIAS A ELEMENTOS DEL DOM =====
+		
+		        //  Formulario campos
+		        const formC = document.getElementById('fieldsForm');
+		
+		        //  Contenedor donde se renderiza la tabla campos
+	            const tableContentC = document.getElementById('tableContentC');
+	 
+	            // ===== EVENT LISTENERS =====
+		
+		        //  Escuchar el evento submit del formulario campos
+		        formC.addEventListener('submit', handleSubmitFc);
+
+		
+			    // ===== SECCIÓN CAMPOS: MOSTRAR MODAL ===== 
+			 
+			    function handleSubmitc () {
+				 const modal = document.getElementById('modal-container');
+				 const openBtn = document.getElementById('btn-agregar');
+				 const closeBtn = document.querySelector('.close');
+				 
+				 openBtn.addEventListener ('click',() =>{
+				 modal.style.display = 'flex';});
+				 
+				 closeBtn.addEventListener('click', () => {
+				 modal.style.display = 'none';});
+				 formC.reset();
+				 
+				 window.addEventListener('click', (e) => {
+					 if (e.target === modal) {
+					 modal.style.display = 'none';
+					 formC.reset();
+					}});
+			
+				}
+				
+			    // ===== FUNCIÓN PRINCIPAL: AGREGAR REGISTRO SECCIÓN INSTITUCIÓN =====
+				
+				function handleSubmitFc (e){
+                    
+					e.preventDefault();
+                    const modal = document.getElementById('modal-container');
+    
+					// Crear objeto FormData para extraer los datos del formulario
+					const formDataC = new FormData(formC);
+					
+					// Obtener el código ingresado
+					const codigoIngresado = formDataC.get('IdLista').trim();
+					
+					// Verificar si el código ya existe
+					const codigoExiste = configDataC.some((record, index) => {
+						// Si estamos editando, excluimos el registro actual de la validación
+						if (editingIndexC >= 0 && index === editingIndexC) {
+							return false;
+						}
+						// Comparamos sin distinguir mayúsculas/minúsculas
+						return record.codigoCampo.toLowerCase() === codigoIngresado.toLowerCase();
+					});
+    
+                    // Si el código ya existe, mostrar alerta y detener el proceso
+                    if (codigoExiste) {
+                      alert('El código de institución "' + codigoIngresado + '" ya está registrado. Por favor ingrese un código diferente.');
+                      return; // Detiene la función aquí
+                    }
+    
+					// Crear nuevo registro con los datos del formulario
+					const newRecordC = {
+						codigoCampo: codigoIngresado,
+						nombre: formDataC.get('nombre'),
+						nit: formDataC.get('nit'),
+						pais: formDataC.get('pais'),
+						departamento: formDataC.get('departamento'),
+						ciudad: formDataC.get('ciudad'),
+						direccion: formDataC.get('direccion'),
+						telefono: formDataC.get('telefono'),
+						correo: formDataC.get('correo'),
+						activo: document.getElementById('activo').checked, 
+						id: Date.now() // ID único basado en timestamp
+					};
+					
+					// Verificar si estamos editando o agregando
+					if (editingIndexC >= 0) {
+						// MODO EDICIÓN
+						newRecordC.id = configDataC[editingIndexC].id; // Mantener el ID original
+						configDataC[editingIndexC] = newRecordC;
+						editingIndexC = -1; // Resetear el índice de edición
+					} else {
+						// MODO AGREGAR
+						newRecordC.id = Date.now(); // Generar nuevo ID
+						configDataC.push(newRecordC);
+					}
+					
+					// Renderizar la tabla actualizada
+					renderTableC();
+					
+					// Limpiar y cerrar
+					closeModal();
+				}
+				
+				function renderTableC() {
+				    
+				    // Si no hay datos, mostrar mensaje
+                    if (configDataC.length === 0) {
+					    document.getElementById('breadcrumb-instituciones-container').innerHTML = '';
+                        tableContentC.innerHTML = `
+                            <div class="empty-state">
+                               No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+                            </div>
+                        `;
+						return;
+					}
+					
+					// Si hay datos, mostrar breadcrumb
+					renderBreadcrumbInstituciones();
+					
+					// Construir HTML de la tabla
+                    let tableHTML = `
+                        <table class="data-table">
+                         <thead>
+                            <tr>
+							 <th>Seleccionar</th>
+                             <th>Código</th>
+                             <th>Nombre</th>
+                             <th>NIT</th>
+                             <th>Correo</th>
+                             <th>Activo</th>
+                             <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+					
+                    `;
+					
+					// Agregar filas con los datos
+                    configDataC.forEach((record, index) => {
+					    const isSelected = selectedInstitutionRow === index;
+                        tableHTML += `
+                            <tr class="${isSelected ? 'selected' : ''}">
+							    <td>
+								    <input type="checkbox" class="row-selector" ${isSelected ? 'checked' : ''} onchange="selectInstitutionRow(${index})">
+								</td>
+                                <td>${record.codigoCampo}</td>
+                                <td>${record.nombre}</td>
+                                <td>${record.nit}</td>
+                                <td>${record.correo}</td>
+                                <td>
+                                    <input type="checkbox" ${record.activo ? 'checked' : ''} disabled>
+                                </td>
+                                <td>
+                                    <button class="btn-action btn-edit" onclick="showDetailModal(${index})">Detalle</button>
+                                    <button class="btn-action btn-edit" onclick="editRecordC(${index})">Editar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+					
+					tableHTML += `
+                            </tbody>
+                        </table>
+                    `;
+					
+					// Actualizar el contenido de la tabla
+                    tableContentC.innerHTML = tableHTML;
+				}
+				
+				function closeModal() {
+				
+                 const modal = document.getElementById('modal-container');
+    
+                 // Cerrar modal
+                 modal.style.display = 'none';
+				 
+				 // Resetear índice de edición
+                 editingIndexC = -1;
+    
+                 // Restaurar título
+                 document.querySelector('.container-title').textContent = 'Agregar institución';
+    
+                    // Habilitar todos los campos
+                    const inputs = formC.querySelectorAll('input');
+                    inputs.forEach(input => {
+                     input.disabled = false;
+                    });
+    
+                    // Mostrar botón "Agregar" y restaurar texto de "Cancelar"
+					document.querySelector('.btn-agregarFormulario').textContent = 'Agregar';
+                    document.querySelector('.btn-agregarFormulario').style.display = 'inline-block';
+                    document.querySelector('.btn-cancelarFormulario').textContent = 'Cancelar';
+    
+                    // Limpiar formulario
+                    formC.reset();
+                }
+				
+				function renderBreadcrumbInstituciones() {
+				
+				    const hasSelection = selectedInstitutionRow >= 0;
+					
+					const breadcrumbHTML = `
+					    <div class="breadcrumb-container">
+						    <span class="breadcrumb-item active">
+							    <i class="fas fa-building" style="margin-right: 8px;"></i>
+								Institución
+							</span>
+							<span class="breadcrumb-separator">›</span>
+							<span class="breadcrumb-item ${hasSelection ? 'clickable' : 'disabled'}" ${hasSelection ? 'onclick="navigateToSedes()"' : ''}>
+							    <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
+								Sedes
+							</span>
+						</div>
+					`;
+					
+					document.getElementById('breadcrumb-instituciones-container').innerHTML = breadcrumbHTML;
+				}
+				
+				function showDetailModal(index) {
+                 const record = configDataC[index];
+                 const modal = document.getElementById('modal-container');
+    
+                 // Llenar los campos del formulario con los datos
+                 document.getElementById('IdLista').value = record.codigoCampo;
+                 document.getElementById('nombre').value = record.nombre;
+                 document.getElementById('nit').value = record.nit;
+                 document.getElementById('pais').value = record.pais;
+                 document.getElementById('departamento').value = record.departamento;
+                 document.getElementById('ciudad').value = record.ciudad;
+                 document.getElementById('direccion').value = record.direccion;
+                 document.getElementById('telefono').value = record.telefono;
+                 document.getElementById('correo').value = record.correo;
+				 document.getElementById('activo').checked = record.activo;
+				 
+				    // Deshabilitar todos los campos (modo solo lectura)
+                    const inputs = formC.querySelectorAll('input');
+                    inputs.forEach(input => {
+                     input.disabled = true;
+                    });
+					
+					// Cambiar el título del modal
+                    document.querySelector('.container-title').textContent = 'Detalle de institución';
+					
+					// Ocultar el botón "Agregar" y mostrar solo "Cerrar"
+                    document.querySelector('.btn-agregarFormulario').style.display = 'none';
+                    document.querySelector('.btn-cancelarFormulario').textContent = 'Cerrar';
+    
+                   // Mostrar el modal
+                   modal.style.display = 'flex';
+                }
+				
+				function editRecordC(index) {
+                 
+				  const record = configDataC[index];
+                  const modal = document.getElementById('modal-container');
+    
+                  // Guardar el índice del registro que se está editando
+                  editingIndexC = index;
+    
+                  // Llenar los campos del formulario con los datos existentes
+                  document.getElementById('IdLista').value = record.codigoCampo;
+                  document.getElementById('nombre').value = record.nombre;
+                  document.getElementById('nit').value = record.nit;
+                  document.getElementById('pais').value = record.pais;
+                  document.getElementById('departamento').value = record.departamento;
+                  document.getElementById('ciudad').value = record.ciudad;
+                  document.getElementById('direccion').value = record.direccion;
+                  document.getElementById('telefono').value = record.telefono;
+                  document.getElementById('correo').value = record.correo;
+                  document.getElementById('activo').checked = record.activo;
+    
+                    // Asegurarse que todos los campos estén habilitados
+                    const inputs = formC.querySelectorAll('input');
+                    inputs.forEach(input => {
+                     input.disabled = false;
+                    });
+    
+                   // Cambiar el título del modal
+                   document.querySelector('.container-title').textContent = 'Editar institución';
+    
+                   // Cambiar el texto del botón de "Agregar" a "Guardar"
+                   document.querySelector('.btn-agregarFormulario').textContent = 'Guardar';
+                   document.querySelector('.btn-agregarFormulario').style.display = 'inline-block';
+    
+                   // Restaurar texto del botón cancelar
+                   document.querySelector('.btn-cancelarFormulario').textContent = 'Cancelar';
+    
+                  // Mostrar el modal
+                  modal.style.display = 'flex';
+                }
+				
+				function selectInstitutionRow(index) {
+				
+					// Si ya está seleccionada, deseleccionar
+					if (selectedInstitutionRow === index) {
+						selectedInstitutionRow = -1;
+					} else {
+						selectedInstitutionRow = index;
+					}
+					
+					// Re-renderizar tabla y breadcrumb
+					renderTableC();
+			    }
+				
+				// === FUNCIÓN PARA CONTROLAR LA RELACIÓN DE SEDE-INSTITUCIÓN ===
+				
+				function showSedesSelection() {
+					if (configDataC.length === 0) {
+						alert('Primero debe agregar una institución');
+						return;
+					}
+					
+					// Si solo hay una institución, ir directamente
+					if (configDataC.length === 1) {
+						showSedes(0);
+						return;
+					}
+					
+					// Si hay múltiples instituciones, mostrar selector
+					let optionsHTML = '<option value="">Seleccione una institución</option>';
+					configDataC.forEach((institution, index) => {
+						optionsHTML += `<option value="${index}">${institution.nombre}</option>`;
+					});
+					
+					const modal = document.createElement('div');
+					modal.className = 'modal-container';
+					modal.style.display = 'flex';
+					modal.innerHTML = `
+						<div class="modal-content" style="max-width: 500px;">
+							<h2 class="container-title">Seleccionar Institución</h2>
+							<div class="form-group" style="margin: 20px 0;">
+								<label for="selectInstitution">Institución:</label>
+								<select id="selectInstitution" class="form-input">
+									${optionsHTML}
+								</select>
+							</div>
+							<button class="btn-agregarFormulario" onclick="goToSelectedInstitution()">Continuar</button>
+							<button class="btn-cancelarFormulario" onclick="closeInstitutionSelector()">Cancelar</button>
+						</div>
+					`;
+					
+					document.body.appendChild(modal);
+				}
+
+				function goToSelectedInstitution() {
+				
+					const select = document.getElementById('selectInstitution');
+					const selectedIndex = select.value;
+					
+					if (selectedIndex === '') {
+						alert('Por favor seleccione una institución');
+						return;
+					}
+					
+					closeInstitutionSelector();
+					showSedes(parseInt(selectedIndex));
+				}
+
+				function closeInstitutionSelector() {
+				
+					const modal = document.querySelector('.modal-container:last-of-type');
+					if (modal) {
+						modal.remove();
+					}
+				}
+
+                function showSedes(index) {
+				 
+				    //Asignar el index que recibe a la institución actual
+				    currentInstitutionIndex = index;
+				 
+				    //Extraer los datos de la institución según el index
+				    const institution = configDataC[index];
+				 
+				    // Inicializar array de sedes para esta institución si no existe
+                    if (!sedesData[institution.id]) {
+                     sedesData[institution.id] = [];
+                    }
+					
+					// Ocultar sección de instituciones
+                    document.getElementById('campos-section').style.display = 'none';
+    
+                   // Mostrar y configurar sección de sedes
+                   const sedesSection = document.getElementById('sedes-section');
+                   sedesSection.style.display = 'block';
+				   
+				   // Generar el contenido de la sección de sedes
+                   generateSedesContent(institution);
+                }
+				
+				function navigateToSedes() {
+				
+					// Validar que hay una institución seleccionada
+					if (selectedInstitutionRow < 0) {
+						alert('Por favor seleccione una institución antes de continuar.');
+						return;
+					}
+					
+					// Establecer la institución actual
+					currentInstitutionIndex = selectedInstitutionRow;
+					
+					// Resetear selección de sede
+					selectedSedeRow = -1;
+					
+					// Llamar a la función existente
+					showSedes(selectedInstitutionRow);
+				}
+				
+				
+				// ===== FUNCIÓN DISEÑO SECCIÓN SEDES =====
+				
+				function generateSedesContent(institution) {
+				
+				    //Obtiene el contendor de la sección sedes
+                    const sedesSection = document.getElementById('sedes-section');
+    
+                    sedesSection.innerHTML = `
+                        <section id="sedes-section" class="fade-in">
+                            <!-- Navegación de breadcrumb -->
+                            <div class="breadcrumb-sedes-container">
+								<div class="breadcrumb-container">	
+								    <span class="breadcrumb-item clickable" onclick="backToInstituciones()">
+										<i class="fas fa-building" style="margin-right: 8px;"></i>
+										Institución
+									</span>
+									<span class="breadcrumb-separator">›</span>
+									<span class="breadcrumb-item active">
+										<i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
+										Sedes
+									</span>
+									<span class="breadcrumb-separator">›</span>
+									<span class="breadcrumb-item disabled" id="breadcrumb-servicios-btn">
+										<i class="fas fa-concierge-bell" style="margin-right: 8px;"></i>
+										Servicios
+									</span>
+								</div>
+							</div>
+                            <!-- Nombre de la institución -->
+                            <h3 style="color: var(--mysiss-purple); font-size: 1.3rem; margin-bottom: 2rem;">
+                             ${institution.nombre}
+                            </h3>
+            
+                            <!-- Contenedor de la tabla de sedes -->
+                            <div class="table-container">
+                                <div id="tableContentSedes">
+                                     <!-- Estado inicial: sin datos -->
+                                    <div class="empty-state">
+                                     No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+                                    </div>
+                                </div>
+                            </div>
+            
+                            <div class="AgregarCampos">
+                             <!-- Botón para agregar sede -->
+                             <button type="button" class="btn-agregar" onclick="openSedeModal()">Agregar</button>
+                            </div>
+            
+                            <!-- Modal para agregar/editar sedes -->
+                            <div class="modal-container" id="modal-container-sede">
+                                <div class="modal-content" id="modal-content-sede">
+                                  <h2 class="container-title" id="sede-modal-title">Agregar Sede</h2>
+                                    <form id="sedesForm">
+                                        <div class="form-gridCampos">
+											<div class="form-group">
+											 <label for="codigoSede">Código</label>
+											 <input type="text" id="codigoSede" name="codigoSede" required>
+											</div>
+											<div class="form-group">
+											 <label for="nombreSede">Nombre</label>
+											 <input type="text" id="nombreSede" name="nombreSede" required>
+											</div>
+											<div class="form-group">
+											 <label for="direccionSede">Dirección</label>
+											 <input type="text" id="direccionSede" name="direccionSede" required>
+											</div>
+											<div class="form-group">
+											 <label for="paisSede">País</label>
+											 <input type="text" id="paisSede" name="paisSede" required>
+											</div>
+											<div class="form-group">
+											 <label for="departamentoSede">Departamento</label>
+											 <input type="text" id="departamentoSede" name="departamentoSede">
+											</div>
+											<div class="form-group">
+											 <label for="ciudadSede">Población/Ciudad</label>
+											 <input type="text" id="ciudadSede" name="ciudadSede">
+											</div>
+											<div class="form-group">
+											 <label for="telefonoSede">Teléfono</label>
+											 <input type="text" id="telefonoSede" name="telefonoSede">
+											</div>
+											<div class="form-groupCheck">
+												<div class="column-groupCheck">
+												 <label for="activoSede">Activo</label>
+												 <input type="checkbox" id="activoSede" name="activoSede" checked>
+												</div>
+											</div>
+                                        </div>
+                                       <button type="submit" class="btn-agregarFormulario">Agregar</button>
+                                       <button type="button" class="btn-cancelarFormulario" onclick="closeSedeModal()">Cancelar</button>
+                                       <span class='close' onclick="closeSedeModal()">×</span>
+                                    </form>
+                                </div>
+                            </div>
+                        </section>
+                    `;
+    
+                    // Configurar evento del formulario
+					
+                    const sedesForm = document.getElementById('sedesForm');
+                    sedesForm.addEventListener('submit', handleSubmitSede);
+    
+                   // Renderizar tabla de sedes
+				   
+                   renderTableSedes();
+                }
+				
+				// ===== FUNCIÓN PARA DISEÑO SECCIÓN INSTITUCION (MENÚ) =====
+				
+				function backToInstituciones() {
+                 
+				    // Ocultar sección sedes
+                    document.getElementById('sedes-section').style.display = 'none';
+					
+                    //Ocultar sección servicios
+                    document.getElementById('servicios-section').style.display = 'none';
+					
+					//Ocultar sección Área física
+					document.getElementById('areaF-section').style.display = 'none';
+					
+					// Mostrar sección de instituciones
+                    document.getElementById('campos-section').style.display = 'block';
+					
+					// Resetear índices actuales
+					currentInstitutionIndex = -1;
+					
+					// Resetear índice de sede actual
+                    currentSedeIndex = -1;
+					
+					// Resetear índice de servicio actual
+					currentServicioIndex = -1;
+					
+					// Resetear índice de edición de área física
+					editingIndexAfisica = -1;
+					
+					// Resetear selecciones
+					selectedInstitutionRow = -1;
+					selectedSedeRow = -1;
+					selectedServicioRow = -1;
+					
+					// Re-renderizar
+                    renderTableC();
+					
+                }
+				
+				// ===== FUNCIONES MODAL SEDES =====
+				
+				function openSedeModal() {
+				    
+					const modal = document.getElementById('modal-container-sede');
+				    const sedesForm = document.getElementById('sedesForm');
+    
+                    sedesForm.reset();
+                    editingIndexSede = -1;
+    
+                    document.getElementById('sede-modal-title').textContent = 'Agregar sede';
+                    document.querySelector('#modal-container-sede .btn-agregarFormulario').textContent = 'Agregar';
+                    document.querySelector('#modal-container-sede .btn-agregarFormulario').style.display = 'inline-block';
+                    document.querySelector('#modal-container-sede .btn-cancelarFormulario').textContent = 'Cancelar';
+    
+                    // Habilitar todos los campos
+                    const inputs = sedesForm.querySelectorAll('input');
+                    inputs.forEach(input => input.disabled = false);
+                    modal.style.display = 'flex';
+                }
+
+                function closeSedeModal() {
+                    
+					const modal = document.getElementById('modal-container-sede');
+                    const sedesForm = document.getElementById('sedesForm');
+    
+                    modal.style.display = 'none';
+                    editingIndexSede = -1;
+    
+                    document.getElementById('sede-modal-title').textContent = 'Agregar sede';
+                    document.querySelector('#modal-container-sede .btn-agregarFormulario').textContent = 'Agregar';
+                    document.querySelector('#modal-container-sede .btn-agregarFormulario').style.display = 'inline-block';
+                    document.querySelector('#modal-container-sede .btn-cancelarFormulario').textContent = 'Cancelar';
+    
+                    const inputs = sedesForm.querySelectorAll('input');
+                    inputs.forEach(input => input.disabled = false);
+    
+                    sedesForm.reset();
+                }
+				
+				
+				// ===== FUNCIÓN PRINCIPAL: AGREGAR REGISTRO SECCIÓN SEDES =====
+				
+				function handleSubmitSede(e) {
+                 
+				    e.preventDefault();
+    
+                    const institution = configDataC[currentInstitutionIndex];
+                    const formData = new FormData(e.target);
+					
+					// Obtener el código ingresado
+					const codigoIngresado = formData.get('codigoSede').trim();
+					
+					const sedes = sedesData[institution.id] || [];
+                    const codigoExiste = sedes.some((sede, index) => {
+						// Si estamos editando, excluimos la sede actual de la validación
+                        if (editingIndexSede >= 0 && index === editingIndexSede) {
+                         return false;
+                        }
+                        
+						// Comparamos sin distinguir mayúsculas/minúsculas
+                        return sede.codigo.toLowerCase() === codigoIngresado.toLowerCase();
+                    });
+					
+					// Si el código ya existe, mostrar alerta y detener el proceso
+                    if (codigoExiste) {
+                      alert('El código de sede "' + codigoIngresado + '" ya está registrado. Por favor ingrese un código diferente.');
+                      return;
+                    }
+    
+                    const newSede = {
+                        codigo: formData.get('codigoSede'),
+                        nombre: formData.get('nombreSede'),
+                        direccion: formData.get('direccionSede'),
+                        pais: formData.get('paisSede'),
+                        departamento: formData.get('departamentoSede'),
+                        ciudad: formData.get('ciudadSede'),
+                        telefono: formData.get('telefonoSede'),
+                        activo: document.getElementById('activoSede').checked,
+                        id: Date.now()
+                    };
+    
+                    if (editingIndexSede >= 0) {
+                        // MODO EDICIÓN
+                        newSede.id = sedesData[institution.id][editingIndexSede].id;
+                        sedesData[institution.id][editingIndexSede] = newSede;
+                        editingIndexSede = -1;
+                    } else {
+                        // MODO AGREGAR
+                        sedesData[institution.id].push(newSede);
+                    }
+    
+                    renderTableSedes();
+                    closeSedeModal();
+                }
+				
+				// =====RENDERIZAR TABLA SEDES =====
+				
+				function renderTableSedes() {
+				
+                    const institution = configDataC[currentInstitutionIndex];
+                    const tableContent = document.getElementById('tableContentSedes');
+                    const sedes = sedesData[institution.id] || [];
+    
+                    // Actualizar breadcrumb
+                    updateSedesBreadcrumb();
+					
+					if (sedes.length === 0) {
+                        tableContent.innerHTML = `
+                            <div class="empty-state">
+                                No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+                            </div>
+                        `;
+                        return;
+                    }
+					
+                    let tableHTML = `
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Seleccionar</th>
+									<th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Dirección</th>
+                                    <th>Ciudad/Población</th>
+                                    <th>Activo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;            
+					sedes.forEach((sede, index) => {
+                        const isSelected = selectedSedeRow === index;
+						tableHTML += `
+                            <tr class="${isSelected ? 'selected' : ''}">
+								<td>
+								    <input type="checkbox" class="row-selector" ${isSelected ? 'checked' : ''} onchange="selectSedeRow(${index})">
+								</td>
+								<td>${sede.codigo}</td>
+								<td>${sede.nombre}</td>
+								<td>${sede.direccion}</td>
+								<td>${sede.ciudad || 'N/A'}</td>
+								<td>
+									<input type="checkbox" ${sede.activo ? 'checked' : ''} disabled>
+								</td>
+								<td>
+									<button class="btn-action btn-edit" onclick="showSedeDetail(${index})">Detalle</button>
+									<button class="btn-action btn-edit" onclick="editSede(${index})">Editar</button>
+								</td>
+							</tr>
+                        `;
+                    });
+    
+                    tableHTML += `
+                            </tbody>
+                        </table>
+                    `;
+    
+                    tableContent.innerHTML = tableHTML;
+                }
+				
+				function showSedeDetail(index) {
+				
+                    const institution = configDataC[currentInstitutionIndex];
+                    const sede = sedesData[institution.id][index];
+                    const modal = document.getElementById('modal-container-sede');
+    
+                    document.getElementById('codigoSede').value = sede.codigo;
+                    document.getElementById('nombreSede').value = sede.nombre;
+                    document.getElementById('direccionSede').value = sede.direccion;
+                    document.getElementById('paisSede').value = sede.pais;
+                    document.getElementById('departamentoSede').value = sede.departamento;
+                    document.getElementById('ciudadSede').value = sede.ciudad;
+                    document.getElementById('telefonoSede').value = sede.telefono;
+                    document.getElementById('activoSede').checked = sede.activo;
+    
+                    // Deshabilitar todos los campos
+                    const inputs = document.getElementById('sedesForm').querySelectorAll('input');
+                    inputs.forEach(input => input.disabled = true);
+    
+                    document.getElementById('sede-modal-title').textContent = 'Detalle de sede';
+                    document.querySelector('#modal-container-sede .btn-agregarFormulario').style.display = 'none';
+                    document.querySelector('#modal-container-sede .btn-cancelarFormulario').textContent = 'Cerrar';
+    
+                    modal.style.display = 'flex';
+                }
+
+                function editSede(index) {
+                    
+					const institution = configDataC[currentInstitutionIndex];
+                    const sede = sedesData[institution.id][index];
+                    const modal = document.getElementById('modal-container-sede');
+    
+                    editingIndexSede = index;
+    
+                    document.getElementById('codigoSede').value = sede.codigo;
+                    document.getElementById('nombreSede').value = sede.nombre;
+                    document.getElementById('direccionSede').value = sede.direccion;
+                    document.getElementById('paisSede').value = sede.pais;
+                    document.getElementById('departamentoSede').value = sede.departamento;
+                    document.getElementById('ciudadSede').value = sede.ciudad;
+                    document.getElementById('telefonoSede').value = sede.telefono;
+                    document.getElementById('activoSede').checked = sede.activo;
+    
+                    // Asegurarse que todos los campos estén habilitados
+                    const inputs = document.getElementById('sedesForm').querySelectorAll('input');
+                    inputs.forEach(input => input.disabled = false);
+    
+                    document.getElementById('sede-modal-title').textContent = 'Editar sede';
+                    document.querySelector('#modal-container-sede .btn-agregarFormulario').textContent = 'Guardar';
+                    document.querySelector('#modal-container-sede .btn-agregarFormulario').style.display = 'inline-block';
+                    document.querySelector('#modal-container-sede .btn-cancelarFormulario').textContent = 'Cancelar';
+    
+                    modal.style.display = 'flex';
+                }
+				
+				function selectSedeRow(index) {
+			
+					if (selectedSedeRow === index) {
+						selectedSedeRow = -1;
+					} else {
+						selectedSedeRow = index;
+					}
+					
+					renderTableSedes();
+				}
+				
+				function updateSedesBreadcrumb() {
+				
+					const institution = configDataC[currentInstitutionIndex];
+					const sedes = sedesData[institution.id] || [];
+					const hasSelection = selectedSedeRow >= 0;
+					
+					const serviciosBtn = document.getElementById('breadcrumb-servicios-btn');
+					if (serviciosBtn) {
+						if (hasSelection) {
+							serviciosBtn.classList.remove('disabled');
+							serviciosBtn.classList.add('clickable');
+							serviciosBtn.setAttribute('onclick', 'navigateToServicios()');
+						} else {
+							serviciosBtn.classList.add('disabled');
+							serviciosBtn.classList.remove('clickable');
+							serviciosBtn.removeAttribute('onclick');
+						}
+					}
+				}
+				
+				// === FUNCIÓN PARA CONTROLAR LA RELACIÓN DE SEDE-INSTITUCIÓN ===
+
+                function showSedes(index) {
+				 
+				    //Asignar el index que recibe a la institución actual
+				    currentInstitutionIndex = index;
+				 
+				    //Extraer los datos de la institución según el index
+				    const institution = configDataC[index];
+				 
+				    // Inicializar array de sedes para esta institución si no existe
+                    if (!sedesData[institution.id]) {
+                     sedesData[institution.id] = [];
+                    }
+					
+					// Ocultar sección de instituciones
+                    document.getElementById('campos-section').style.display = 'none';
+    
+                   // Mostrar y configurar sección de sedes
+                   const sedesSection = document.getElementById('sedes-section');
+                   sedesSection.style.display = 'block';
+				   
+				   // Generar el contenido de la sección de sedes
+                   generateSedesContent(institution);
+                }
+				
+				// ===== FUNCIÓN CONTROL SERVICIOS =====
+				
+				function showServicio(index){
+				
+				    //Asignar el index que recibe a la sede actual
+				    currentSedeIndex = index;
+					
+					//Extraer los datos de la institución actual
+				    const institution = configDataC[currentInstitutionIndex];
+					
+					//Extraer sede actual
+					const sede = sedesData[institution.id][index];
+					
+					// Inicializar array de servicios para esta sede si no existe
+                    if (!serviciosData[sede.id]) {
+                     serviciosData[sede.id] = [];
+                    }
+					
+					// Ocultar sección de sedes
+                    document.getElementById('sedes-section').style.display = 'none';
+    
+                    // Mostrar y configurar sección de servicios
+                    const serviciosSection = document.getElementById('servicios-section');
+                    serviciosSection.style.display = 'block';
+    
+                    // Generar el contenido de la sección de servicios
+                    generateServiciosContent(institution, sede);
+				
+				}
+				
+				function navigateToServicios() {
+				
+					if (selectedSedeRow < 0) {
+						alert('Por favor seleccione una sede antes de continuar.');
+						return;
+					}
+					
+					currentSedeIndex = selectedSedeRow;
+					selectedServicioRow = -1;
+					showServicio(selectedSedeRow);
+				}
+				
+				// ===== FUNCIÓN DISEÑO SECCIÓN SERVICIOS =====
+
+                function generateServiciosContent(institution, sede) {
+				
+					const serviciosSection = document.getElementById('servicios-section');
+					
+					serviciosSection.innerHTML = `
+						<section class="fade-in">
+							<!-- Navegación de breadcrumb -->
+							<div class="breadcrumb-container">
+								<span class="breadcrumb-item clickable" onclick="backToInstituciones()">
+									<i class="fas fa-building" style="margin-right: 8px;"></i>
+									Institución
+								</span>
+								<span class="breadcrumb-separator">›</span>
+								<span class="breadcrumb-item clickable" onclick="backToSedes()">
+									<i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
+									Sedes
+								</span>
+								<span class="breadcrumb-separator">›</span>
+								<span class="breadcrumb-item active">
+									<i class="fas fa-concierge-bell" style="margin-right: 8px;"></i>
+									Servicios
+								</span>
+								<span class="breadcrumb-separator">›</span>
+								<span class="breadcrumb-item disabled" id="breadcrumb-area-btn">
+									<i class="fas fa-layer-group" style="margin-right: 8px;"></i>
+									Área física
+								</span>
+							</div>
+							
+							<!-- Nombre de la institución y sede -->
+							<h3 style="color: var(--mysiss-purple); font-size: 1.3rem; margin-bottom: 2rem;">
+								${institution.nombre} / ${sede.nombre}
+							</h3>
+							
+							<!-- Contenedor de la tabla de servicios -->
+							<div class="table-container">
+								<div id="tableContentServicios">
+									<!-- Estado inicial: sin datos -->
+									<div class="empty-state">
+										No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+									</div>
+								</div>
+							</div>
+							
+							<div class="AgregarCampos">
+								<!-- Botón para agregar servicio -->
+								<button type="button" class="btn-agregar" onclick="openServicioModal()">Agregar</button>
+							</div>
+							
+							<!-- Modal para agregar/editar servicios -->
+							<div class="modal-container" id="modal-container-servicio">
+								<div class="modal-content" id="modal-content-servicio">
+									<h2 class="container-title" id="servicio-modal-title">Agregar Servicio</h2>
+									<form id="serviciosForm">
+										<div class="form-gridCampos">
+											<div class="form-group">
+												<label for="codigoServicio">Código</label>
+												<input type="text" id="codigoServicio" name="codigoServicio" required>
+											</div>
+											<div class="form-group">
+												<label for="nombreServicio">Nombre</label>
+												<input type="text" id="nombreServicio" name="nombreServicio" required>
+											</div>
+											<div class="form-group">
+												<label for="usuarioLider">Usuario líder</label>
+												<input type="text" id="usuarioLider" name="usuarioLider" required>
+											</div>
+											<div class="form-group">
+												<label for="contacto">Correo</label>
+												<input type="email" id="contacto" name="contacto" required>
+											</div>
+											<div class="form-groupCheck">
+												<div class="column-groupCheck">
+													<label for="activoServicio">Activo</label>
+													<input type="checkbox" id="activoServicio" name="activoServicio" checked>
+												</div>
+											</div>
+										</div>
+										<button type="submit" class="btn-agregarFormulario">Agregar</button>
+										<button type="button" class="btn-cancelarFormulario" onclick="closeServicioModal()">Cancelar</button>
+										<span class='close' onclick="closeServicioModal()">×</span>
+									</form>
+								</div>
+							</div>
+						</section>
+					`;
+					
+					// Configurar evento del formulario
+					const serviciosForm = document.getElementById('serviciosForm');
+					serviciosForm.addEventListener('submit', handleSubmitServicio);
+					
+					// Renderizar tabla de servicios
+					renderTableServicios();
+				}
+				
+				// ===== FUNCIÓN PARA VOLVER A SECCIÓN SEDES =====
+
+                function backToSedes() {
+    
+					// Ocultar sección de área física
+					document.getElementById('areaF-section').style.display = 'none';
+					
+					// Ocultar sección de servicios
+					document.getElementById('servicios-section').style.display = 'none';
+					
+					// Mostrar sección de sedes
+					document.getElementById('sedes-section').style.display = 'block';
+					
+					// Resetear índice de servicio actual
+					currentServicioIndex = -1;
+					
+					// Resetear índice de edición de área física
+					editingIndexServicio = -1;
+					
+					// Resetear selecciones
+					selectedServicioRow = -1;
+					selectedSedeRow = -1;
+					
+					// Re-renderizar
+					renderTableSedes();
+					
+				}
+				
+				// ===== FUNCIONES MODAL SERVICIOS =====
+
+				function openServicioModal() {
+					
+					const modal = document.getElementById('modal-container-servicio');
+					const serviciosForm = document.getElementById('serviciosForm');
+					
+					serviciosForm.reset();
+					editingIndexServicio = -1;
+					
+					document.getElementById('servicio-modal-title').textContent = 'Agregar servicio';
+					document.querySelector('#modal-container-servicio .btn-agregarFormulario').textContent = 'Agregar';
+					document.querySelector('#modal-container-servicio .btn-agregarFormulario').style.display = 'inline-block';
+					document.querySelector('#modal-container-servicio .btn-cancelarFormulario').textContent = 'Cancelar';
+					
+					// Habilitar todos los campos
+					const inputs = serviciosForm.querySelectorAll('input');
+					inputs.forEach(input => input.disabled = false);
+					
+					modal.style.display = 'flex';
+				}
+
+				function closeServicioModal() {
+					
+					const modal = document.getElementById('modal-container-servicio');
+					const serviciosForm = document.getElementById('serviciosForm');
+					
+					modal.style.display = 'none';
+					editingIndexServicio = -1;
+					
+					document.getElementById('servicio-modal-title').textContent = 'Agregar servicio';
+					document.querySelector('#modal-container-servicio .btn-agregarFormulario').textContent = 'Agregar';
+					document.querySelector('#modal-container-servicio .btn-agregarFormulario').style.display = 'inline-block';
+					document.querySelector('#modal-container-servicio .btn-cancelarFormulario').textContent = 'Cancelar';
+					
+					const inputs = serviciosForm.querySelectorAll('input');
+					inputs.forEach(input => input.disabled = false);
+					
+					serviciosForm.reset();
+				}
+				
+				// ===== FUNCIÓN PRINCIPAL: AGREGAR/EDITAR REGISTRO SECCIÓN SERVICIOS =====
+
+				function handleSubmitServicio(e) {
+					
+					e.preventDefault();
+					
+					const institution = configDataC[currentInstitutionIndex];
+					const sede = sedesData[institution.id][currentSedeIndex];
+					const formData = new FormData(e.target);
+					
+					// Obtener el código ingresado
+					const codigoIngresado = formData.get('codigoServicio').trim();
+					
+					const servicios = serviciosData[sede.id] || [];
+					const codigoExiste = servicios.some((servicio, index) => {
+						// Si estamos editando, excluimos el servicio actual de la validación
+						if (editingIndexServicio >= 0 && index === editingIndexServicio) {
+							return false;
+						}
+						
+						// Comparamos sin distinguir mayúsculas/minúsculas
+						return servicio.codigo.toLowerCase() === codigoIngresado.toLowerCase();
+					});
+					
+					// Si el código ya existe, mostrar alerta y detener el proceso
+					if (codigoExiste) {
+						alert('El código de servicio "' + codigoIngresado + '" ya está registrado. Por favor ingrese un código diferente.');
+						return;
+					}
+					
+					const newServicio = {
+						codigo: formData.get('codigoServicio'),
+						nombre: formData.get('nombreServicio'),
+						usuario: formData.get('usuarioLider'),
+						contacto: formData.get('contacto'),
+						activo: document.getElementById('activoServicio').checked,
+						id: Date.now()
+					};
+					
+					if (editingIndexServicio >= 0) {
+						// MODO EDICIÓN
+						newServicio.id = serviciosData[sede.id][editingIndexServicio].id;
+						serviciosData[sede.id][editingIndexServicio] = newServicio;
+						editingIndexServicio = -1;
+					} else {
+						// MODO AGREGAR
+						serviciosData[sede.id].push(newServicio);
+					}
+					
+					renderTableServicios();
+					closeServicioModal();
+				}
+				
+				// ===== RENDERIZAR TABLA SERVICIOS =====
+
+				function renderTableServicios() {
+				
+					const institution = configDataC[currentInstitutionIndex];
+					const sede = sedesData[institution.id][currentSedeIndex];
+					const tableContent = document.getElementById('tableContentServicios');
+					const servicios = serviciosData[sede.id] || [];
+					
+					// Actualizar breadcrumb
+					updateServiciosBreadcrumb();
+					
+					if (servicios.length === 0) {
+						tableContent.innerHTML = `
+							<div class="empty-state">
+								No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+							</div>
+						`;
+						return;
+					}
+					
+					let tableHTML = `
+						<table class="data-table">
+							<thead>
+								<tr>
+									<th>Seleccionar</th>
+									<th>Código</th>
+									<th>Nombre</th>
+									<th>Usuario líder</th>
+									<th>Correo</th>
+									<th>Activo</th>
+									<th>Acciones</th>
+								</tr>
+							</thead>
+							<tbody>
+					`;
+					
+					servicios.forEach((servicio, index) => {
+						const isSelected = selectedServicioRow === index;
+						tableHTML += `
+							<tr class="${isSelected ? 'selected' : ''}">
+								<td>
+									<input type="checkbox" class="row-selector" ${isSelected ? 'checked' : ''} onchange="selectServicioRow(${index})">
+								</td>
+								<td>${servicio.codigo}</td>
+								<td>${servicio.nombre}</td>
+								<td>${servicio.usuario}</td>
+								<td>${servicio.contacto}</td>
+								<td>
+									<input type="checkbox" ${servicio.activo ? 'checked' : ''} disabled>
+								</td>
+								<td>
+									<button class="btn-action btn-edit" onclick="editServicio(${index})">Editar</button>
+								</td>
+							</tr>
+						`;
+					});
+					
+					tableHTML += `
+							</tbody>
+						</table>
+					`;
+					
+					tableContent.innerHTML = tableHTML;
+				}
+				
+				// ===== FUNCIÓN EDITAR SERVICIO =====
+
+				function editServicio(index) {
+					
+					const institution = configDataC[currentInstitutionIndex];
+					const sede = sedesData[institution.id][currentSedeIndex];
+					const servicio = serviciosData[sede.id][index];
+					const modal = document.getElementById('modal-container-servicio');
+					
+					editingIndexServicio = index;
+					
+					document.getElementById('codigoServicio').value = servicio.codigo;
+					document.getElementById('nombreServicio').value = servicio.nombre;
+					document.getElementById('usuarioLider').value = servicio.usuario;
+					document.getElementById('contacto').value = servicio.contacto;
+					document.getElementById('activoServicio').checked = servicio.activo;
+					
+					// Asegurarse que todos los campos estén habilitados
+					const inputs = document.getElementById('serviciosForm').querySelectorAll('input');
+					inputs.forEach(input => input.disabled = false);
+					
+					document.getElementById('servicio-modal-title').textContent = 'Editar servicio';
+					document.querySelector('#modal-container-servicio .btn-agregarFormulario').textContent = 'Guardar';
+					document.querySelector('#modal-container-servicio .btn-agregarFormulario').style.display = 'inline-block';
+					document.querySelector('#modal-container-servicio .btn-cancelarFormulario').textContent = 'Cancelar';
+					
+					modal.style.display = 'flex';
+				}
+				
+				function selectServicioRow(index) {
+				
+					if (selectedServicioRow === index) {
+						selectedServicioRow = -1;
+					} else {
+						selectedServicioRow = index;
+					}
+					
+					renderTableServicios();
+				}
+
+				function updateServiciosBreadcrumb() {
+					const hasSelection = selectedServicioRow >= 0;
+					
+					const areaBtn = document.getElementById('breadcrumb-area-btn');
+					if (areaBtn) {
+						if (hasSelection) {
+							areaBtn.classList.remove('disabled');
+							areaBtn.classList.add('clickable');
+							areaBtn.setAttribute('onclick', 'navigateToAreaFisica()');
+						} else {
+							areaBtn.classList.add('disabled');
+							areaBtn.classList.remove('clickable');
+							areaBtn.removeAttribute('onclick');
+						}
+					}
+				}
+
+				function navigateToAreaFisica() {
+					if (selectedServicioRow < 0) {
+						alert('Por favor seleccione un servicio antes de continuar.');
+						return;
+					}
+					
+					currentServicioIndex = selectedServicioRow;
+					showAreaFisica(selectedServicioRow);
+				}
+				
+				// ===== FUNCIÓN CONTROL ÁREA FÍSICA =====
+				
+				function showAreaFisica(index) {
+					
+					//Asignar el index que recibe al servicio actual
+				    currentServicioIndex = index;
+					
+					//Extraer los datos de la institución actual
+				    const institution = configDataC[currentInstitutionIndex];
+					
+					//Extraer los datos de la sede actual
+					const sede = sedesData[institution.id][currentSedeIndex]
+					
+					//Extraer servicio actual
+					const service = serviciosData[sede.id][index];
+					
+					// Inicializar array de área física para este servicio si no existe
+                    if (!areaData[service.id]) {
+                     areaData[service.id] = [];
+                    }
+					
+					// Ocultar sección de servicios
+                    document.getElementById('servicios-section').style.display = 'none';
+    
+                    // Mostrar y configurar sección de área física
+                    const areaSection = document.getElementById('areaF-section');
+                    areaSection.style.display = 'block';
+    
+                    // Generar el contenido de la sección de área física
+                    generateAreaFContent(institution, sede, service);
+                }
+				
+				// ===== FUNCIÓN DISEÑO SECCIÓN ÁREA FÍSICA =====
+
+                function generateAreaFContent(institution, sede, service) {
+    
+					// Obtiene el contenedor de la sección área física
+					const areaSection = document.getElementById('areaF-section');
+					
+					areaSection.innerHTML = `
+						<section class="fade-in">
+							<!-- Navegación de breadcrumb -->
+							<div class="breadcrumb-container">
+								<span class="breadcrumb-item" onclick="backToInstituciones()">
+									<i class="fas fa-building" style="margin-right: 8px;"></i>
+									Institución
+								</span>
+								<span class="breadcrumb-separator">›</span>
+								<span class="breadcrumb-item" onclick="backToSedes()">
+									<i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
+									Sedes
+								</span>
+								<span class="breadcrumb-separator">›</span>
+								<span class="breadcrumb-item" onclick="backToServices()">
+									<i class="fas fa-concierge-bell" style="margin-right: 8px;"></i>
+									Servicios
+								</span>
+								<span class="breadcrumb-separator">›</span>
+								<span class="breadcrumb-item active">
+									<i class="fas fa-layer-group" style="margin-right: 8px;"></i>
+									Área física
+								</span>
+							</div>
+							
+							<!-- Nombre de la institución y sede -->
+							<h3 style="color: var(--mysiss-purple); font-size: 1.3rem; margin-bottom: 2rem;">
+								${institution.nombre} / ${sede.nombre} / ${service.nombre}
+							</h3>
+							
+							<!-- Contenedor de la tabla de área física -->
+							<div class="table-container">
+								<div id="tableContentAreaF">
+									<!-- Estado inicial: sin datos -->
+									<div class="empty-state">
+										No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+									</div>
+								</div>
+							</div>
+							
+							<div class="AgregarCampos">
+								<!-- Botón para agregar área física -->
+								<button type="button" class="btn-agregar" onclick="openAreaModal()">Agregar</button>
+							</div>
+							
+							<!-- Modal para agregar/editar área física -->
+							<div class="modal-container" id="modal-container-areaF">
+								<div class="modal-content" id="modal-content-areaF">
+									<h2 class="container-title" id="areaF-modal-title">Agregar Área Física</h2>
+									<form id="areaForm">
+										<div class="form-gridCampos">
+											<div class="form-group">
+												<label for="codigoAreaF">Código</label>
+												<input type="text" id="codigoAreaF" name="codigoAreaF" required>
+											</div>
+											<div class="form-group">
+												<label for="nombreAreaF">Nombre</label>
+												<input type="text" id="nombreAreaF" name="nombreAreaF" required>
+											</div>
+											<div class="form-groupCheck">
+												<div class="column-groupCheck">
+													<label for="activoAreaF">Activo</label>
+													<input type="checkbox" id="activoAreaF" name="activoAreaF" checked>
+												</div>
+											</div>
+										</div>
+										<button type="submit" class="btn-agregarFormulario">Agregar</button>
+										<button type="button" class="btn-cancelarFormulario" onclick="closeAreaModal()">Cancelar</button>
+										<span class='close' onclick="closeAreaModal()">×</span>
+									</form>
+								</div>
+							</div>
+						</section>
+					`;
+					
+					// Configurar evento del formulario
+					const areaForm = document.getElementById('areaForm');
+					areaForm.addEventListener('submit', handleSubmitAreaF);
+					
+					// Renderizar tabla de área física
+					renderTableAreaF();
+				}
+				
+				// ===== RENDERIZAR TABLA ÁREA FÍSICA =====
+
+				function renderTableAreaF() {
+					
+					const institution = configDataC[currentInstitutionIndex];
+					const sede = sedesData[institution.id][currentSedeIndex];
+					const service = serviciosData[sede.id][currentServicioIndex];
+					const tableContent = document.getElementById('tableContentAreaF');
+					const areaF = areaData[service.id] || [];
+					
+					if (areaF.length === 0) {
+						tableContent.innerHTML = `
+							<div class="empty-state">
+								No hay datos registrados. Haga clic en "Agregar" para crear un nuevo registro.
+							</div>
+						`;
+						return;
+					}
+					
+					let tableHTML = `
+						<table class="data-table">
+							<thead>
+								<tr>
+									<th>Código</th>
+									<th>Nombre</th>
+									<th>Activo</th>
+									<th>Acciones</th>
+								</tr>
+							</thead>
+							<tbody>
+					`;
+					
+					areaF.forEach((area, index) => {
+						tableHTML += `
+							<tr>
+								<td>${area.codigo}</td>
+								<td>${area.nombre}</td>
+								<td>
+									<input type="checkbox" ${area.activo ? 'checked' : ''} disabled>
+								</td>
+								<td>
+									<button class="btn-action btn-edit" onclick="editAreaF(${index})">Editar</button>
+								</td>
+							</tr>
+						`;
+					});
+					
+					tableHTML += `
+							</tbody>
+						</table>
+					`;
+					
+					tableContent.innerHTML = tableHTML;
+				}
+				
+				// ===== FUNCIÓN PARA VOLVER A SECCIÓN SEDES =====
+
+                function backToServices() {
+    
+					// Ocultar sección de área física
+					document.getElementById('areaF-section').style.display = 'none';
+					
+					// Mostrar sección de servicios
+					document.getElementById('servicios-section').style.display = 'block';
+					
+					// Resetear índice de servicio actual
+					currentServicioIndex = -1;
+					
+					// Resetear índice de edición de área física
+					editingIndexServicio = -1;
+					
+					// Resetear selección de servicios
+					selectedServicioRow = -1;
+					
+					// Re-renderizar
+					renderTableServicios();
+				}
+				
+				// ===== FUNCIÓN PRINCIPAL: AGREGAR/EDITAR REGISTRO SECCIÓN SERVICIOS =====
+
+				function handleSubmitAreaF(e) {
+					
+					e.preventDefault();
+					
+					const institution = configDataC[currentInstitutionIndex];
+					const sede = sedesData[institution.id][currentSedeIndex];
+					const service = serviciosData[sede.id][currentServicioIndex];
+					const formData = new FormData(e.target);
+					
+					// Obtener el código ingresado
+					const codigoIngresado = formData.get('codigoAreaF').trim();
+					
+					const areaF = areaData[service.id] || [];
+					const codigoExiste = areaF.some((area, index) => {
+						// Si estamos editando, excluimos el área actual de la validación
+						if (editingIndexAfisica >= 0 && index === editingIndexAfisica) {
+							return false;
+						}
+
+						// Comparamos sin distinguir mayúsculas/minúsculas
+						return area.codigo.toLowerCase() === codigoIngresado.toLowerCase();
+					});
+					
+					// Si el código ya existe, mostrar alerta y detener el proceso
+					if (codigoExiste) {
+						alert('El código del área física "' + codigoIngresado + '" ya está registrado. Por favor ingrese un código diferente.');
+						return;
+					}
+					
+					const newArea = {
+						codigo: formData.get('codigoAreaF'),
+						nombre: formData.get('nombreAreaF'),
+						activo: document.getElementById('activoAreaF').checked,
+						id: Date.now()
+					};
+					
+					if (editingIndexAfisica >= 0) {
+						// MODO EDICIÓN
+						newArea.id = areaData[service.id][editingIndexAfisica].id;
+						areaData[service.id][editingIndexAfisica] = newArea;
+						editingIndexAfisica = -1;
+					} else {
+						// MODO AGREGAR
+						areaData[service.id].push(newArea);
+					}
+					
+					renderTableAreaF();
+					closeAreaModal();
+				}
+				
+				// ===== FUNCIONES MODAL ÁREA FÍSICA =====
+
+				function openAreaModal() {
+					
+					const modal = document.getElementById('modal-container-areaF');
+					const areaForm = document.getElementById('areaForm');
+					
+					areaForm.reset();
+					editingIndexAfisica = -1;
+					
+					document.getElementById('areaF-modal-title').textContent = 'Agregar área física';
+					document.querySelector('#modal-container-areaF .btn-agregarFormulario').textContent = 'Agregar';
+					document.querySelector('#modal-container-areaF .btn-agregarFormulario').style.display = 'inline-block';
+					document.querySelector('#modal-container-areaF .btn-cancelarFormulario').textContent = 'Cancelar';
+					
+					// Habilitar todos los campos
+					const inputs = areaForm.querySelectorAll('input');
+					inputs.forEach(input => input.disabled = false);
+					
+					modal.style.display = 'flex';
+				}
+				
+				
+				function closeAreaModal() {
+					
+					const modal = document.getElementById('modal-container-areaF');
+					const areaForm = document.getElementById('areaForm');
+					
+					modal.style.display = 'none';
+					editingIndexAfisica = -1;
+					
+					document.getElementById('areaF-modal-title').textContent = 'Agregar área física';
+					document.querySelector('#modal-container-areaF .btn-agregarFormulario').textContent = 'Agregar';
+					document.querySelector('#modal-container-areaF .btn-agregarFormulario').style.display = 'inline-block';
+					document.querySelector('#modal-container-areaF .btn-cancelarFormulario').textContent = 'Cancelar';
+					
+					const inputs = areaForm.querySelectorAll('input');
+					inputs.forEach(input => input.disabled = false);
+					
+					areaForm.reset();
+				}
+				
+				// ===== FUNCIÓN EDITAR ÁREA FÍSICA =====
+
+				function editAreaF(index) {
+					
+					const institution = configDataC[currentInstitutionIndex];
+					const sede = sedesData[institution.id][currentSedeIndex];
+					const servicio = serviciosData[sede.id][currentServicioIndex];
+					const areaF = areaData[servicio.id] [index];
+					const modal = document.getElementById('modal-container-areaF');
+					
+					editingIndexAfisica = index;
+					
+					document.getElementById('codigoAreaF').value = areaF.codigo;
+					document.getElementById('nombreAreaF').value = areaF.nombre;
+					document.getElementById('activoAreaF').checked = areaF.activo;
+					
+					// Asegurarse que todos los campos estén habilitados
+					const inputs = document.getElementById('areaForm').querySelectorAll('input');
+					inputs.forEach(input => input.disabled = false);
+					
+					document.getElementById('areaF-modal-title').textContent = 'Editar área física';
+					document.querySelector('#modal-container-areaF .btn-agregarFormulario').textContent = 'Guardar';
+					document.querySelector('#modal-container-areaF .btn-agregarFormulario').style.display = 'inline-block';
+					document.querySelector('#modal-container-areaF .btn-cancelarFormulario').textContent = 'Cancelar';
+					
+					modal.style.display = 'flex';
+				}
+				
+            </script>
+        </body>
+    </html>

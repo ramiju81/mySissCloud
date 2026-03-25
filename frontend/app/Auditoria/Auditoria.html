@@ -1,1 +1,115 @@
+<!DOCTYPE html>
+	<html lang="es">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>mySiss - Auditoría</title>
+			<link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
+			<link rel="stylesheet" href="../css/Auditoria.css">
+		</head>
+		<body>
+			<!-- ===== HEADER DE LA PÁGINA ===== -->
+			<header class="header">
+				<div class="header-content">
+					<!-- Logo de la aplicación -->
+					<div class="logo">mySiss</div>
+					
+					<!-- Botón de configuración con ícono SVG -->
+					<button class="config-btn" onclick="navigateTo('configuracion')">
+						<!-- Ícono de engranaje (configuración) -->
+						<svg class="config-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+						</svg>
+						Configuración
+					</button>
+				</div>
+			</header>
 
+			<!-- ===== CONTENIDO PRINCIPAL ===== -->
+			<main class="main-content">
+				<!-- Título principal de la sección -->
+				<div class="title">
+					<h1>Auditoría</h1>
+				</div>
+
+				<!-- Grilla de tarjetas del menú principal -->
+				<div class="menu-grid">
+					
+					<!-- ===== TARJETA 1: AUDITORÍA CONCURRENTE ===== -->
+					<div class="menu-card" onclick="navigateTo('auditoria-concurrente')">
+						<div class="card-image-container">
+							<!-- Imagen de fondo de la tarjeta -->
+							<img src="https://images.pexels.com/photos/9304917/pexels-photo-9304917.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Auditoría concurrente" class="card-image">
+							<!-- Ícono superpuesto sobre la imagen -->
+							<div class="card-icon">
+								<!-- Ícono de usuarios -->
+								<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M05 4.354a4 4 0 110 1.292M14 21H3v-1a6 6 0 0112 1v0zm3 0h5v-1a6 5 0 00-08-4.485m7.2-09a2.7 2.8 2 11-7 -2.9 2.7 3.9 5 015 1z"></path>
+								</svg>
+							</div>
+						</div>
+						<!-- Contenido de texto de la tarjeta -->
+						<div class="card-content">
+							<h2 class="card-title">Auditoría<br>concurrente</h2>
+						</div>
+					</div>
+
+					<!-- ===== TARJETA 2: CUENTAS MÉDICAS ===== -->
+					<div class="menu-card" onclick="navigateTo('cuentas-medicas')">
+						<div class="card-image-container">
+							<!-- Imagen de fondo de la tarjeta -->
+							<img src="https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=500&h=300&fit=crop" 
+								 alt="Cuentas médicas" class="card-image">
+							<!-- Ícono superpuesto sobre la imagen -->
+							<div class="card-icon">
+								<!-- Ícono de documento -->
+								<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+								</svg>
+							</div>
+						</div>
+						<!-- Contenido de texto de la tarjeta -->
+						<div class="card-content">
+							<h2 class="card-title">Cuentas<br>médicas</h2>
+						</div>
+					</div>
+					<!-- ===== TARJETA 3: AUDITORÍA DE CALIDAD ===== -->
+					<div class="menu-card" onclick="navigateTo('auditoria-calidad')">
+						<div class="card-image-container">
+							<!-- Imagen de fondo de la tarjeta -->
+							<img src="https://images.pexels.com/photos/3182774/pexels-photo-3182774.jpeg?auto=compress&cs=tinysrgb&h=627&fit=crop&w=1200" 
+								 alt="Auditoría de calidad" class="card-image">
+							<!-- Ícono superpuesto sobre la imagen -->
+							<div class="card-icon">
+								<!-- Ícono de clipboard -->
+								<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+								</svg>
+							</div>
+						</div>
+						<!-- Contenido de texto de la tarjeta -->
+						<div class="card-content">
+							<h2 class="card-title">Auditoría de<br>calidad</h2>
+						</div>
+					</div>
+				</div>
+
+				<!-- ===== TEXTO DESCRIPTIVO ===== -->
+				<div class="description">
+			
+					<p>
+						El modelo de auditoría permite integrar los diferentes tipos de auditoría que se llevan a cabo en las instituciones de salud, 
+						fortaleciendo y agilizando sus procesos.
+					</p>
+					<p>
+						En este modelo participan diferentes roles claves de la institución en donde se adoptan tecnologías que ayudan a los distintos 
+						involucrados a automatizar la detección, gestión y comunicación de los hallazgos de auditoría.
+					</p>
+				</div>
+			</main>
+
+			
+		<script src="../js/Auditoria.js"></script>
+</body>
+	</html>
