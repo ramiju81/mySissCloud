@@ -1,0 +1,16 @@
+; ============================================================
+; mySissCloud - Solo compilar clases
+; Uso: cat scripts/compile.osc | iris session IRIS
+; ============================================================
+
+zn "CNET"
+
+Write "Compilando clases mySiss...",!
+Set sc = $system.OBJ.LoadDir("/opt/irisapp/src", "ck", .errors, 1)
+If $$$ISERR(sc) {
+    Write "ERROR: ",$system.Status.GetErrorText(sc),!
+} Else {
+    Write "Compilacion completada OK",!
+}
+
+halt

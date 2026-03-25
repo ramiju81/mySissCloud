@@ -1,0 +1,63 @@
+; ============================================================
+; mySissCloud - Inicialización completa
+; Uso: cat scripts/init.osc | iris session IRIS
+; ============================================================
+
+; Arrancar en USER (siempre existe), luego configuramos CNET
+zn "USER"
+
+; Compilar primero en USER
+Write "Compilando clases en USER...",!
+Set sc = $system.OBJ.LoadDir("/opt/irisapp/src", "ck", .errors, 1)
+If $$$ISERR(sc) {
+    Write "ERROR compilando: ",$system.Status.GetErrorText(sc),!
+} Else {
+    Write "Compilacion OK",!
+}
+
+; Configurar WebApp (crea namespace CNET si no existe)
+Write !,"Configurando WebApp...",!
+Set sc = ##class(mySiss.Config.WebApp).Run()
+If $$$ISERR(sc) {
+    Write "ERROR WebApp: ",$system.Status.GetErrorText(sc),!
+}
+
+; Cambiar a CNET si fue creado, sino usar USER
+Set ns = $Get(^mySiss.Namespace, "USER")
+Write !,"Usando namespace: "_ns,!
+zn ns
+
+; Recompilar en el namespace correcto
+Write !,"Recompilando en "_ns_"...",!
+Set sc = $system.OBJ.LoadDir("/opt/irisapp/src", "ck", .errors, 1)
+If $$$ISERR(sc) {
+    Write "ERROR recompilando: ",$system.Status.GetErrorText(sc),!
+} Else {
+    Write "Recompilacion OK",!
+}
+
+; Crear tablas
+Write !,"Inicializando base de datos...",!
+Set sc = ##class(mySiss.Config.DBInit).Run()
+If $$$ISERR(sc) {
+    Write "ERROR DBInit: ",$system.Status.GetErrorText(sc),!
+} Else {
+    Write "DBInit OK",!
+}
+
+; Cargar datos semilla
+Write !,"Cargando datos semilla...",!
+Set sc = ##class(mySiss.Config.Seed).Run()
+If $$$ISERR(sc) {
+    Write "ERROR Seed: ",$system.Status.GetErrorText(sc),!
+} Else {
+    Write "Seed OK",!
+}
+
+Write !,"============================================",!
+Write " mySissCloud inicializado correctamente",!
+Write " Login: ABAP  /  Password: Admin2025*",!
+Write " URL: http://localhost:52773/csp/mySissCloud/mySiss_Cloud_Login.html",!
+Write "============================================",!
+
+halt

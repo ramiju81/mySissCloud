@@ -1,0 +1,380 @@
+Listado de rutas de carpetas
+El número de serie del volumen es 000001BC 3C71:32A3
+C:\MYSISSCLOUD
+|   .env
+|   .gitignore
+|   docker-compose.yml
+|   estructura_mySissCloud.txt
+|   manage.ps1
+|   manage.sh
+|   README.md
+|   
++---.devcontainer
+|   |   devcontainer.json
+|   |   
+|   \---.devcontainer
+|           devcontainer.json
+|           
++---.vscode
+|       settings.json
+|       
++---archivos actualizacion readme
+|       AUDITORIA_TECNICA_2026-03-25.md
+|       ENTREGA1_1_BASE_TECNICA.md
+|       ENTREGA1_REORGANIZACION_TECNICA.md
+|       ENTREGA2_SEGURIDAD_IMPLEMENTACION.md
+|       ENTREGA3_FRONTEND_REORGANIZACION.md
+|       ENTREGA4_FRONTEND_ESTANDARDIZACION.md
+|       ENTREGA5_CORRECCION_CENTRALIZACION_FRONTEND.md
+|       IMPLEMENTACION.md
+|       MIGRACION_HTML.md
+|       TROUBLESHOOTING.md
+|       
++---db
+|       mySiss_Cloud.sql
+|       
++---frontend
+|   |   localstorage.html
+|   |   mysiss_cloud.html
+|   |   mySiss_Cloud_Login.html
+|   |   
+|   \---app
+|       +---assets
+|       |   +---css
+|       |   |       Auditoria.css
+|       |   |       honorarios.css
+|       |   |       mySiss_Cloud_Login.css
+|       |   |       mySiss_WebService.css
+|       |   |       radicacion.css
+|       |   |       seg_gestion_usuario.css
+|       |   |       
+|       |   +---img
+|       |   |       glosas.png
+|       |   |       honorarios.png
+|       |   |       
+|       |   \---js
+|       |           app.js
+|       |           Auditoria.js
+|       |           honorarios.js
+|       |           mySiss_Cloud_Login.js
+|       |           mySiss_WebService.js
+|       |           radicacion.js
+|       |           seg_gestion_usuario.js
+|       |           
+|       +---Auditoria
+|       |   |   Auditoria.html
+|       |   |   
+|       |   +---Auditoria
+|       |   |   |   Auditoria.html
+|       |   |   |   
+|       |   |   +---Concurrente
+|       |   |   |       Aconcurrente-Hallazgos.html
+|       |   |   |       Aconcurrente-HallazgosH.html
+|       |   |   |       Aconcurrente-HallazgosP.html
+|       |   |   |       Aconcurrente-Informe.html
+|       |   |   |       Aconcurrente-InformeH.html
+|       |   |   |       Aconcurrente-Placcion.html
+|       |   |   |       Aconcurrente-PlaccionH.html
+|       |   |   |       Aconcurrente-Resultados.html
+|       |   |   |       Aconcurrente-Validaciones.html
+|       |   |   |       Aconcurrente.html
+|       |   |   |       
+|       |   |   +---Configuracion
+|       |   |   |       Configuracion - campos.html
+|       |   |   |       Configuracion - general.html
+|       |   |   |       Configuracion.html
+|       |   |   |       ConfiguracionN - campos.html
+|       |   |   |       ConfiguracionN - institucion.html
+|       |   |   |       ConfiguracionN - RPago.html
+|       |   |   |       ConfiguracionN.html
+|       |   |   |       
+|       |   |   +---Cuentas medicas
+|       |   |   |       AcuentasM-CarConvenios.html
+|       |   |   |       AcuentasM-ConfConvenios.html
+|       |   |   |       AcuentasM-EstCuenta.html
+|       |   |   |       AcuentasM-EstCuentaD.html
+|       |   |   |       AcuentasM-Gauditoria.html
+|       |   |   |       AcuentasM-GauditoriaA.html
+|       |   |   |       AcuentasM-GauditoriaP.html
+|       |   |   |       AcuentasM-GauditoriaS.html
+|       |   |   |       AcuentasM-Gestcorrec.html
+|       |   |   |       AcuentasM-GestcorrecA.html
+|       |   |   |       AcuentasM-Resultados.html
+|       |   |   |       AcuentasM-Validaciones.html
+|       |   |   |       AcuentasM.html
+|       |   |   |       Libro1 - sin error.xlsx
+|       |   |   |       Libro1.xlsx
+|       |   |   |       
+|       |   |   \---rol lider proceso
+|       |   |           Aconcurrente-PlaccionHLP.html
+|       |   |           Aconcurrente-PlaccionLP.html
+|       |   |           AconcurrenteLP.html
+|       |   |           AcuentasM-GestcorrecAL.html
+|       |   |           AcuentasM-GestcorrecL.html
+|       |   |           AcuentasM-ResultadosL.html
+|       |   |           AcuentasMl.html
+|       |   |           AuditoriaLP.html
+|       |   |           
+|       |   +---Concurrente
+|       |   |       Aconcurrente-Hallazgos.html
+|       |   |       Aconcurrente-HallazgosH.html
+|       |   |       Aconcurrente-HallazgosP.html
+|       |   |       Aconcurrente-Informe.html
+|       |   |       Aconcurrente-InformeH.html
+|       |   |       Aconcurrente-Placcion.html
+|       |   |       Aconcurrente-PlaccionH.html
+|       |   |       Aconcurrente-Resultados.html
+|       |   |       Aconcurrente-Validaciones.html
+|       |   |       Aconcurrente.html
+|       |   |       
+|       |   +---Configuracion
+|       |   |       Configuracion - campos.html
+|       |   |       Configuracion - general.html
+|       |   |       Configuracion.html
+|       |   |       ConfiguracionN - campos.html
+|       |   |       ConfiguracionN - institucion.html
+|       |   |       ConfiguracionN - RPago.html
+|       |   |       ConfiguracionN.html
+|       |   |       
+|       |   \---Cuentas medicas
+|       |           AcuentasM-CarConvenios.html
+|       |           AcuentasM-ConfConvenios.html
+|       |           AcuentasM-EstCuenta.html
+|       |           AcuentasM-EstCuentaD.html
+|       |           AcuentasM-Gauditoria.html
+|       |           AcuentasM-GauditoriaA.html
+|       |           AcuentasM-GauditoriaP.html
+|       |           AcuentasM-GauditoriaS.html
+|       |           AcuentasM-Gestcorrec.html
+|       |           AcuentasM-GestcorrecA.html
+|       |           AcuentasM-Resultados.html
+|       |           AcuentasM-Validaciones.html
+|       |           AcuentasM.html
+|       |           Libro1 - sin error.xlsx
+|       |           
+|       +---Glosas
+|       |   |   actualizar_rad.html
+|       |   |   cargue.html
+|       |   |   cargue_data.html
+|       |   |   carg_obj.html
+|       |   |   conciliacion.html
+|       |   |   Configuracion.html
+|       |   |   conr_obj.html
+|       |   |   conr_obj_n.html
+|       |   |   consultar_fact.html
+|       |   |   cons_obj.html
+|       |   |   cont_obj.html
+|       |   |   con_dev.html
+|       |   |   con_glo.html
+|       |   |   devolucion.html
+|       |   |   gestion.html
+|       |   |   informe.html
+|       |   |   informes1.html
+|       |   |   informes2.html
+|       |   |   p.html
+|       |   |   radicacion.html
+|       |   |   radicar_fact.html
+|       |   |   regr_asig.html
+|       |   |   reg_dev.html
+|       |   |   reporte.html
+|       |   |   reportes.html
+|       |   |   reportes1.html
+|       |   |   reportes2.html
+|       |   |   resultados_rad.html
+|       |   |   unif_gestion.html
+|       |   |   uni_gestion.html
+|       |   |   Z_Ingenier.html
+|       |   |   
+|       |   +---Doc
+|       |   |       mySiss. Iniciativas Gesti#U00f3n facturas y glosas_Sol. 2916_Radicaci#U00f3n de facturas_V2.pdf
+|       |   |       mySiss. Iniciativas Gesti#U00f3n facturas y glosas_Sol. 2917_Devoluci#U00f3n de facturas_V1.pdf
+|       |   |       mySiss. Iniciativas Gesti#U00f3n facturas y glosas_Sol. 2918_Cargue de objeciones_V1.pdf
+|       |   |       mySiss. Iniciativas Gesti#U00f3n facturas y glosas_Sol. 2920_Conciliaci#U00f3n de objeciones_V1.pdf
+|       |   |       mySiss. Iniciativas Gesti#U00f3n facturas y glosas_Sol. 2921_Indicadores gesti#U00f3n de facturas y glosas_V1.pdf
+|       |   |       mySiss. Iniciativas Gestión facturas y glosas_Sol. 2916_Radicación de facturas_V2.pdf
+|       |   |       mySiss. Iniciativas Gestión facturas y glosas_Sol. 2917_Devolución de facturas_V1.pdf
+|       |   |       mySiss. Iniciativas Gestión facturas y glosas_Sol. 2918_Cargue de objeciones_V1.pdf
+|       |   |       mySiss. Iniciativas Gestión facturas y glosas_Sol. 2920_Conciliación de objeciones_V1.pdf
+|       |   |       mySiss. Iniciativas Gestión facturas y glosas_Sol. 2921_Indicadores gestión de facturas y glosas_V1.pdf
+|       |   |       mySiss.Iniciativas Gesti#U00f3n facturas y glosas _Sol. 2919_Gesti#U00f3n de objeciones y glosas_V1.pdf
+|       |   |       mySiss.Iniciativas Gesti#U00f3n facturas y glosas_Sol. 2922_Filtros_V1.pdf
+|       |   |       mySiss.Iniciativas Gestión facturas y glosas _Sol. 2919_Gestión de objeciones y glosas_V1.pdf
+|       |   |       mySiss.Iniciativas Gestión facturas y glosas_Sol. 2922_Filtros_V1.pdf
+|       |   |       
+|       |   \---Documentos
+|       |       |   Factura WS.xlsx
+|       |       |   FEV _800150244_A001_90003577.pdf
+|       |       |   FEV _800150244_A001_90007472.pdf
+|       |       |   FEV_80150244_A001_90007491.pdf
+|       |       |   FEV_80150244_A001_90007512.pdf
+|       |       |   PDX_800150244_A001_90007472.pdf
+|       |       |   PDX_800150244_A001_90007577.pdf
+|       |       |   PDX_80150244_A001_90007491.pdf
+|       |       |   PDX_80150244_A001_90007512.pdf
+|       |       |   Plantilla cargue.xlsx
+|       |       |   plantilla_configuracion.xlsx
+|       |       |   plantilla_maestros.xlsx
+|       |       |   plantilla_unica_mysiss.xlsx
+|       |       |   RELACION_RADICACION_FACTURACION_BN.pdf
+|       |       |   ~$LACION_RADICACION_FACTURACION_BN.pdf
+|       |       |   
+|       |       \---img
+|       |               ant_rad_fact.png
+|       |               carg_obj.png
+|       |               conc_obj.png
+|       |               dev_fact.png
+|       |               gest_obj.png
+|       |               Informes.png
+|       |               rad_fact.png
+|       |               Thumbs.db
+|       |               
+|       +---Honorarios
+|       |   |   cargue.html
+|       |   |   cargueHIS.html
+|       |   |   Configuracion.html
+|       |   |   ConfiguracionHIS.html
+|       |   |   contratos.html
+|       |   |   contratosHIS.html
+|       |   |   honorarios.html
+|       |   |   reportes_liq.html
+|       |   |   reportes_med.html
+|       |   |   validacion_liq.html
+|       |   |   validacion_med.html
+|       |   |   
+|       |   \---files
+|       |           2.pdf
+|       |           descarga_pdf_hon.pdf
+|       |           descarga_xlsx_hon.xlsx
+|       |           extract.xlsx
+|       |           extracto.jpg
+|       |           extracto.png
+|       |           extract_med.pdf
+|       |           plantilla_datos_maestos.xlsx
+|       |           reporte_liq.pdf
+|       |           reporte_liq.xlsx
+|       |           Reporte_Servicios.xlsx
+|       |           Thumbs.db
+|       |           
+|       +---Login
+|       |       mySiss_Cloud_Login.html
+|       |       
+|       +---Seguridad
+|       |   |   conf_bas_1.html
+|       |   |   conf_func_1.html
+|       |   |   conf_func_3.html
+|       |   |   conf_rol.html
+|       |   |   conf_rol1.html
+|       |   |   conf_role.html
+|       |   |   conf_role1.html
+|       |   |   conf_usua_1.html
+|       |   |   conf_usua_4.html
+|       |   |   seg_clientes.html
+|       |   |   seg_gestion_usuario.html
+|       |   |   
+|       |   \---Plantillas
+|       |           Plantilla cargue Funcionalidades.xlsx
+|       |           Plantilla cargue Rol.xlsx
+|       |           Plantilla cargue Usuario_Rol.xlsx
+|       |           
+|       +---services
+|       |       api.js
+|       |       auth.js
+|       |       config.js
+|       |       session.js
+|       |       
+|       \---WS
+|               mySissWSEjecucion.html
+|               mySissWSIntegracion.html
+|               mySissWSMaster.html
+|               
++---scripts
+|       compile.osc
+|       init.osc
+|       
+\---src
+    \---mySiss
+        +---Config
+        |   |   DBInit.cls
+        |   |   REVIEW_NOTES.txt
+        |   |   Seed.cls
+        |   |   WebApp.cls
+        |   |   
+        |   +---AU
+        |   |       CabeHallaz.cls
+        |   |       CampLista.cls
+        |   |       Campo.cls
+        |   |       CCCabeHalla.cls
+        |   |       CCPoscHall.cls
+        |   |       CMCabecera.cls
+        |   |       CMPosicion.cls
+        |   |       Convenio.cls
+        |   |       ConvServ.cls
+        |   |       ListasPosi.cls
+        |   |       Opcion.cls
+        |   |       PosiHallaz.cls
+        |   |       SedeServicio.cls
+        |   |       ValidaAudCC.cls
+        |   |       Validacion.cls
+        |   |       
+        |   +---GL
+        |   |       Auditores.cls
+        |   |       Conciliacion.cls
+        |   |       Devolucion.cls
+        |   |       DiasRes.cls
+        |   |       EstadoFact.cls
+        |   |       Objeciones.cls
+        |   |       Radic.cls
+        |   |       Radicacion.cls
+        |   |       RelMotD.cls
+        |   |       
+        |   +---HO
+        |   |       AsegTar.cls
+        |   |       Condicion.cls
+        |   |       Contrato.cls
+        |   |       DatoContac.cls
+        |   |       DatosResp.cls
+        |   |       Descuento.cls
+        |   |       Estatus.cls
+        |   |       Liquida.cls
+        |   |       Medico.cls
+        |   |       Periodo.cls
+        |   |       Preliquida.cls
+        |   |       SecEstatus.cls
+        |   |       Tarifa.cls
+        |   |       Valida.cls
+        |   |       
+        |   +---MS
+        |   |       Asegur.cls
+        |   |       Cliente.cls
+        |   |       ClienteMod.cls
+        |   |       ClienteModEstado.cls
+        |   |       
+        |   +---SG
+        |   |       Actividad.cls
+        |   |       Celular.cls
+        |   |       Email.cls
+        |   |       Funcion.cls
+        |   |       Modulo.cls
+        |   |       Motivo.cls
+        |   |       Passw.cls
+        |   |       Person.cls
+        |   |       PerValidez.cls
+        |   |       Rol.cls
+        |   |       RolModulo.cls
+        |   |       RolUser.cls
+        |   |       SeedSuperUser.cls
+        |   |       User.cls
+        |   |       
+        |   \---WS
+        |           Asegurador.cls
+        |           Casos.cls
+        |           DocClin.cls
+        |           Factura.cls
+        |           Insumos.cls
+        |           Medto.cls
+        |           Paciente.cls
+        |           Servicios.cls
+        |           
+        \---conn
+                API.cls
+                
