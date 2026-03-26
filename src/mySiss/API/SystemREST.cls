@@ -17,6 +17,20 @@ XData UrlMap
   <Route Url="/auth/context" Method="GET" Call="AuthContext" />
   <Route Url="/auth/resolve-route" Method="GET" Call="ResolveRoute" />
   <Route Url="/auth/authorize-module/:slug" Method="GET" Call="AuthorizeModule" />
+  <Route Url="/security/users" Method="GET" Call="ListSecurityUsers" />
+  <Route Url="/security/users" Method="POST" Call="CreateSecurityUser" />
+  <Route Url="/security/users/:id" Method="GET" Call="GetSecurityUser" />
+  <Route Url="/security/users/:id" Method="PUT" Call="UpdateSecurityUser" />
+  <Route Url="/security/users/:id/status" Method="PUT" Call="UpdateSecurityUserStatus" />
+  <Route Url="/security/roles" Method="GET" Call="ListSecurityRoles" />
+  <Route Url="/security/roles" Method="POST" Call="CreateSecurityRole" />
+  <Route Url="/security/roles/:id" Method="GET" Call="GetSecurityRole" />
+  <Route Url="/security/roles/:id" Method="PUT" Call="UpdateSecurityRole" />
+  <Route Url="/security/roles/:id/status" Method="PUT" Call="UpdateSecurityRoleStatus" />
+  <Route Url="/security/roles/:id/permissions" Method="GET" Call="GetSecurityRolePermissions" />
+  <Route Url="/security/roles/:id/permissions" Method="PUT" Call="UpdateSecurityRolePermissions" />
+  <Route Url="/security/catalog/clients" Method="GET" Call="SecurityClientsCatalog" />
+  <Route Url="/security/catalog/modules" Method="GET" Call="SecurityModulesCatalog" />
   <Route Url="/ms/clients" Method="GET" Call="ListClients" />
   <Route Url="/ms/clients" Method="POST" Call="CreateClient" />
   <Route Url="/ms/clients/:id" Method="PUT" Call="UpdateClient" />
@@ -210,6 +224,165 @@ ClassMethod GetModuleCatalog() As %Status
 {
     Set tData = ##class(mySiss.API.SystemService).GetModuleCatalog()
     Do ..WriteJSON({"success":1,"data":tData})
+    Quit $$$OK
+}
+
+ClassMethod RequireSecurityAdmin() As %Boolean
+{
+    If '##class(mySiss.API.SystemService).IsSecurityAdmin() {
+        Do ..WriteJSON({"success":0,"error":"No autorizado"}, 403)
+        Quit 0
+    }
+    Quit 1
+}
+
+ClassMethod ListSecurityUsers() As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Do ..WriteJSON({"success":1,"data":##class(mySiss.API.SystemService).ListSecurityUsers()})
+    Quit $$$OK
+}
+
+ClassMethod CreateSecurityUser() As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tRes = ##class(mySiss.API.SystemService).SaveSecurityUser(0, ..ReadJSONBody())
+    If +$Get(tRes.ok)'=1 {
+        Do ..WriteJSON({"success":0,"error":$Get(tRes.error)}, 400)
+        Quit $$$OK
+    }
+    Do ..WriteJSON({"success":1,"data":tRes}, 201)
+    Quit $$$OK
+}
+
+ClassMethod GetSecurityUser(id As %String) As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tData = ##class(mySiss.API.SystemService).GetSecurityUserDetail(+id)
+    If '$IsObject(tData) {
+        Do ..WriteJSON({"success":0,"error":"USER_NOT_FOUND"}, 404)
+        Quit $$$OK
+    }
+    Do ..WriteJSON({"success":1,"data":tData})
+    Quit $$$OK
+}
+
+ClassMethod UpdateSecurityUser(id As %String) As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tRes = ##class(mySiss.API.SystemService).SaveSecurityUser(+id, ..ReadJSONBody())
+    If +$Get(tRes.ok)'=1 {
+        Do ..WriteJSON({"success":0,"error":$Get(tRes.error)}, 400)
+        Quit $$$OK
+    }
+    Do ..WriteJSON({"success":1,"data":tRes})
+    Quit $$$OK
+}
+
+ClassMethod UpdateSecurityUserStatus(id As %String) As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tPayload = ..ReadJSONBody()
+    Set tSC = ##class(mySiss.API.SystemService).SetSecurityUserStatus(+id, +$Get(tPayload.active))
+    If $$$ISERR(tSC) {
+        Do ..WriteJSON({"success":0,"error":"STATUS_UPDATE_FAILED"}, 400)
+        Quit $$$OK
+    }
+    Do ..WriteJSON({"success":1})
+    Quit $$$OK
+}
+
+ClassMethod ListSecurityRoles() As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Do ..WriteJSON({"success":1,"data":##class(mySiss.API.SystemService).ListSecurityRoles()})
+    Quit $$$OK
+}
+
+ClassMethod CreateSecurityRole() As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tRes = ##class(mySiss.API.SystemService).SaveSecurityRole(0, ..ReadJSONBody())
+    If +$Get(tRes.ok)'=1 {
+        Do ..WriteJSON({"success":0,"error":$Get(tRes.error)}, 400)
+        Quit $$$OK
+    }
+    Do ..WriteJSON({"success":1,"data":tRes}, 201)
+    Quit $$$OK
+}
+
+ClassMethod GetSecurityRole(id As %String) As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tRoles = ##class(mySiss.API.SystemService).ListSecurityRoles()
+    For i=1:1:tRoles.%Size() {
+        If +$Get(tRoles.%Get(i).id_rol)=+id {
+            Do ..WriteJSON({"success":1,"data":tRoles.%Get(i)})
+            Quit $$$OK
+        }
+    }
+    Do ..WriteJSON({"success":0,"error":"ROLE_NOT_FOUND"}, 404)
+    Quit $$$OK
+}
+
+ClassMethod UpdateSecurityRole(id As %String) As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tRes = ##class(mySiss.API.SystemService).SaveSecurityRole(+id, ..ReadJSONBody())
+    If +$Get(tRes.ok)'=1 {
+        Do ..WriteJSON({"success":0,"error":$Get(tRes.error)}, 400)
+        Quit $$$OK
+    }
+    Do ..WriteJSON({"success":1,"data":tRes})
+    Quit $$$OK
+}
+
+ClassMethod UpdateSecurityRoleStatus(id As %String) As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tPayload = ..ReadJSONBody()
+    Set tSC = ##class(mySiss.API.SystemService).SetSecurityRoleStatus(+id, +$Get(tPayload.active))
+    If $$$ISERR(tSC) {
+        Do ..WriteJSON({"success":0,"error":"ROLE_STATUS_UPDATE_FAILED"}, 400)
+        Quit $$$OK
+    }
+    Do ..WriteJSON({"success":1})
+    Quit $$$OK
+}
+
+ClassMethod GetSecurityRolePermissions(id As %String) As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Do ..WriteJSON({"success":1,"data":##class(mySiss.API.SystemService).GetRolePermissions(+id)})
+    Quit $$$OK
+}
+
+ClassMethod UpdateSecurityRolePermissions(id As %String) As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Set tPayload = ..ReadJSONBody()
+    Set tPerms = $Get(tPayload.permissions)
+    If '$IsObject(tPerms) Set tPerms = []
+    Set tSC = ##class(mySiss.API.SystemService).SaveRolePermissions(+id, tPerms)
+    If $$$ISERR(tSC) {
+        Do ..WriteJSON({"success":0,"error":"ROLE_PERMISSIONS_UPDATE_FAILED"}, 400)
+        Quit $$$OK
+    }
+    Do ..WriteJSON({"success":1})
+    Quit $$$OK
+}
+
+ClassMethod SecurityClientsCatalog() As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Do ..WriteJSON({"success":1,"data":##class(mySiss.API.SystemService).ListSecurityClients()})
+    Quit $$$OK
+}
+
+ClassMethod SecurityModulesCatalog() As %Status
+{
+    If (..RequireSecurityAdmin()=0) { Quit $$$OK }
+    Do ..WriteJSON({"success":1,"data":##class(mySiss.API.SystemService).GetModuleCatalog()})
     Quit $$$OK
 }
 

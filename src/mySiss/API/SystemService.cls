@@ -130,8 +130,7 @@ ClassMethod GetDatabaseStatus() As %DynamicObject
             Do tStatus.%Set("message", "SQLITE_DB_PATH no configurado")
             Quit tStatus
         }
-        Set tSC = ##class(%File).NormalizeDirectory($Piece(tPath,"/",1,*-1), .tDir)
-        Set tExists = ##class(%File).Exists(tPath)
+                Set tExists = ##class(%File).Exists(tPath)
         If 'tExists {
             Set tFile=##class(%File).%New(tPath)
             Set tSC=tFile.Open("WSN")
@@ -372,6 +371,217 @@ ClassMethod NormalizeModuleSlug(pName As %String) As %String
     If n["mysiss" Quit "mysiss"
     If n["webservice" Quit ""
     Quit $ZStrip(n, "<>W")
+}
+
+ClassMethod IsSecurityAdmin() As %Boolean
+{
+    Quit (..IsSuperUser() || ..IsAdmin())
+}
+
+ClassMethod ListSecurityUsers() As %DynamicArray
+{
+    Set tArr = []
+    Set sql = "SELECT u.ID_user, u.Nombre_user, u.ID_Cliente, p.Nombre, p.Apellido, COALESCE(pv.status,'A') AS status, ru.ID_rol, r.Rol FROM mySiss_Config_SG.""User"" u LEFT JOIN mySiss_Config_SG.Person p ON p.ID_Person = u.ID_Person LEFT JOIN mySiss_Config_SG.RolUser ru ON ru.ID_user = u.ID_user LEFT JOIN mySiss_Config_SG.Rol r ON r.ID_rol = ru.ID_rol LEFT JOIN mySiss_Config_SG.PerValidez pv ON pv.ID_user = u.ID_user ORDER BY u.ID_user"
+    Set tStmt = ##class(%SQL.Statement).%New()
+    Set tRS = tStmt.%ExecDirect(, sql)
+    While tRS.%Next() {
+        Set tUserName = $Get(tRS.%Get("Nombre_user"))
+        Do tArr.%Push({
+            "id_user": +tRS.%Get("ID_user"),
+            "username": tUserName,
+            "full_name": $ZStrip($Get(tRS.%Get("Nombre"))_" "_$Get(tRS.%Get("Apellido")),"<>W"),
+            "id_cliente": +$Get(tRS.%Get("ID_Cliente")),
+            "status": $Select($Get(tRS.%Get("status"))="I":"INACTIVE",1:"ACTIVE"),
+            "id_rol": +$Get(tRS.%Get("ID_rol")),
+            "rol": $Get(tRS.%Get("Rol")),
+            "is_superuser": $Select($ZConvert(tUserName,"L")=$ZConvert(..Env("SUPERUSER_USERNAME","ramiju"),"L"):1,1:0),
+            "is_admin_base": $Select($ZConvert(tUserName,"L")=$ZConvert(..Env("ADMIN_USERNAME","mySiss"),"L"):1,1:0)
+        })
+    }
+    Quit tArr
+}
+
+ClassMethod GetSecurityUserDetail(pUserId As %Integer) As %DynamicObject
+{
+    Set tStmt = ##class(%SQL.Statement).%New()
+    Set sql = "SELECT TOP 1 u.ID_user, u.Nombre_user, u.ID_Cliente, u.ID_Person, u.ID_Password, p.Nombre, p.Apellido, COALESCE(pv.status,'A') AS status, ru.ID_rol, r.Rol FROM mySiss_Config_SG.""User"" u LEFT JOIN mySiss_Config_SG.Person p ON p.ID_Person = u.ID_Person LEFT JOIN mySiss_Config_SG.RolUser ru ON ru.ID_user = u.ID_user LEFT JOIN mySiss_Config_SG.Rol r ON r.ID_rol = ru.ID_rol LEFT JOIN mySiss_Config_SG.PerValidez pv ON pv.ID_user = u.ID_user WHERE u.ID_user = ?"
+    Set tRS = tStmt.%ExecDirect(, sql, pUserId)
+    If 'tRS.%Next() Quit {}
+    Set tUserName = $Get(tRS.%Get("Nombre_user"))
+    Quit {
+        "id_user": +tRS.%Get("ID_user"),
+        "username": tUserName,
+        "nombre": $Get(tRS.%Get("Nombre")),
+        "apellido": $Get(tRS.%Get("Apellido")),
+        "id_cliente": +$Get(tRS.%Get("ID_Cliente")),
+        "status": $Select($Get(tRS.%Get("status"))="I":"INACTIVE",1:"ACTIVE"),
+        "id_rol": +$Get(tRS.%Get("ID_rol")),
+        "rol": $Get(tRS.%Get("Rol")),
+        "is_superuser": $Select($ZConvert(tUserName,"L")=$ZConvert(..Env("SUPERUSER_USERNAME","ramiju"),"L"):1,1:0),
+        "is_admin_base": $Select($ZConvert(tUserName,"L")=$ZConvert(..Env("ADMIN_USERNAME","mySiss"),"L"):1,1:0)
+    }
+}
+
+ClassMethod SaveSecurityUser(pUserId As %Integer = 0, pPayload As %DynamicObject) As %DynamicObject
+{
+    Set tUsername = $Extract($ZStrip($Get(pPayload.username),"<>W"),1,60)
+    Set tNombre = $Extract($ZStrip($Get(pPayload.nombre),"<>W"),1,100)
+    Set tApellido = $Extract($ZStrip($Get(pPayload.apellido),"<>W"),1,100)
+    Set tPassword = $Extract($Get(pPayload.password),1,255)
+    Set tClientId = +$Get(pPayload.id_cliente)
+    Set tRolId = +$Get(pPayload.id_rol)
+
+    If tUsername="" Quit {"ok":0,"error":"USERNAME_REQUIRED"}
+
+    Set tExisting = +..Scalar("SELECT TOP 1 ID_user FROM mySiss_Config_SG.""User"" WHERE Nombre_user = ?", tUsername)
+    If (pUserId=0),(tExisting>0) Quit {"ok":0,"error":"USERNAME_DUPLICATE"}
+    If (pUserId>0),(tExisting>0),(tExisting'=pUserId) Quit {"ok":0,"error":"USERNAME_DUPLICATE"}
+
+    If pUserId=0 {
+        Set pUserId = +..Scalar("SELECT COALESCE(MAX(ID_user),0)+1 FROM mySiss_Config_SG.""User""")
+        Set tPersonId = +..Scalar("SELECT COALESCE(MAX(ID_Person),0)+1 FROM mySiss_Config_SG.Person")
+        Set tPassId = +..Scalar("SELECT COALESCE(MAX(ID_Passw),0)+1 FROM mySiss_Config_SG.Passw")
+        Do ..Exec("INSERT INTO mySiss_Config_SG.Person (ID_Person, Nombre, Apellido, Fecha_crea, UserCreado) VALUES (?, ?, ?, CURRENT_TIMESTAMP, 0)", tPersonId, tNombre, tApellido)
+        Do ..Exec("INSERT INTO mySiss_Config_SG.Passw (ID_Passw, Passw_hash, Fecha_crea, UserCreado) VALUES (?, ?, CURRENT_TIMESTAMP, 0)", tPassId, tPassword)
+        Do ..Exec("INSERT INTO mySiss_Config_SG.""User"" (ID_user, ID_Cliente, ID_Person, Nombre_user, ID_Password, Valido_de, Valido_hasta, Fecha_crea, UserCreado) VALUES (?, ?, ?, ?, ?, CURRENT_DATE, '2099-12-31', CURRENT_TIMESTAMP, 0)", pUserId, $Select(tClientId>0:tClientId,1:""), tPersonId, tUsername, tPassId)
+    } Else {
+        Set tCurrent = ..GetSecurityUserDetail(pUserId)
+        If '$IsObject(tCurrent) Quit {"ok":0,"error":"USER_NOT_FOUND"}
+        Set tPersonId = +..Scalar("SELECT ID_Person FROM mySiss_Config_SG.""User"" WHERE ID_user = ?", pUserId)
+        If tPersonId>0 {
+            Do ..Exec("UPDATE mySiss_Config_SG.Person SET Nombre = ?, Apellido = ?, Fecha_modif = CURRENT_TIMESTAMP WHERE ID_Person = ?", tNombre, tApellido, tPersonId)
+        }
+        Do ..Exec("UPDATE mySiss_Config_SG.""User"" SET Nombre_user = ?, ID_Cliente = ?, Fecha_modif = CURRENT_TIMESTAMP WHERE ID_user = ?", tUsername, $Select(tClientId>0:tClientId,1:""), pUserId)
+        If tPassword'="" {
+            Set tPassId = +..Scalar("SELECT ID_Password FROM mySiss_Config_SG.""User"" WHERE ID_user = ?", pUserId)
+            If tPassId>0 {
+                Do ..Exec("UPDATE mySiss_Config_SG.Passw SET Passw_hash = ?, Fecha_modif = CURRENT_TIMESTAMP WHERE ID_Passw = ?", tPassword, tPassId)
+            }
+        }
+    }
+
+    Do ..SetUserRole(pUserId, tRolId)
+    Do ..EnsureUserStatusRow(pUserId)
+    Quit {"ok":1,"id_user":pUserId}
+}
+
+ClassMethod EnsureUserStatusRow(pUserId As %Integer)
+{
+    Set tId = +..Scalar("SELECT TOP 1 ID_PerValidez FROM mySiss_Config_SG.PerValidez WHERE ID_user = ?", pUserId)
+    If tId>0 Quit
+    Set tId = +..Scalar("SELECT COALESCE(MAX(ID_PerValidez),0)+1 FROM mySiss_Config_SG.PerValidez")
+    Set tMotivo = +..Scalar("SELECT TOP 1 ID_motivo FROM mySiss_Config_SG.Motivo")
+    If tMotivo=0 {
+        Set tMotivo = +..Scalar("SELECT COALESCE(MAX(ID_motivo),0)+1 FROM mySiss_Config_SG.Motivo")
+        Do ..Exec("INSERT INTO mySiss_Config_SG.Motivo (ID_motivo, motivo, Fecha_crea, UserCreado) VALUES (?, 'ALTA USUARIO', CURRENT_TIMESTAMP, 0)", tMotivo)
+    }
+    Do ..Exec("INSERT INTO mySiss_Config_SG.PerValidez (ID_PerValidez, ID_user, ID_motivo, status, valido_de, valido_hasta, Fecha_crea, UserCreado) VALUES (?, ?, ?, 'A', CURRENT_DATE, '2099-12-31', CURRENT_TIMESTAMP, 0)", tId, pUserId, tMotivo)
+}
+
+ClassMethod SetSecurityUserStatus(pUserId As %Integer, pActive As %Boolean) As %Status
+{
+    Do ..EnsureUserStatusRow(pUserId)
+    Set tStatus = $Select(pActive:"A",1:"I")
+    Quit ..Exec("UPDATE mySiss_Config_SG.PerValidez SET status = ?, Fecha_modif = CURRENT_TIMESTAMP WHERE ID_user = ?", tStatus, pUserId)
+}
+
+ClassMethod SetUserRole(pUserId As %Integer, pRolId As %Integer)
+{
+    Do ..Exec("DELETE FROM mySiss_Config_SG.RolUser WHERE ID_user = ?", pUserId)
+    If pRolId>0 {
+        Set tId = +..Scalar("SELECT COALESCE(MAX(ID_roluser),0)+1 FROM mySiss_Config_SG.RolUser")
+        Do ..Exec("INSERT INTO mySiss_Config_SG.RolUser (ID_roluser, ID_user, ID_rol, Fecha_crea, UserCreado) VALUES (?, ?, ?, CURRENT_TIMESTAMP, 0)", tId, pUserId, pRolId)
+    }
+}
+
+ClassMethod ListSecurityRoles() As %DynamicArray
+{
+    Set tArr = []
+    Set tStmt = ##class(%SQL.Statement).%New()
+    Set sql = "SELECT r.ID_rol, r.Rol, COALESCE(rs.status,'ACTIVE') AS status FROM mySiss_Config_SG.Rol r LEFT JOIN mySiss_Config_SG.RolStatus rs ON rs.ID_rol = r.ID_rol ORDER BY r.ID_rol"
+    Set tRS = tStmt.%ExecDirect(, sql)
+    While tRS.%Next() {
+        Do tArr.%Push({"id_rol":+tRS.%Get("ID_rol"),"rol":$Get(tRS.%Get("Rol")),"status":$Get(tRS.%Get("status"))})
+    }
+    Quit tArr
+}
+
+ClassMethod SaveSecurityRole(pRolId As %Integer = 0, pPayload As %DynamicObject) As %DynamicObject
+{
+    Set tName = $Extract($ZStrip($Get(pPayload.rol),"<>W"),1,120)
+    If tName="" Quit {"ok":0,"error":"ROL_REQUIRED"}
+    Set tExisting = +..Scalar("SELECT TOP 1 ID_rol FROM mySiss_Config_SG.Rol WHERE Rol = ?", tName)
+    If (pRolId=0),(tExisting>0) Quit {"ok":0,"error":"ROL_DUPLICATE"}
+    If (pRolId>0),(tExisting>0),(tExisting'=pRolId) Quit {"ok":0,"error":"ROL_DUPLICATE"}
+    If pRolId=0 {
+        Set pRolId = +..Scalar("SELECT COALESCE(MAX(ID_rol),0)+1 FROM mySiss_Config_SG.Rol")
+        Do ..Exec("INSERT INTO mySiss_Config_SG.Rol (ID_rol, Rol, Fecha_crea, UserCreado) VALUES (?, ?, CURRENT_TIMESTAMP, 0)", pRolId, tName)
+    } Else {
+        Do ..Exec("UPDATE mySiss_Config_SG.Rol SET Rol = ?, Fecha_modif = CURRENT_TIMESTAMP WHERE ID_rol = ?", tName, pRolId)
+    }
+    Do ..EnsureRoleStatus(pRolId)
+    Quit {"ok":1,"id_rol":pRolId}
+}
+
+ClassMethod EnsureRoleStatus(pRolId As %Integer)
+{
+    Set tId = +..Scalar("SELECT TOP 1 ID_RolStatus FROM mySiss_Config_SG.RolStatus WHERE ID_rol = ?", pRolId)
+    If tId>0 Quit
+    Set tId = +..Scalar("SELECT COALESCE(MAX(ID_RolStatus),0)+1 FROM mySiss_Config_SG.RolStatus")
+    Do ..Exec("INSERT INTO mySiss_Config_SG.RolStatus (ID_RolStatus, ID_rol, status, updated_at) VALUES (?, ?, 'ACTIVE', CURRENT_TIMESTAMP)", tId, pRolId)
+}
+
+ClassMethod SetSecurityRoleStatus(pRolId As %Integer, pActive As %Boolean) As %Status
+{
+    Do ..EnsureRoleStatus(pRolId)
+    Set tStatus = $Select(pActive:"ACTIVE",1:"INACTIVE")
+    Quit ..Exec("UPDATE mySiss_Config_SG.RolStatus SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE ID_rol = ?", tStatus, pRolId)
+}
+
+ClassMethod GetRolePermissions(pRolId As %Integer) As %DynamicArray
+{
+    Set tArr = []
+    Set sql = "SELECT rm.ID_actividad, a.Actividad, f.Funcion, m.Modulo, rm.Crear, rm.Modificar, rm.Visualizar, rm.Eliminar FROM mySiss_Config_SG.RolModulo rm LEFT JOIN mySiss_Config_SG.Actividad a ON a.ID_actividad = rm.ID_actividad LEFT JOIN mySiss_Config_SG.Funcion f ON f.ID_Funcion = a.ID_funcion LEFT JOIN mySiss_Config_SG.Modulo m ON m.ID_Modulo = f.ID_Modulo WHERE rm.ID_rol = ? ORDER BY m.Modulo, f.Funcion, a.Actividad"
+    Set tStmt = ##class(%SQL.Statement).%New()
+    Set tRS = tStmt.%ExecDirect(, sql, pRolId)
+    While tRS.%Next() {
+        Do tArr.%Push({
+            "id_actividad": +tRS.%Get("ID_actividad"),
+            "modulo": $Get(tRS.%Get("Modulo")),
+            "funcion": $Get(tRS.%Get("Funcion")),
+            "actividad": $Get(tRS.%Get("Actividad")),
+            "crear": $Get(tRS.%Get("Crear")),
+            "modificar": $Get(tRS.%Get("Modificar")),
+            "visualizar": $Get(tRS.%Get("Visualizar")),
+            "eliminar": $Get(tRS.%Get("Eliminar"))
+        })
+    }
+    Quit tArr
+}
+
+ClassMethod SaveRolePermissions(pRolId As %Integer, pPermissions As %DynamicArray) As %Status
+{
+    Do ..Exec("DELETE FROM mySiss_Config_SG.RolModulo WHERE ID_rol = ?", pRolId)
+    For i=1:1:pPermissions.%Size() {
+        Set tItem = pPermissions.%Get(i)
+        Set tAct = +$Get(tItem.id_actividad)
+        If tAct>0 {
+            Set tId = +..Scalar("SELECT COALESCE(MAX(ID_rolmodulo),0)+1 FROM mySiss_Config_SG.RolModulo")
+            Do ..Exec("INSERT INTO mySiss_Config_SG.RolModulo (ID_rolmodulo, ID_rol, ID_actividad, Crear, Modificar, Visualizar, Eliminar, Fecha_crea, UserCreado) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 0)", tId, pRolId, tAct, $Select(+$Get(tItem.crear)=1:"Y",1:"N"), $Select(+$Get(tItem.modificar)=1:"Y",1:"N"), $Select(+$Get(tItem.visualizar)=1:"Y",1:"N"), $Select(+$Get(tItem.eliminar)=1:"Y",1:"N"))
+        }
+    }
+    Quit $$$OK
+}
+
+ClassMethod ListSecurityClients() As %DynamicArray
+{
+    Set tArr = []
+    Set tStmt = ##class(%SQL.Statement).%New()
+    Set tRS = tStmt.%ExecDirect(, "SELECT ID_Cliente, Nombre_Prest FROM mySiss_Config_MS.Cliente ORDER BY Nombre_Prest")
+    While tRS.%Next() {
+        Do tArr.%Push({"id_cliente":+tRS.%Get("ID_Cliente"),"nombre":$Get(tRS.%Get("Nombre_Prest"))})
+    }
+    Quit tArr
 }
 
 ClassMethod Scalar(pSQL As %String, p1 = "", p2 = "") As %String
