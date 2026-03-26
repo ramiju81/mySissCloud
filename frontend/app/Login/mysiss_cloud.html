@@ -213,7 +213,7 @@
             <div class="logo">mySiss</div>
             
             <!-- Botón de configuración con ícono SVG -->
-            <button class="config-btn" onclick="navigateTo('WebService')">
+            <button class="config-btn" id="webServiceBtn" data-module-slug="webservice" onclick="navigateTo('WebService')">
                 <!-- Ícono de engranaje (configuración) -->
                 <svg class="config-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -229,12 +229,13 @@
         <!-- Título principal de la sección -->
         <div class="title">
             <h1>Modulos</h1>
+            <p id="routingStateMessage" style="color:#6b7280;font-size:1rem;"></p>
         </div>
 
         <!-- Grilla de tarjetas del menú principal -->
         <div class="menu-grid">
             <!-- ===== TARJETA 1: AUDITORÍA DE CALIDAD ===== -->
-            <div class="menu-card" onclick="navigateTo('auditoria-calidad')">
+            <div class="menu-card" data-module-slug="auditoria" onclick="navigateTo('auditoria-calidad')">
                 <div class="card-image-container">
                     <!-- Imagen de fondo de la tarjeta -->
                     <img src="https://images.pexels.com/photos/3182774/pexels-photo-3182774.jpeg?auto=compress&cs=tinysrgb&h=627&fit=crop&w=1200" 
@@ -254,7 +255,7 @@
             </div>
 
             <!-- ===== TARJETA 2: AUDITORÍA CONCURRENTE ===== -->
-            <div class="menu-card" onclick="navigateTo('auditoria-concurrente')">
+            <div class="menu-card" data-module-slug="auditoria" onclick="navigateTo('auditoria-concurrente')">
                 <div class="card-image-container">
                     <!-- Imagen de fondo de la tarjeta -->
                     <img src="https://images.pexels.com/photos/9304917/pexels-photo-9304917.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
@@ -274,7 +275,7 @@
             </div>
 
             <!-- ===== TARJETA 3: CUENTAS MÉDICAS ===== -->
-            <div class="menu-card" onclick="navigateTo('cuentas-medicas')">
+            <div class="menu-card" data-module-slug="auditoria" onclick="navigateTo('cuentas-medicas')">
                 <div class="card-image-container">
                     <!-- Imagen de fondo de la tarjeta -->
                     <img src="https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=500&h=300&fit=crop" 
@@ -294,7 +295,7 @@
             </div>
 
             <!-- ===== TARJETA 4: HONORARIOS ===== -->
-            <div class="menu-card" onclick="navigateTo('honorarios')">
+            <div class="menu-card" data-module-slug="honorarios" onclick="navigateTo('honorarios')">
                 <div class="card-image-container">
                     <!-- Imagen de fondo de la tarjeta -->
                     <img src="img/honorarios.png" 
@@ -315,7 +316,7 @@
 
 
             <!-- ===== TARJETA 5: CUENTAS MÉDICAS ===== -->
-            <div class="menu-card" onclick="navigateTo('glosas')">
+            <div class="menu-card" data-module-slug="glosas" onclick="navigateTo('glosas')">
                 <div class="card-image-container">
                     <!-- Imagen de fondo de la tarjeta -->
                     <img src="img/glosas.png" 
@@ -352,132 +353,87 @@
     </main>
 
     <!-- ===== JAVASCRIPT ===== -->
+    <script src="/csp/mySissCloud/app/services/config.js"></script>
+    <script src="/csp/mySissCloud/app/services/api.js"></script>
+    <script src="/csp/mySissCloud/app/services/routing.js"></script>
     <script>
-        /**
-         * Función principal de navegación
-         * @param {string} page - Nombre de la página a la que se desea navegar
-         */
+        const routeByPage = {
+            'WebService': '/csp/mySissCloud/app/WS/mySissWSMaster.html',
+            'auditoria-calidad': '/csp/mySissCloud/app/Auditoria/Auditoria.html',
+            'auditoria-concurrente': '/csp/mySissCloud/app/Auditoria/Auditoria.html',
+            'cuentas-medicas': '/csp/mySissCloud/app/Auditoria/Auditoria.html',
+            'honorarios': '/csp/mySissCloud/app/Honorarios/honorarios.html',
+            'glosas': '/csp/mySissCloud/app/Glosas/radicacion.html'
+        };
+
         function navigateTo(page) {
-              switch (page) {
-                case 'WebService':
-                window.location.href ='WS/template/mySissWSMaster.html';
-                break;
-                case 'auditoria-calidad':
-                window.location.href ='app/Auditoria/Auditoria.html';
-                break;
-                case 'auditoria-concurrente':
-                window.location.href ='app/Auditoria/Aconcurrente.html';
-                break;
-                case 'honorarios':
-                window.location.href ='app/Honorarios/honorarios.html';
-                break;
-                case 'glosas':
-                window.location.href ='app/Glosas/radicacion.html';
-                break;
-              default:
-                alert("Estamos trabajando en ello");
-              }            
-            
-            // OPCIÓN 2: Abrir en nueva pestaña (descomenta para usar)
-            // window.open(page + '.html', '_blank');
-            
-            // OPCIÓN 3: Cambiar URL sin recargar página (descomenta para usar)
-            // history.pushState(null, null, page);
-            
-            // OPCIÓN 4: Navegación con confirmación (descomenta para usar)
-            // if (confirm('¿Deseas navegar a ' + page + '?')) {
-            //     window.location.href = page + '.html';
-            // }
-            
-            // Alerta temporal para demostrar funcionalidad (eliminar en producción)
-            /*alert('Navegando a: ' + page);*/
+            const path = routeByPage[page];
+            if (!path) {
+                alert('Estamos trabajando en ello');
+                return;
+            }
+            window.location.href = path;
         }
 
-        /**
-         * Código que se ejecuta cuando el DOM está completamente cargado
-         */
-        document.addEventListener('DOMContentLoaded', function() {
-            // Obtener todas las tarjetas del menú
-            const cards = document.querySelectorAll('.menu-card');
-            
-            // Aplicar animación de entrada a cada tarjeta
-            cards.forEach((card, index) => {
-                // Estado inicial: invisible y desplazada hacia abajo
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                
-                // Aplicar animación con retraso escalonado
-                setTimeout(() => {
-                    // Definir transiciones CSS
-                    card.style.transition = 'opacity 0.5s, transform 0.5s';
-                    // Estado final: visible y en posición normal
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 200); // Retraso de 200ms entre cada tarjeta
-            });
-            
-            // Opcional: Agregar listener para teclas del teclado
-            document.addEventListener('keydown', function(event) {
-                // Navegación con teclas numéricas
-                switch(event.key) {
-                    case '1':
-                        navigateTo('auditoria-calidad');
-                        break;
-                    case '2':
-                        navigateTo('auditoria-concurrente');
-                        break;
-                    case '3':
-                        navigateTo('cuentas-medicas');
-                        break;
-                    case 'h':
-                    case 'H':
-                        navigateTo('honorarios');
-                        break;
-                    case 'g':
-                    case 'G':
-                        navigateTo('glosas');
-                        break;
-                    case 'c':
-                    case 'C':
-                        navigateTo('configuracion');
-                        break;
-                }
-            });
-        });
-
-        /**
-         * Función opcional para manejar errores de carga de imágenes
-         */
-        function handleImageError(img) {
-            // Imagen de respaldo en caso de error
-            img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMTUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUI5QkEzIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiPkltYWdlbiBubyBkaXNwb25pYmxlPC90ZXh0Pgo8L3N2Zz4K';
-            console.log('Error cargando imagen, usando imagen de respaldo');
-        }
-
-        /**
-         * Función para cambiar el tema de colores (funcionalidad adicional)
-         */
-        function toggleTheme() {
-            const body = document.body;
-            body.classList.toggle('dark-theme');
-            
-            // Guardar preferencia en localStorage
-            const isDark = body.classList.contains('dark-theme');
-            localStorage.setItem('darkTheme', isDark);
-        }
-
-        /**
-         * Cargar tema guardado al iniciar la página
-         */
-        function loadSavedTheme() {
-            const savedTheme = localStorage.getItem('darkTheme');
-            if (savedTheme === 'true') {
-                document.body.classList.add('dark-theme');
+        function updateStateMessage(ctx) {
+            const msg = document.getElementById('routingStateMessage');
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('state') === 'no-modules') {
+                msg.textContent = 'No tienes módulos habilitados actualmente. Contacta al administrador.';
+                return;
+            }
+            if ((ctx.modules || []).length === 0) {
+                msg.textContent = 'Sin módulos habilitados para esta sesión.';
             }
         }
 
-        // Cargar tema guardado al cargar la página
-        loadSavedTheme();
+        function filterCardsByContext(ctx) {
+            const userType = (ctx.user_type || '').toLowerCase();
+            const allowed = new Set((ctx.modules || []).map(m => (m.slug || '').toLowerCase()));
+
+            if (userType === 'superusuario' || userType === 'administrador') {
+                document.querySelectorAll('.menu-card').forEach(card => { card.style.display = ''; });
+                const wsBtn = document.getElementById('webServiceBtn');
+                if (wsBtn) wsBtn.style.display = '';
+                return;
+            }
+
+            document.querySelectorAll('.menu-card').forEach(card => {
+                const slug = (card.dataset.moduleSlug || '').toLowerCase();
+                card.style.display = allowed.has(slug) ? '' : 'none';
+            });
+
+            const wsBtn = document.getElementById('webServiceBtn');
+            if (wsBtn) wsBtn.style.display = 'none';
+        }
+
+        async function loadRoutingContext() {
+            try {
+                const ctx = await window.mySissRouting.getContext();
+                if (!ctx.authenticated) {
+                    window.location.replace('/csp/mySissCloud/app/Login/mySiss_Cloud_Login.html');
+                    return;
+                }
+                filterCardsByContext(ctx);
+                updateStateMessage(ctx);
+            } catch (error) {
+                window.location.replace('/csp/mySissCloud/app/Login/mySiss_Cloud_Login.html');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.menu-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s, transform 0.5s';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 120);
+            });
+            loadRoutingContext();
+        });
     </script>
 </body>
 </html>
