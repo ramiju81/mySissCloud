@@ -1,6 +1,5 @@
 (function () {
   const SESSION_KEY = 'mySiss_session';
-  const REMEMBER_KEY = 'mySiss_remember_email';
 
   function setSession(sessionData) {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionData || {}));
@@ -17,15 +16,15 @@
 
   function rememberEmail(email) {
     if (!email) return;
-    localStorage.setItem(REMEMBER_KEY, email);
+    sessionStorage.setItem('mySiss_remember_email', email);
   }
 
   function getRememberedEmail() {
-    return localStorage.getItem(REMEMBER_KEY) || '';
+    return sessionStorage.getItem('mySiss_remember_email') || '';
   }
 
   function clearRememberedEmail() {
-    localStorage.removeItem(REMEMBER_KEY);
+    sessionStorage.removeItem('mySiss_remember_email');
   }
 
   window.mySissSession = {
