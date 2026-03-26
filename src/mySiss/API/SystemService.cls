@@ -227,7 +227,11 @@ ClassMethod GetModuleCatalog() As %DynamicArray
     Set tStmt = ##class(%SQL.Statement).%New()
     Set tRS = tStmt.%ExecDirect(, "SELECT ID_Modulo, Cod_Modulo, Modulo FROM mySiss_Config_SG.Modulo WHERE $ZCONVERT(Modulo,'L') <> 'webservice' ORDER BY Modulo")
     While tRS.%Next() {
-        Do tArr.%Push({"id_modulo":+tRS.%Get("ID_Modulo"),"codigo":$Get(tRS.%Get("Cod_Modulo")),"nombre":$Get(tRS.%Get("Modulo"))})
+        Set tNombre = $Get(tRS.%Get("Modulo"))
+        Set tSlug = ..NormalizeModuleSlug(tNombre)
+        If tSlug'="" {
+            Do tArr.%Push({"id_modulo":+tRS.%Get("ID_Modulo"),"codigo":$Get(tRS.%Get("Cod_Modulo")),"nombre":tNombre,"slug":tSlug,"entry_path":..ModuleSlugToPath(tSlug)})
+        }
     }
     Quit tArr
 }
@@ -238,7 +242,11 @@ ClassMethod GetClientModules(pClientId As %Integer) As %DynamicArray
     Set tStmt = ##class(%SQL.Statement).%New()
     Set tRS = tStmt.%ExecDirect(, "SELECT cm.ID_ClienteMod, cm.id_Mod, m.Modulo, cm.id_EstadoActual FROM mySiss_Config_MS.ClienteMod cm LEFT JOIN mySiss_Config_SG.Modulo m ON m.ID_Modulo = cm.id_Mod WHERE cm.id_Prest = ? AND cm.id_Mod IS NOT NULL ORDER BY m.Modulo", pClientId)
     While tRS.%Next() {
-        Do tArr.%Push({"id_cliente_mod":+tRS.%Get("ID_ClienteMod"),"id_modulo":+tRS.%Get("id_Mod"),"modulo":$Get(tRS.%Get("Modulo")),"activo":+$Get(tRS.%Get("id_EstadoActual"))})
+        Set tNombre = $Get(tRS.%Get("Modulo"))
+        Set tSlug = ..NormalizeModuleSlug(tNombre)
+        If tSlug'="" {
+            Do tArr.%Push({"id_cliente_mod":+tRS.%Get("ID_ClienteMod"),"id_modulo":+tRS.%Get("id_Mod"),"modulo":tNombre,"slug":tSlug,"entry_path":..ModuleSlugToPath(tSlug),"activo":+$Get(tRS.%Get("id_EstadoActual"))})
+        }
     }
     Quit tArr
 }
@@ -255,6 +263,115 @@ ClassMethod ReplaceClientModules(pClientId As %Integer, pModules As %DynamicArra
         }
     }
     Quit $$$OK
+}
+
+ClassMethod GetUserContext() As %DynamicObject
+{
+    Set tUser = ..CurrentUserName()
+    Set tCtx = {
+        "authenticated":($Select(tUser'="":1,1:0)),
+        "username":tUser,
+        "user_type":"normal",
+        "client_id":"",
+        "session_status":$Select(tUser'="":"ACTIVE",1:"NO_SESSION"),
+        "modules":[],
+        "can_access_dashboard":0,
+        "direct_module":"",
+        "can_edit_sensitive_config":0
+    }
+
+    If tUser = "" Quit tCtx
+
+    Set tIsSuper = ..IsSuperUser()
+    Set tIsAdmin = ..IsAdmin()
+    If tIsSuper {
+        Set tCtx.user_type = "superusuario"
+        Set tCtx.can_edit_sensitive_config = 1
+        Set tCtx.modules = ..GetModuleCatalog()
+        Set tCtx.can_access_dashboard = 1
+        Quit tCtx
+    }
+
+    If tIsAdmin {
+        Set tCtx.user_type = "administrador"
+        Set tCtx.modules = ..GetModuleCatalog()
+        Set tCtx.can_access_dashboard = 1
+        Quit tCtx
+    }
+
+    Set tClientId = +..Scalar("SELECT TOP 1 ID_Cliente FROM mySiss_Config_SG.""User"" WHERE Nombre_user = ?", tUser)
+    If tClientId>0 {
+        Set tCtx.client_id = tClientId
+        Set tCtx.modules = ..GetClientModules(tClientId)
+    }
+
+    Set tCount = tCtx.modules.%Size()
+    If tCount>1 {
+        Set tCtx.can_access_dashboard = 1
+    } ElseIf tCount=1 {
+        Set tCtx.direct_module = $Get(tCtx.modules.%Get(1).slug)
+    }
+
+    Quit tCtx
+}
+
+ClassMethod ResolvePostLoginRoute() As %DynamicObject
+{
+    Set tCtx = ..GetUserContext()
+    Set tResp = {"context":tCtx,"route":"","route_type":"dashboard"}
+    If '$Get(tCtx.authenticated) {
+        Set tResp.route = "/csp/mySissCloud/app/Login/mySiss_Cloud_Login.html"
+        Set tResp.route_type = "login"
+        Quit tResp
+    }
+
+    If $Get(tCtx.user_type)="superusuario" {
+        Set tResp.route = "/csp/mySissCloud/mysiss_cloud.html"
+        Quit tResp
+    }
+
+    If $Get(tCtx.user_type)="administrador" {
+        Set tResp.route = "/csp/mySissCloud/mysiss_cloud.html"
+        Quit tResp
+    }
+
+    If $Get(tCtx.direct_module)'="" {
+        Set tResp.route = ..ModuleSlugToPath($Get(tCtx.direct_module))
+        Set tResp.route_type = "direct_module"
+        Quit tResp
+    }
+
+    If +$Get(tCtx.can_access_dashboard)=1 {
+        Set tResp.route = "/csp/mySissCloud/mysiss_cloud.html"
+        Quit tResp
+    }
+
+    Set tResp.route = "/csp/mySissCloud/mysiss_cloud.html?state=no-modules"
+    Set tResp.route_type = "no_modules"
+    Quit tResp
+}
+
+ClassMethod ModuleSlugToPath(pSlug As %String) As %String
+{
+    Set s = $ZConvert($Get(pSlug),"L")
+    If s="auditoria" Quit "/csp/mySissCloud/app/Auditoria/Auditoria.html"
+    If s="honorarios" Quit "/csp/mySissCloud/app/Honorarios/honorarios.html"
+    If s="glosas" Quit "/csp/mySissCloud/app/Glosas/radicacion.html"
+    If s="seguridad" Quit "/csp/mySissCloud/app/Seguridad/seg_gestion_usuario.html"
+    If s="mysiss" Quit "/csp/mySissCloud/app/mySiss/system_base.html"
+    Quit "/csp/mySissCloud/mysiss_cloud.html"
+}
+
+ClassMethod NormalizeModuleSlug(pName As %String) As %String
+{
+    Set n = $ZConvert($Get(pName),"L")
+    If n["honor" Quit "honorarios"
+    If n["glosa" Quit "glosas"
+    If n["audit" Quit "auditoria"
+    If n["segur" Quit "seguridad"
+    If n["mysiss" Quit "mysiss"
+    If n["webservice" Quit ""
+    Quit $ZStrip(n, "<>W")
 }
 
 ClassMethod Scalar(pSQL As %String, p1 = "", p2 = "") As %String

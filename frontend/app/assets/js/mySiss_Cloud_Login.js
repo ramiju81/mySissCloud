@@ -1,13 +1,12 @@
 let recoveryEmail = "";
 let recoveryToken = "";
 
-function resolveLandingByRoles(roles) {
-    const normalized = (roles || []).map(r => String(r).toUpperCase());
-    if (normalized.includes("SUPERADMIN") || normalized.includes("ADMINISTRADOR")) return "../Seguridad/seg_gestion_usuario.html";
-    if (normalized.includes("LIQUIDADOR_HON")) return "../Honorarios/honorarios.html";
-    if (normalized.includes("AUDITOR_CONCURRENTE") || normalized.includes("AUDITOR_CUENTAS") || normalized.includes("LIDER_PROCESO")) return "../Auditoria/Auditoria.html";
-    if (normalized.includes("GLOSADOR")) return "../Glosas/radicacion.html";
-    return "../Seguridad/seg_gestion_usuario.html";
+async function resolvePostLoginRoute() {
+    if (window.mySissRouting && window.mySissRouting.resolveRoute) {
+        return window.mySissRouting.resolveRoute();
+    }
+    const resp = await window.mySissApi.get('/auth/resolve-route');
+    return (resp.data && resp.data.route) || '/csp/mySissCloud/mysiss_cloud.html';
 }
 
 async function login() {
@@ -23,10 +22,11 @@ async function login() {
     }
 
     try {
-        const auth = await window.mySissAuth.login({ username: usuario, email: usuario, password, rememberMe });
+        await window.mySissAuth.login({ username: usuario, email: usuario, password, rememberMe });
         if (rememberMe) window.mySissSession.rememberEmail(usuario); else window.mySissSession.clearRememberedEmail();
         document.getElementById("password").value = "";
-        window.location.href = resolveLandingByRoles((auth.user && auth.user.roles) || []);
+        const route = await resolvePostLoginRoute();
+        window.location.href = route;
     } catch (error) {
         mensaje.textContent = (error.payload && error.payload.error) ? error.payload.error : "Error de autenticación.";
         document.getElementById("password").value = "";
@@ -125,7 +125,8 @@ window.addEventListener("DOMContentLoaded", async function () {
     try {
         const active = await window.mySissAuth.verifySession();
         if (active && active.authenticated) {
-            window.location.href = resolveLandingByRoles((active.user && active.user.roles) || []);
+            const route = await resolvePostLoginRoute();
+            window.location.href = route;
         }
     } catch (e) {
         // sin sesión

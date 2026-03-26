@@ -14,6 +14,9 @@ XData UrlMap
   <Route Url="/system/config" Method="POST" Call="CreateConfig" />
   <Route Url="/system/config" Method="PUT" Call="UpdateConfig" />
   <Route Url="/system/database/status" Method="GET" Call="DatabaseStatus" />
+  <Route Url="/auth/context" Method="GET" Call="AuthContext" />
+  <Route Url="/auth/resolve-route" Method="GET" Call="ResolveRoute" />
+  <Route Url="/auth/authorize-module/:slug" Method="GET" Call="AuthorizeModule" />
   <Route Url="/ms/clients" Method="GET" Call="ListClients" />
   <Route Url="/ms/clients" Method="POST" Call="CreateClient" />
   <Route Url="/ms/clients/:id" Method="PUT" Call="UpdateClient" />
@@ -76,6 +79,49 @@ ClassMethod DatabaseStatus() As %Status
     Set tDB = ##class(mySiss.API.SystemService).UpdateConnectionStatus()
     Set tCode = $Select($Get(tDB.status)="OK":200,1:500)
     Do ..WriteJSON({"success":1,"data":tDB}, tCode)
+    Quit $$$OK
+}
+
+ClassMethod AuthContext() As %Status
+{
+    Set tCtx = ##class(mySiss.API.SystemService).GetUserContext()
+    Do ..WriteJSON({"success":1,"data":tCtx})
+    Quit $$$OK
+}
+
+ClassMethod ResolveRoute() As %Status
+{
+    Set tData = ##class(mySiss.API.SystemService).ResolvePostLoginRoute()
+    Do ..WriteJSON({"success":1,"data":tData})
+    Quit $$$OK
+}
+
+ClassMethod AuthorizeModule(slug As %String) As %Status
+{
+    Set tCtx = ##class(mySiss.API.SystemService).GetUserContext()
+    If '$Get(tCtx.authenticated) {
+        Do ..WriteJSON({"success":0,"allowed":0,"redirect":"/csp/mySissCloud/app/Login/mySiss_Cloud_Login.html","error":"Sesión no válida."}, 401)
+        Quit $$$OK
+    }
+
+    Set tAllowed = 0
+    For i=1:1:tCtx.modules.%Size() {
+        If $Get(tCtx.modules.%Get(i).slug)=$ZConvert(slug,"L") {
+            Set tAllowed = 1
+            Quit
+        }
+    }
+
+    If ($Get(tCtx.user_type)="superusuario")||($Get(tCtx.user_type)="administrador") {
+        Set tAllowed = 1
+    }
+
+    If 'tAllowed {
+        Do ..WriteJSON({"success":0,"allowed":0,"redirect":"/csp/mySissCloud/mysiss_cloud.html?state=no-access"}, 403)
+        Quit $$$OK
+    }
+
+    Do ..WriteJSON({"success":1,"allowed":1})
     Quit $$$OK
 }
 
