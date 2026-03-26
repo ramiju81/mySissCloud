@@ -68,12 +68,54 @@
 
     <!-- Contenido principal -->
     <div class="flex-1 bg-white p-8 overflow-auto">
-        <!-- Contenido de la página -->
+        <h2 class="text-2xl font-semibold mb-4 text-[var(--mysiss-purple)]">Seguridad administrativa</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <section class="border rounded-lg p-4">
+                <h3 class="font-semibold mb-3">Usuarios</h3>
+                <form id="userForm" class="space-y-2 mb-3">
+                    <input id="userId" type="number" placeholder="ID (vacío para crear)" class="border p-2 w-full" />
+                    <input id="username" required placeholder="Username" class="border p-2 w-full" />
+                    <input id="nombre" placeholder="Nombre" class="border p-2 w-full" />
+                    <input id="apellido" placeholder="Apellido" class="border p-2 w-full" />
+                    <input id="password" type="password" placeholder="Password (solo para crear/actualizar)" class="border p-2 w-full" />
+                    <select id="userClienteId" class="border p-2 w-full"></select>
+                    <select id="userRolId" class="border p-2 w-full"></select>
+                    <button class="bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded">Guardar usuario</button>
+                </form>
+                <table class="w-full text-sm border">
+                    <thead><tr><th>ID</th><th>Usuario</th><th>Rol</th><th>Cliente</th><th>Estado</th></tr></thead>
+                    <tbody id="usersBody"></tbody>
+                </table>
+            </section>
+            <section class="border rounded-lg p-4">
+                <h3 class="font-semibold mb-3">Roles</h3>
+                <form id="roleForm" class="space-y-2 mb-3">
+                    <input id="roleId" type="number" placeholder="ID (vacío para crear)" class="border p-2 w-full" />
+                    <input id="roleName" required placeholder="Nombre de rol" class="border p-2 w-full" />
+                    <button class="bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded">Guardar rol</button>
+                </form>
+                <table class="w-full text-sm border">
+                    <thead><tr><th>ID</th><th>Rol</th><th>Estado</th></tr></thead>
+                    <tbody id="rolesBody"></tbody>
+                </table>
+            </section>
+        </div>
+        <section class="border rounded-lg p-4 mt-6">
+            <h3 class="font-semibold mb-3">Permisos por rol</h3>
+            <form id="permissionsForm" class="space-y-2">
+                <input id="permissionsRoleId" type="number" required placeholder="ID Rol" class="border p-2 w-full max-w-sm" />
+                <textarea id="permissionsList" rows="10" class="border p-2 w-full" placeholder='[{"id_actividad":1,"crear":1,"modificar":1,"visualizar":1,"eliminar":0}]'></textarea>
+                <button class="bg-[var(--mysiss-purple)] text-white px-4 py-2 rounded">Guardar permisos</button>
+            </form>
+        </section>
     </div>
-	<!-->
-	<button id="devClearBtn">Limpiar</button>
-
 
 <script src="../js/seg_gestion_usuario.js"></script>
+
+<script src="/csp/mySissCloud/app/services/config.js"></script>
+<script src="/csp/mySissCloud/app/services/api.js"></script>
+<script src="/csp/mySissCloud/app/services/routing.js"></script>
+<script src="/csp/mySissCloud/app/services/module-guard.js"></script>
+<script>window.mySissModuleGuard.requireModuleAccess('seguridad');</script>
 </body>
 </html>
