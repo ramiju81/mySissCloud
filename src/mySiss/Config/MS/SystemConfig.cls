@@ -36,51 +36,21 @@ Index IDXEnvironment On Environment;
 Storage Default
 {
 <Data name="SystemConfigDefaultData">
-<Value name="1">
-<Value>%%CLASSNAME</Value>
-</Value>
-<Value name="2">
-<Value>IDConfig</Value>
-</Value>
-<Value name="3">
-<Value>Environment</Value>
-</Value>
-<Value name="4">
-<Value>DatabaseEngine</Value>
-</Value>
-<Value name="5">
-<Value>BackendBaseURL</Value>
-</Value>
-<Value name="6">
-<Value>FrontendBaseURL</Value>
-</Value>
-<Value name="7">
-<Value>WebappBasePath</Value>
-</Value>
-<Value name="8">
-<Value>DatabaseHost</Value>
-</Value>
-<Value name="9">
-<Value>DatabasePort</Value>
-</Value>
-<Value name="10">
-<Value>DatabaseName</Value>
-</Value>
-<Value name="11">
-<Value>DatabaseNamespace</Value>
-</Value>
-<Value name="12">
-<Value>ConnectionStatus</Value>
-</Value>
-<Value name="13">
-<Value>LastCheckAt</Value>
-</Value>
-<Value name="14">
-<Value>UpdatedAt</Value>
-</Value>
-<Value name="15">
-<Value>UpdatedBy</Value>
-</Value>
+<Value name="1"><Value>%%CLASSNAME</Value></Value>
+<Value name="2"><Value>IDConfig</Value></Value>
+<Value name="3"><Value>Environment</Value></Value>
+<Value name="4"><Value>DatabaseEngine</Value></Value>
+<Value name="5"><Value>BackendBaseURL</Value></Value>
+<Value name="6"><Value>FrontendBaseURL</Value></Value>
+<Value name="7"><Value>WebappBasePath</Value></Value>
+<Value name="8"><Value>DatabaseHost</Value></Value>
+<Value name="9"><Value>DatabasePort</Value></Value>
+<Value name="10"><Value>DatabaseName</Value></Value>
+<Value name="11"><Value>DatabaseNamespace</Value></Value>
+<Value name="12"><Value>ConnectionStatus</Value></Value>
+<Value name="13"><Value>LastCheckAt</Value></Value>
+<Value name="14"><Value>UpdatedAt</Value></Value>
+<Value name="15"><Value>UpdatedBy</Value></Value>
 </Data>
 <DataLocation>^mySiss.Config.MS.SystemConfigD</DataLocation>
 <DefaultData>SystemConfigDefaultData</DefaultData>

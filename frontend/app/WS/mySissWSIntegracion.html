@@ -1,21 +1,46 @@
-<!DOCTYPE html><html lang="es"><head>
-<link rel="stylesheet" href="../../css/mySiss_WebService.css">
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mySiss – WebService Integración</title>
-<link rel="icon" href="https://mysiss.com/wp-content/uploads/2024/02/favicon.png" sizes="32x32">
-</head><body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mySiss – WebService Integración</title>
+  <link rel="stylesheet" href="../../css/mySiss_WebService.css">
+</head>
+<body>
 <div class="app-container">
-<aside class="sidebar">
+  <aside class="sidebar">
     <div class="sidebar-top">
-        <div class="logo" style="font-size:2rem;font-weight:800;color:#800080;text-align:center;margin-bottom:1.5rem">mySiss</div>
-        <a href="mySissWSMaster.html" class="nav-link focus-outline">WebService</a>
-        <a href="mySissWSEjecucion.html" class="nav-link focus-outline">Ejecución</a>
-        <a href="mySissWSIntegracion.html" class="nav-link focus-outline">Integración</a>
+      <div class="logo" style="font-size:2rem;font-weight:800;color:#800080;text-align:center;margin-bottom:1.5rem">mySiss</div>
+      <a href="mySissWSMaster.html" class="nav-link focus-outline">WebService</a>
+      <a href="mySissWSEjecucion.html" class="nav-link focus-outline">Ejecución</a>
+      <a href="mySissWSIntegracion.html" class="nav-link focus-outline">Integración</a>
     </div>
-</aside>
-<main class="main-content" style="margin-left:190px;padding:28px;flex:1">
-    <h2 style="color:#800080;margin-bottom:12px">WebService Integración</h2>
-    <p style="color:#6b7280">Módulo de WebService — en desarrollo.</p>
-</main>
+  </aside>
+  <main class="main-content" style="margin-left:190px;padding:28px;flex:1">
+    <h2 style="color:#800080;margin-bottom:12px">Configurar Integración</h2>
+    <p id="wsError" style="color:#b91c1c"></p>
+    <form id="integrationForm" style="display:grid;gap:8px;max-width:920px">
+      <input id="integrationId" type="number" placeholder="ID (autogenerado)" readonly>
+      <input id="nombre" required placeholder="Nombre">
+      <textarea id="descripcion" rows="2" placeholder="Descripción"></textarea>
+      <select id="metodo_http"><option>GET</option><option>POST</option></select>
+      <input id="url_base" required placeholder="URL base (ej. https://api.ejemplo.com)">
+      <input id="endpoint" required placeholder="Endpoint (ej. /v1/recurso)">
+      <input id="tipo_autenticacion" value="NONE" placeholder="Tipo autenticación">
+      <textarea id="headers" rows="3" placeholder='Headers JSON (ej. {"Authorization":"Bearer ***"})'></textarea>
+      <textarea id="body_template" rows="4" placeholder='Body template JSON (opcional)'></textarea>
+      <input id="timeout" type="number" min="1" max="120" value="30" placeholder="Timeout (segundos)">
+      <label><input id="activo" type="checkbox" checked> Activo</label>
+      <select id="integrationClient"></select>
+      <button>Guardar integración</button>
+    </form>
+    <p id="integrationResult" style="margin-top:8px;color:#166534"></p>
+  </main>
 </div>
-</body></html>
+<script src="/csp/mySissCloud/app/services/config.js"></script>
+<script src="/csp/mySissCloud/app/services/api.js"></script>
+<script src="/csp/mySissCloud/app/services/routing.js"></script>
+<script src="/csp/mySissCloud/app/services/module-guard.js"></script>
+<script src="/csp/mySissCloud/app/assets/js/mysiss_webservice_admin.js"></script>
+</body>
+</html>
