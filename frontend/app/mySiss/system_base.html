@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mySiss - Base Sistema</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    h1 { color: #5a2a82; }
+    section { margin-bottom: 24px; padding: 16px; border: 1px solid #ddd; border-radius: 8px; }
+    label { display: block; margin: 8px 0 4px; }
+    input, select { width: 100%; max-width: 420px; padding: 8px; }
+    button { margin-top: 12px; padding: 8px 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>mySiss - Configuración Base</h1>
+
+  <section>
+    <h2>Estado del sistema</h2>
+    <p><b>Status:</b> <span id="healthStatus">-</span></p>
+    <p><b>Motor:</b> <span id="healthEngine">-</span></p>
+    <p><b>Mensaje:</b> <span id="healthMessage">-</span></p>
+  </section>
+
+  <section>
+    <h2>Configuración global</h2>
+    <form id="configForm">
+      <label>Environment</label>
+      <select id="environment"><option value="local">local</option><option value="dev">dev</option><option value="prod">prod</option></select>
+      <label>Database engine</label>
+      <select id="database_engine"><option value="iris">iris</option><option value="sqlite">sqlite</option></select>
+      <label>Backend base URL</label><input id="backend_base_url" />
+      <label>Frontend base URL</label><input id="frontend_base_url" />
+      <label>Webapp base path</label><input id="webapp_base_path" />
+      <label>Database host</label><input id="database_host" />
+      <label>Database port</label><input id="database_port" type="number" />
+      <label>Database name</label><input id="database_name" />
+      <label>Database namespace</label><input id="database_namespace" />
+      <button type="submit">Guardar configuración</button>
+    </form>
+    <p id="configResult"></p>
+  </section>
+
+  <section>
+    <h2>Clientes</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Estado</th></tr></thead>
+      <tbody id="clientsBody"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Módulos</h2>
+    <p>Módulos disponibles en catálogo: <span id="moduleCatalogCount">0</span></p>
+  </section>
+
+  <script src="/csp/mySissCloud/app/services/config.js"></script>
+  <script src="/csp/mySissCloud/app/services/api.js"></script>
+  <script src="/csp/mySissCloud/app/services/routing.js"></script>
+  <script src="/csp/mySissCloud/app/services/module-guard.js"></script>
+  <script>window.mySissModuleGuard.requireModuleAccess('mysiss');</script>
+  <script src="/csp/mySissCloud/app/assets/js/mysiss_system_base.js"></script>
+</body>
+</html>
