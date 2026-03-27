@@ -16,11 +16,21 @@ Index IDXRol On IDRol [ Unique ];
 Storage Default
 {
 <Data name="RolStatusDefaultData">
-<Value name="1"><Value>%%CLASSNAME</Value></Value>
-<Value name="2"><Value>IDRolStatus</Value></Value>
-<Value name="3"><Value>IDRol</Value></Value>
-<Value name="4"><Value>Status</Value></Value>
-<Value name="5"><Value>UpdatedAt</Value></Value>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>IDRolStatus</Value>
+</Value>
+<Value name="3">
+<Value>IDRol</Value>
+</Value>
+<Value name="4">
+<Value>Status</Value>
+</Value>
+<Value name="5">
+<Value>UpdatedAt</Value>
+</Value>
 </Data>
 <DataLocation>^mySiss.Config.SG.RolStatusD</DataLocation>
 <DefaultData>RolStatusDefaultData</DefaultData>

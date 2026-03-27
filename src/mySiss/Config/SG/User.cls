@@ -79,8 +79,87 @@ Storage Default
 </Data>
 <DataLocation>^mySiss.Config.SG.UserD</DataLocation>
 <DefaultData>UserDefaultData</DefaultData>
+<ExtentSize>2</ExtentSize>
 <IdLocation>^mySiss.Config.SG.UserD</IdLocation>
 <IndexLocation>^mySiss.Config.SG.UserI</IndexLocation>
+<Property name="%%CLASSNAME">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="%%ID">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>1</Selectivity>
+</Property>
+<Property name="FechaCrea">
+<AverageFieldSize>21</AverageFieldSize>
+<OutlierSelectivity>.999999:"2026-03-26 11:47:10"</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="FechaModif">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="IDCliente">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="IDUser">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>1</Selectivity>
+</Property>
+<Property name="NombreUser">
+<AverageFieldSize>8</AverageFieldSize>
+<Selectivity>1</Selectivity>
+</Property>
+<Property name="Password">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="Person">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="UserCreado">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:0</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="UserModif">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="ValidoDe">
+<AverageFieldSize>5</AverageFieldSize>
+<OutlierSelectivity>.999999:67655</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="ValidoHasta">
+<AverageFieldSize>5</AverageFieldSize>
+<OutlierSelectivity>.999999:94598</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<SQLMap name="IDKEY">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXCliente">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXNombreUser">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXPassword">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXPerson">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="PK">
+<BlockCount>-4</BlockCount>
+</SQLMap>
 <StreamLocation>^mySiss.Config.SG.UserS</StreamLocation>
 <Type>%Storage.Persistent</Type>
 }
