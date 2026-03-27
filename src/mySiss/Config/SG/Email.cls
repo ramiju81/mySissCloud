@@ -24,8 +24,35 @@ Storage Default
 </Data>
 <DataLocation>^mySiss.Config.SG.EmailD</DataLocation>
 <DefaultData>EmailDefaultData</DefaultData>
+<ExtentSize>2</ExtentSize>
 <IdLocation>^mySiss.Config.SG.EmailD</IdLocation>
 <IndexLocation>^mySiss.Config.SG.EmailI</IndexLocation>
+<Property name="%%CLASSNAME">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="%%ID">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>1</Selectivity>
+</Property>
+<Property name="Email">
+<AverageFieldSize>25</AverageFieldSize>
+<Selectivity>1</Selectivity>
+</Property>
+<Property name="IDEmail">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>1</Selectivity>
+</Property>
+<SQLMap name="IDKEY">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXEmail">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="PK">
+<BlockCount>-4</BlockCount>
+</SQLMap>
 <StreamLocation>^mySiss.Config.SG.EmailS</StreamLocation>
 <Type>%Storage.Persistent</Type>
 }

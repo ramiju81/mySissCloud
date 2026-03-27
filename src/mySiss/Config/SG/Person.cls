@@ -99,8 +99,103 @@ Storage Default
 </Data>
 <DataLocation>^mySiss.Config.SG.PersonD</DataLocation>
 <DefaultData>PersonDefaultData</DefaultData>
+<ExtentSize>2</ExtentSize>
 <IdLocation>^mySiss.Config.SG.PersonD</IdLocation>
 <IndexLocation>^mySiss.Config.SG.PersonI</IndexLocation>
+<Property name="%%CLASSNAME">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="%%ID">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>1</Selectivity>
+</Property>
+<Property name="Apellido">
+<AverageFieldSize>8</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="Apellido2">
+<AverageFieldSize>5.5</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="Cedula">
+<AverageFieldSize>16</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="Celular">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="Email">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="FechaCrea">
+<AverageFieldSize>21</AverageFieldSize>
+<OutlierSelectivity>.999999:"2026-03-26 11:47:10"</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="FechaModif">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="FechaNacmto">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="IDPerson">
+<AverageFieldSize>3</AverageFieldSize>
+<Selectivity>1</Selectivity>
+</Property>
+<Property name="IDTipoDoc">
+<AverageFieldSize>3</AverageFieldSize>
+<OutlierSelectivity>.999999:1</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="Nombre">
+<AverageFieldSize>8</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="Nombre2">
+<AverageFieldSize>5.5</AverageFieldSize>
+<Selectivity>50.0000%</Selectivity>
+</Property>
+<Property name="Ocupacion">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="UserCreado">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:0</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="UserModif">
+<AverageFieldSize>2</AverageFieldSize>
+<OutlierSelectivity>.999999:</OutlierSelectivity>
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<SQLMap name="IDKEY">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXApellidoNombre">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXCedula">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXCelular">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDXEmail">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="PK">
+<BlockCount>-4</BlockCount>
+</SQLMap>
 <StreamLocation>^mySiss.Config.SG.PersonS</StreamLocation>
 <Type>%Storage.Persistent</Type>
 }

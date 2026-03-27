@@ -1,0 +1,20 @@
+# IRIS (artefactos compilados)
+*.int
+*.obj
+*.devcontainer
+
+# Logs / temporales
+*.log
+*.tmp
+
+# SO / editor
+.DS_Store
+.vscode/
+
+# Node / Python (por si aparece)
+node_modules/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
